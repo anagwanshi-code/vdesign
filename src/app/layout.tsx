@@ -19,8 +19,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "V Design Luxury",
-    template: "%s | V Design Luxury",
+    default: "V Design Surat",
+    template: "%s | V Design Surat",
   },
   description:
     "Premium packaging design, luxury ecommerce, and creative agency services rooted in modern Indian artistic excellence.",
