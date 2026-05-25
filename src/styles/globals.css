@@ -1,0 +1,139 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+/* ── Satoshi (self-host from /public/fonts when licensed) ── */
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Variable.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+:root {
+  /* ── Surfaces & Text ── */
+  --color-surface: 24 100% 97%;
+  --color-border: 32 29% 88%;
+  --color-text-primary: 0 0% 10%;
+  --color-text-muted: 0 0% 40%;
+
+  /* ── Accents ── */
+  --color-peacock: 192 100% 33%;
+  --color-magenta: 340 76% 48%;
+  --color-saffron: 37 74% 57%;
+  --color-emerald: 146 44% 44%;
+  --color-floral: 341 86% 66%;
+  --color-purple: 252 100% 69%;
+
+  /* ── Semantic (raw HSL components) ── */
+  --color-ring: 192 100% 33%;
+
+  /* ── Typography stacks (--font-serif / --font-sans injected via next/font on <html>) ── */
+  --font-serif-stack: var(--font-serif), Georgia, "Times New Roman", serif;
+  --font-sans-stack: var(--font-sans), "Satoshi", system-ui, sans-serif;
+
+  /* ── Spacing scale (4px base) ── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* ── Radius ── */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-soft: 0 2px 24px -4px hsl(32 29% 50% / 0.08);
+  --shadow-lift: 0 8px 40px -8px hsl(32 29% 30% / 0.12);
+
+  /* ── Motion ── */
+  --ease-luxury: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 700ms;
+  --duration-cinematic: 1200ms;
+
+  /* ── WebGPU surface tokens ── */
+  --gpu-grain-opacity: 0.04;
+  --gpu-vignette: hsl(0 0% 10% / 0.15);
+  --gpu-ambient-peacock: hsl(192 100% 33% / 0.06);
+  --gpu-ambient-saffron: hsl(37 74% 57% / 0.04);
+}
+
+@theme inline {
+  --color-surface: hsl(var(--color-surface));
+  --color-border: hsl(var(--color-border));
+  --color-text-primary: hsl(var(--color-text-primary));
+  --color-text-muted: hsl(var(--color-text-muted));
+  --color-peacock: hsl(var(--color-peacock));
+  --color-magenta: hsl(var(--color-magenta));
+  --color-saffron: hsl(var(--color-saffron));
+  --color-emerald: hsl(var(--color-emerald));
+  --color-floral: hsl(var(--color-floral));
+  --color-purple: hsl(var(--color-purple));
+  --color-background: hsl(var(--color-surface));
+  --color-foreground: hsl(var(--color-text-primary));
+  --color-muted: hsl(var(--color-text-muted));
+  --color-ring: hsl(var(--color-ring));
+  --font-serif: var(--font-serif-stack);
+  --font-sans: var(--font-sans-stack);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: hsl(var(--color-border));
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: hsl(var(--color-surface));
+    color: hsl(var(--color-text-primary));
+    font-family: var(--font-sans-stack);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif-stack);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .font-serif {
+    font-family: var(--font-serif-stack);
+  }
+
+  .font-sans {
+    font-family: var(--font-sans-stack);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
