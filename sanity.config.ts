@@ -9,7 +9,7 @@ const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production";
 
 export default defineConfig({
   name: "v-design-luxury",
-  title: "V Design Luxury",
+  title: "V Design Surat",
   projectId,
   dataset,
   basePath: "/studio",
