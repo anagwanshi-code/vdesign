@@ -1,6 +1,19 @@
-import type { ProductShowcaseItem } from "@/types/home";
+import { formatProductPriceWithMoq } from "@/lib/commerce/pricing";
+import { normalizeMoq } from "@/lib/commerce/moq";
+import { normalizeSaleType } from "@/lib/commerce/sale-type";
+import { buildFinishingTags } from "@/lib/product/finishing-tags";
+import { mapSanityProductSpecifications } from "@/lib/product/specifications";
+import {
+  buildFrameOptions,
+  buildSizeOptions,
+  formatInr,
+  mapSanityVariantsToDetail,
+} from "@/lib/product/variants";
+import type { CollectionCard, ProductShowcaseItem } from "@/types/home";
 import type { HeroMedia } from "@/types/home";
+import type { ProductDetail } from "@/types/product";
 import type {
+  SanityCollectionSummary,
   SanityHeroBlock,
   SanityHomePage,
   SanityHomePageWithCatalog,
@@ -14,22 +27,19 @@ import type {
   ServiceVertical,
 } from "@/types/home";
 
-function formatInr(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
-  }).format(amount);
-}
-
 function mapSanityImageToHeroMedia(
   image: SanityImage | null | undefined,
   fallback: HeroMedia,
 ): HeroMedia {
-  const url = image?.asset?.url;
+  const url = image?.asset?.url?.trim();
 
-  if (!url) {
-    return fallback;
+  if (!url || url.includes("unsplash.com")) {
+    return {
+      src: "",
+      alt: image?.alt ?? fallback.alt,
+      width: fallback.width,
+      height: fallback.height,
+    };
   }
 
   return {
@@ -79,19 +89,147 @@ export function mapSanityServiceToStory(
   };
 }
 
+function resolveProductStartingPrice(product: SanityProduct): number {
+  if (Number.isFinite(product.priceInInr) && product.priceInInr > 0) {
+    return product.priceInInr;
+  }
+
+  const variantPrices =
+    product.variants
+      ?.map((variant) => variant.priceInInr)
+      .filter((price) => Number.isFinite(price) && price > 0) ?? [];
+
+  if (variantPrices.length === 0) {
+    return product.priceInInr;
+  }
+
+  return Math.min(...variantPrices);
+}
+
+function resolvePrimaryProductImage(
+  product: SanityProduct,
+): SanityImage | null | undefined {
+  return product.image ?? product.images?.[0] ?? null;
+}
+
+function resolveProductGalleryImages(
+  product: SanityProduct,
+): SanityImage[] {
+  if (product.gallery?.length) {
+    return product.gallery
+      .map((entry) => entry.image)
+      .filter((image): image is SanityImage => Boolean(image?.asset?.url));
+  }
+
+  return (
+    product.images?.slice(1).filter((image) => Boolean(image?.asset?.url)) ??
+    []
+  );
+}
+
+function resolveProductHoverImage(
+  product: SanityProduct,
+  fallbackImage: HeroMedia,
+): HeroMedia | undefined {
+  const galleryImage =
+    product.gallery?.[0]?.image ?? product.images?.[1] ?? undefined;
+
+  if (!galleryImage) {
+    return undefined;
+  }
+
+  return mapSanityImageToHeroMedia(galleryImage, fallbackImage);
+}
+
+export function mapSanityProductToDetail(
+  product: SanityProduct,
+  fallbackImage: HeroMedia,
+): ProductDetail {
+  const startingPrice = resolveProductStartingPrice(product);
+
+  return {
+    id: product._id,
+    handle: product.slug,
+    title: product.title,
+    subtitle: product.subtitle ?? undefined,
+    description: product.description ?? undefined,
+    priceInInr: startingPrice,
+    saleType: normalizeSaleType(product.saleType),
+    minOrderQuantity: normalizeMoq(product.minOrderQuantity),
+    logoUploadRequired: Boolean(product.logoUploadRequired),
+    image: mapSanityImageToHeroMedia(
+      resolvePrimaryProductImage(product),
+      fallbackImage,
+    ),
+    gallery: resolveProductGalleryImages(product).map((image) =>
+      mapSanityImageToHeroMedia(image, fallbackImage),
+    ),
+    sizes: buildSizeOptions(product),
+    frames: buildFrameOptions(product),
+    variants: mapSanityVariantsToDetail(product.variants),
+    specifications: mapSanityProductSpecifications(product),
+    categoryRef: product.categoryRef ?? undefined,
+    collectionRef:
+      product.collectionRef ?? product.collection?._id ?? undefined,
+    collection: product.collection
+      ? {
+          title: product.collection.title,
+          slug: product.collection.slug,
+        }
+      : undefined,
+  };
+}
+
 export function mapSanityProductToShowcaseItem(
   product: SanityProduct,
   fallbackImage: HeroMedia,
 ): ProductShowcaseItem {
+  const startingPrice = resolveProductStartingPrice(product);
+  const minOrderQuantity = normalizeMoq(product.minOrderQuantity);
+  const saleType = normalizeSaleType(product.saleType);
+  const hoverImage = resolveProductHoverImage(product, fallbackImage);
+
   return {
     id: product._id,
     handle: product.slug,
     title: product.title,
     subtitle: product.subtitle ?? "Curated by V Design Luxury",
-    priceLabel: formatInr(product.priceInInr),
-    priceInInr: product.priceInInr,
+    priceLabel: formatProductPriceWithMoq(startingPrice, minOrderQuantity),
+    priceInInr: startingPrice,
+    saleType,
+    minOrderQuantity,
+    logoUploadRequired: Boolean(product.logoUploadRequired),
+    finishingTags: buildFinishingTags(product),
+    searchDescription: product.description ?? undefined,
     source: "sanity",
-    image: mapSanityImageToHeroMedia(product.image, fallbackImage),
+    image: mapSanityImageToHeroMedia(
+      resolvePrimaryProductImage(product),
+      fallbackImage,
+    ),
+    hoverImage,
+    collectionHandle: product.collection?.slug ?? undefined,
+  };
+}
+
+export function mapSanityCollectionToCard(
+  collection: SanityCollectionSummary,
+  fallbackImage: HeroMedia,
+): CollectionCard {
+  return {
+    id: collection._id,
+    slug: (collection.slug ?? "").trim(),
+    title: collection.title,
+    description: collection.description ?? undefined,
+    image: mapSanityImageToHeroMedia(
+      collection.coverImage ?? collection.heroImage,
+      fallbackImage,
+    ),
+    heroImage: collection.heroImage ?? undefined,
+    coverImage: collection.coverImage ?? undefined,
+    firstProductImage: collection.firstProductImage ?? undefined,
+    coverImageUrl: collection.coverImageUrl ?? undefined,
+    heroImageUrl: collection.heroImageUrl ?? undefined,
+    productCount: collection.productCount ?? 0,
   };
 }
 
@@ -142,16 +280,16 @@ export function mapSanityHomePageWithCatalog(
     ? mapSanityHomePageToEditorial(content.editorial, fallback)
     : null;
 
-  const products =
+  const sanityProducts =
     content.products && content.products.length > 0
       ? mapSanityCatalogToShowcaseItems(
           content.products,
           fallback.hero.media,
         )
-      : fallback.products;
+      : [];
 
   const hasEditorial = Boolean(content.editorial?.hero?.headline);
-  const hasProducts = Boolean(content.products && content.products.length > 0);
+  const hasProducts = sanityProducts.length > 0;
 
   if (!hasEditorial && !hasProducts) {
     return null;
@@ -160,6 +298,6 @@ export function mapSanityHomePageWithCatalog(
   return {
     hero: editorial?.hero ?? fallback.hero,
     services: editorial?.services ?? fallback.services,
-    products,
+    products: sanityProducts,
   };
 }

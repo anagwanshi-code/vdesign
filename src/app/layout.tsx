@@ -1,5 +1,4 @@
 import { AppChrome } from "@/components/layout/app-chrome";
-import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "@/styles/globals.css";
@@ -36,10 +35,8 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-surface font-sans text-text-primary">
-        <SmoothScroll>
-          <AppChrome>{children}</AppChrome>
-        </SmoothScroll>
+      <body className="flex min-h-screen flex-col bg-surface font-sans text-text-primary selection:bg-saffron/30 selection:text-text-primary">
+        <AppChrome>{children}</AppChrome>
       </body>
     </html>
   );

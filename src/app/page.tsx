@@ -7,10 +7,10 @@ export default async function HomePage() {
   const { hero, services, products, source } = await resolveHomePageContent();
 
   return (
-    <main className="flex flex-1 flex-col">
+    <>
       <HeroBlock hero={hero} />
       <ServiceStoryGrid services={services} />
       <ProductShowcase products={products} dataSource={source} />
-    </main>
+    </>
   );
 }

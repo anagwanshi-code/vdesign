@@ -2,14 +2,12 @@
 
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/hooks/use-cart";
-import { loadRazorpayScript } from "@/lib/razorpay/load-script";
-import type {
-  CheckoutErrorResponse,
-  CheckoutOrderResponse,
-} from "@/types/checkout";
+import { initiateRazorpayCheckout } from "@/lib/checkout/initiate-checkout";
+import { calculateOrderTotals, labelOrderTotals } from "@/lib/checkout/totals";
+import { formatInr } from "@/lib/product/variants";
 import type { RazorpayHandlerResponse } from "@/types/razorpay";
 import { AnimatePresence, motion } from "framer-motion";
-import { ShoppingBag, X } from "lucide-react";
+import { ShoppingBag, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
@@ -37,26 +35,30 @@ export function CartDrawer() {
     cartItems,
     closeCart,
     clearCart,
+    removeItem,
     subtotalLabel,
+    subtotalInInr,
     totalQuantity,
+    meetsMoqForCheckout,
+    moqMessage,
   } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const estimatedTotals = labelOrderTotals(
+    calculateOrderTotals(subtotalInInr),
+  );
 
   const resetCheckoutState = useCallback(() => {
     setIsCheckingOut(false);
   }, []);
 
   const handlePaymentSuccess = useCallback(
-    (response: RazorpayHandlerResponse) => {
+    (_response: RazorpayHandlerResponse) => {
       clearCart();
       closeCart();
       resetCheckoutState();
       setCheckoutError(null);
-
-      window.alert(
-        `Payment Successful! Order ID: ${response.razorpay_payment_id}`,
-      );
     },
     [clearCart, closeCart, resetCheckoutState],
   );
@@ -89,76 +91,37 @@ export function CartDrawer() {
   }, [isOpen, resetCheckoutState]);
 
   const handleCheckout = async () => {
-    if (cartItems.length === 0 || isCheckingOut) return;
+    if (cartItems.length === 0 || isCheckingOut || !meetsMoqForCheckout) return;
 
     setIsCheckingOut(true);
     setCheckoutError(null);
 
     try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cartItems.map((item) => ({
-            productId: item.productId,
-            title: item.title,
-            quantity: item.quantity,
-            priceInInr: item.priceInInr,
-          })),
-        }),
+      await initiateRazorpayCheckout({
+        items: cartItems.map((item) => ({
+          productId: item.productId,
+          title: item.title,
+          quantity: item.quantity,
+          priceInInr: item.priceInInr,
+          sku: item.sku,
+          saleType: item.saleType,
+          minOrderQuantity: item.minOrderQuantity,
+          logoFileName: item.logoFileName,
+          uploadInstructions: item.uploadInstructions,
+        })),
+        description: "V Design Luxury · Bag checkout",
+        onSuccess: handlePaymentSuccess,
+        onDismiss: handleModalDismiss,
+        onError: (message) => setCheckoutError(message),
       });
-
-      const payload = (await response.json()) as
-        | CheckoutOrderResponse
-        | CheckoutErrorResponse;
-
-      if (!response.ok) {
-        throw new Error(
-          "error" in payload
-            ? payload.error
-            : "Unable to initiate checkout",
-        );
-      }
-
-      const order = payload as CheckoutOrderResponse;
-
-      await loadRazorpayScript();
-
-      if (!window.Razorpay) {
-        throw new Error("Razorpay checkout failed to initialize");
-      }
-
-      const razorpay = new window.Razorpay({
-        key: order.keyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: "V Design Luxury",
-        description: "Signature collection · UPI & cards",
-        order_id: order.orderId,
-        theme: { color: "#0088A9" },
-        handler(response: RazorpayHandlerResponse) {
-          handlePaymentSuccess(response);
-        },
-        modal: {
-          ondismiss() {
-            handleModalDismiss();
-          },
-        },
-      });
-
-      razorpay.on("payment.failed", () => {
-        resetCheckoutState();
-        setCheckoutError("Payment failed. Please try again.");
-      });
-
-      razorpay.open();
     } catch (error) {
-      resetCheckoutState();
       setCheckoutError(
         error instanceof Error
           ? error.message
           : "Checkout unavailable. Please try again.",
       );
+    } finally {
+      setIsCheckingOut(false);
     }
   };
 
@@ -254,20 +217,50 @@ export function CartDrawer() {
                         )}
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <p className="font-serif text-body text-text-primary">
-                          {item.title}
-                        </p>
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-serif text-body text-text-primary">
+                            {item.title}
+                          </p>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${item.title} from bag`}
+                            onClick={() => removeItem(item.id)}
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border text-text-muted transition-colors duration-base ease-luxury hover:border-magenta hover:text-magenta"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        </div>
                         {item.subtitle ? (
                           <p className="text-caption text-text-muted">
                             {item.subtitle}
                           </p>
                         ) : null}
+                        {item.sku ? (
+                          <p className="text-caption uppercase tracking-widest text-text-muted">
+                            SKU {item.sku}
+                          </p>
+                        ) : null}
+                        {item.logoFileName ? (
+                          <p className="text-caption text-text-muted">
+                            Artwork: {item.logoFileName}
+                          </p>
+                        ) : null}
+                        {item.uploadInstructions ? (
+                          <p className="line-clamp-2 text-caption text-text-muted">
+                            {item.uploadInstructions}
+                          </p>
+                        ) : null}
                         <div className="mt-2 flex items-center justify-between gap-4">
                           <p className="text-caption uppercase tracking-widest text-text-muted">
                             Qty {item.quantity}
+                            {item.quantity > 1 ? (
+                              <span className="ml-2 normal-case tracking-normal text-text-muted/80">
+                                · {item.priceLabel} each
+                              </span>
+                            ) : null}
                           </p>
                           <p className="text-body tabular-nums text-text-primary">
-                            {item.priceLabel}
+                            {formatInr(item.priceInInr * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -278,14 +271,37 @@ export function CartDrawer() {
             </div>
 
             <footer className="border-t border-border px-6 py-6">
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-caption uppercase tracking-widest text-text-muted">
-                  Subtotal
-                </p>
-                <p className="font-serif text-body-lg tabular-nums text-text-primary">
-                  {subtotalLabel}
-                </p>
+              <div className="mb-4 space-y-2 text-caption text-text-muted">
+                <div className="flex items-center justify-between">
+                  <span>Subtotal</span>
+                  <span className="tabular-nums text-text-primary">
+                    {estimatedTotals.subtotalLabel}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>GST (18%)</span>
+                  <span className="tabular-nums text-text-primary">
+                    {estimatedTotals.gstLabel}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Shipping</span>
+                  <span className="tabular-nums text-text-primary">
+                    {estimatedTotals.shippingLabel}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-t border-border pt-2 font-serif text-body text-text-primary">
+                  <span>Estimated total</span>
+                  <span className="tabular-nums">
+                    {estimatedTotals.grandTotalLabel}
+                  </span>
+                </div>
               </div>
+              {moqMessage ? (
+                <p className="mb-4 text-center text-caption text-magenta">
+                  {moqMessage}
+                </p>
+              ) : null}
               {checkoutError ? (
                 <p className="mb-4 text-center text-caption text-magenta">
                   {checkoutError}
@@ -294,7 +310,11 @@ export function CartDrawer() {
               <Button
                 variant="accent"
                 className="w-full"
-                disabled={cartItems.length === 0 || isCheckingOut}
+                disabled={
+                  cartItems.length === 0 ||
+                  isCheckingOut ||
+                  !meetsMoqForCheckout
+                }
                 onClick={handleCheckout}
               >
                 {isCheckingOut ? "Preparing Checkout…" : "Continue to Checkout"}

@@ -3,6 +3,13 @@ import {
   getRazorpayPublicKey,
   isRazorpayConfigured,
 } from "@/lib/razorpay/config";
+import { buildCheckoutOrderNotes } from "@/lib/checkout/order-notes";
+import {
+  calculateOrderTotals,
+  orderTotalsToPaise,
+} from "@/lib/checkout/totals";
+import { isQuantityValidForSaleType } from "@/lib/commerce/moq";
+import { normalizeMoq } from "@/lib/commerce/moq";
 import type {
   CheckoutErrorResponse,
   CheckoutOrderResponse,
@@ -26,6 +33,18 @@ function validateItems(items: CheckoutRequestBody["items"]): string | null {
 
     if (!Number.isFinite(item.priceInInr) || item.priceInInr <= 0) {
       return "Invalid item price";
+    }
+
+    const minOrderQuantity = normalizeMoq(item.minOrderQuantity);
+
+    if (
+      !isQuantityValidForSaleType(
+        item.quantity,
+        minOrderQuantity,
+        item.saleType,
+      )
+    ) {
+      return `Invalid quantity for ${item.title}`;
     }
   }
 
@@ -60,11 +79,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const totalInInr = body.items.reduce(
+  const subtotalInInr = body.items.reduce(
     (sum, item) => sum + item.priceInInr * item.quantity,
     0,
   );
-  const amountInPaise = Math.round(totalInInr * 100);
+  const totals = calculateOrderTotals(subtotalInInr);
+  const amountInPaise = orderTotalsToPaise(totals.grandTotalInInr);
 
   if (amountInPaise < 100) {
     return NextResponse.json<CheckoutErrorResponse>(
@@ -87,10 +107,7 @@ export async function POST(req: NextRequest) {
       amount: amountInPaise,
       currency: "INR",
       receipt: `vdl_${Date.now()}`,
-      notes: {
-        itemCount: String(body.items.length),
-        products: body.items.map((item) => item.productId).join(","),
-      },
+      notes: buildCheckoutOrderNotes(body.items, totals),
     });
 
     return NextResponse.json<CheckoutOrderResponse>({
@@ -98,6 +115,7 @@ export async function POST(req: NextRequest) {
       amount: Number(order.amount),
       currency: "INR",
       keyId: getRazorpayPublicKey(),
+      totals,
     });
   } catch (error) {
     console.error("[Razorpay] Order creation failed:", error);

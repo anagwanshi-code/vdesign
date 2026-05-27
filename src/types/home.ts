@@ -1,3 +1,5 @@
+import type { ProductSaleType } from "@/lib/commerce/sale-type";
+
 export type HeroCta = {
   label: string;
   href: string;
@@ -40,8 +42,41 @@ export type ProductShowcaseItem = {
   subtitle: string;
   priceLabel: string;
   priceInInr: number;
+  saleType: ProductSaleType;
+  minOrderQuantity: number;
+  logoUploadRequired: boolean;
+  finishingTags: string[];
+  /** Plain-text description used for storefront search. */
+  searchDescription?: string;
   image: HeroMedia;
+  /** Legacy card payloads that only expose a flat image URL. */
+  imageUrl?: string;
+  hoverImage?: HeroMedia;
+  collectionHandle?: string;
   source?: "sanity" | "mock";
+};
+
+export type CollectionCard = {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  image: HeroMedia;
+  /** Raw Sanity hero image for resolver fallbacks. */
+  heroImage?: {
+    alt?: string | null;
+    asset?: { url?: string | null } | null;
+  } | null;
+  /** Optional cover image when schema uses `coverImage` instead of `heroImage`. */
+  coverImage?: {
+    alt?: string | null;
+    asset?: { url?: string | null } | null;
+  } | null;
+  /** Auto-resolved from first product when no cover/hero is uploaded. */
+  firstProductImage?: string | null;
+  coverImageUrl?: string | null;
+  heroImageUrl?: string | null;
+  productCount: number;
 };
 
 export type HomePageData = {

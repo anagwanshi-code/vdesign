@@ -1,6 +1,11 @@
+import { DEFAULT_MINIMUM_ORDER_QUANTITY } from "@/lib/commerce/moq";
+import { formatProductPriceWithMoq } from "@/lib/commerce/pricing";
 import type { HomePageContentResult, HomePageData } from "@/types/home";
 import { isSanityConfigured } from "@/lib/sanity/client";
-import { mapSanityHomePageWithCatalog } from "@/lib/sanity/mappers";
+import {
+  mapSanityCatalogToShowcaseItems,
+  mapSanityHomePageWithCatalog,
+} from "@/lib/sanity/mappers";
 import { getHomePageWithCatalog } from "@/lib/sanity/queries";
 
 export const MOCK_HOME_PAGE_DATA: HomePageData = {
@@ -18,7 +23,7 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
       href: "/work",
     },
     media: {
-      src: "https://images.unsplash.com/photo-1604719312566-8912a922af0c?auto=format&fit=crop&w=1600&q=80",
+      src: "",
       alt: "Luxury packaging materials with warm surface tones and refined typography",
       width: 1600,
       height: 2000,
@@ -59,11 +64,15 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
       handle: "malabar-candle-archive",
       title: "Malabar Candle Archive",
       subtitle: "Coconut wax · brass lid · Kochi atelier",
-      priceLabel: "₹4,800",
+      priceLabel: formatProductPriceWithMoq(4800, DEFAULT_MINIMUM_ORDER_QUANTITY),
       priceInInr: 4800,
+      saleType: "bulk",
+      minOrderQuantity: DEFAULT_MINIMUM_ORDER_QUANTITY,
+      logoUploadRequired: false,
+      finishingTags: ["Gold Foiling", "Velvet Lamination"],
       source: "mock",
       image: {
-        src: "https://images.unsplash.com/photo-1603006905003-2c4f57c74e5a?auto=format&fit=crop&w=800&q=80",
+        src: "",
         alt: "Malabar Candle Archive luxury candle in brass-lidded vessel",
         width: 800,
         height: 1000,
@@ -74,11 +83,15 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
       handle: "jaipur-rigid-box",
       title: "Jaipur Rigid Box",
       subtitle: "Saffron-dyed cotton paper · magnetic closure",
-      priceLabel: "₹2,200",
+      priceLabel: formatProductPriceWithMoq(2200, DEFAULT_MINIMUM_ORDER_QUANTITY),
       priceInInr: 2200,
+      saleType: "bulk",
+      minOrderQuantity: DEFAULT_MINIMUM_ORDER_QUANTITY,
+      logoUploadRequired: false,
+      finishingTags: ["Spot UV", "350 GSM Ivory"],
       source: "mock",
       image: {
-        src: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80",
+        src: "",
         alt: "Jaipur Rigid Box in saffron-toned luxury packaging",
         width: 800,
         height: 1000,
@@ -89,11 +102,15 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
       handle: "peacock-stationery-set",
       title: "Peacock Stationery Set",
       subtitle: "Cotton rag · foil deboss · limited run",
-      priceLabel: "₹3,600",
+      priceLabel: formatProductPriceWithMoq(3600, DEFAULT_MINIMUM_ORDER_QUANTITY),
       priceInInr: 3600,
+      saleType: "bulk",
+      minOrderQuantity: DEFAULT_MINIMUM_ORDER_QUANTITY,
+      logoUploadRequired: false,
+      finishingTags: ["Embossing", "350 GSM Ivory"],
       source: "mock",
       image: {
-        src: "https://images.unsplash.com/photo-1586075010923-2dd457fbcc78?auto=format&fit=crop&w=800&q=80",
+        src: "",
         alt: "Peacock Stationery Set with foil deboss detailing",
         width: 800,
         height: 1000,
@@ -120,16 +137,30 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
       return { ...mock, source: "mock" };
     }
 
-    const mapped = mapSanityHomePageWithCatalog(content, mock);
+    const sanityProducts =
+      content.products && content.products.length > 0
+        ? mapSanityCatalogToShowcaseItems(
+            content.products,
+            mock.hero.media,
+          )
+        : [];
 
-    if (!mapped) {
-      return { ...mock, source: "mock" };
+    const mapped = mapSanityHomePageWithCatalog(content, {
+      hero: mock.hero,
+      services: mock.services,
+      products: [],
+    });
+
+    if (sanityProducts.length > 0 || mapped) {
+      return {
+        hero: mapped?.hero ?? mock.hero,
+        services: mapped?.services ?? mock.services,
+        products: sanityProducts,
+        source: "sanity",
+      };
     }
 
-    return {
-      ...mapped,
-      source: "sanity",
-    };
+    return { ...mock, source: "mock" };
   } catch (error) {
     console.error("[Sanity] Home page fallback to mock data:", error);
     return { ...mock, source: "mock" };

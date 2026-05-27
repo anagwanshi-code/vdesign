@@ -2,9 +2,13 @@
 
 import { useEffect } from "react";
 
-/** Matches event-source-polyfill heartbeat reconnect noise from Sanity live listeners. */
-const SANITY_SSE_KEEPALIVE_ERROR =
-  /No activity within \d+ milliseconds\.(?: .*)? Reconnecting\./;
+/** Benign Sanity live-listener / event-source-polyfill reconnect noise. */
+export const SANITY_SSE_KEEPALIVE_PATTERNS = [
+  /No activity within \d+ milliseconds\.(?: .*)? Reconnecting\./,
+  /No activity within \d+ milliseconds/i,
+  /EventSource reconnect/i,
+  /event-source-polyfill/i,
+] as const;
 
 function isSanitySseKeepAliveError(value: unknown): boolean {
   const message =
@@ -19,7 +23,55 @@ function isSanitySseKeepAliveError(value: unknown): boolean {
           ? (value as { message: string }).message
           : String(value);
 
-  return SANITY_SSE_KEEPALIVE_ERROR.test(message);
+  return SANITY_SSE_KEEPALIVE_PATTERNS.some((pattern) => pattern.test(message));
+}
+
+let suppressSanitySseDevOverlayInitialized = false;
+
+/**
+ * Installs dev-only guards before Sanity Studio mounts. Idempotent and safe to
+ * call from module scope or a React effect.
+ */
+export function initSuppressSanitySseDevOverlay(): void {
+  if (
+    typeof window === "undefined" ||
+    process.env.NODE_ENV !== "development" ||
+    suppressSanitySseDevOverlayInitialized
+  ) {
+    return;
+  }
+
+  suppressSanitySseDevOverlayInitialized = true;
+
+  const handleWindowError = (event: ErrorEvent) => {
+    if (isSanitySseKeepAliveError(event.error ?? event.message)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  };
+
+  const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    if (isSanitySseKeepAliveError(event.reason)) {
+      event.preventDefault();
+    }
+  };
+
+  const originalConsoleError = console.error.bind(console);
+
+  console.error = (...args: unknown[]) => {
+    if (args.some((arg) => isSanitySseKeepAliveError(arg))) {
+      return;
+    }
+
+    originalConsoleError(...args);
+  };
+
+  window.addEventListener("error", handleWindowError, true);
+  window.addEventListener(
+    "unhandledrejection",
+    handleUnhandledRejection,
+    true,
+  );
 }
 
 /**
@@ -28,48 +80,6 @@ function isSanitySseKeepAliveError(value: unknown): boolean {
  */
 export function useSuppressSanitySseDevOverlay(): void {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "development") {
-      return;
-    }
-
-    const handleWindowError = (event: ErrorEvent) => {
-      if (isSanitySseKeepAliveError(event.error ?? event.message)) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (isSanitySseKeepAliveError(event.reason)) {
-        event.preventDefault();
-      }
-    };
-
-    const originalConsoleError = console.error.bind(console);
-
-    console.error = (...args: unknown[]) => {
-      if (args.some((arg) => isSanitySseKeepAliveError(arg))) {
-        return;
-      }
-
-      originalConsoleError(...args);
-    };
-
-    window.addEventListener("error", handleWindowError, true);
-    window.addEventListener(
-      "unhandledrejection",
-      handleUnhandledRejection,
-      true,
-    );
-
-    return () => {
-      window.removeEventListener("error", handleWindowError, true);
-      window.removeEventListener(
-        "unhandledrejection",
-        handleUnhandledRejection,
-        true,
-      );
-      console.error = originalConsoleError;
-    };
+    initSuppressSanitySseDevOverlay();
   }, []);
 }

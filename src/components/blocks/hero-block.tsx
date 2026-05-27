@@ -3,34 +3,40 @@
 import { cn } from "@/lib/utils/cn";
 import type { HeroEditorialParams } from "@/types/home";
 import { motion, useReducedMotion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import Link from "next/link";
-import { useLayoutEffect, useRef } from "react";
 
-gsap.registerPlugin(ScrollTrigger);
+const CINEMATIC_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const CINEMATIC_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
-
-const containerVariants = {
+const textContainerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.12,
+      staggerChildren: 0.18,
+      delayChildren: 0.35,
     },
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 32 },
+const textItemVariants = {
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.7,
+      duration: 0.8,
       ease: CINEMATIC_EASE,
+    },
+  },
+};
+
+const backgroundReveal = {
+  hidden: { scale: 1.1 },
+  visible: {
+    scale: 1,
+    transition: {
+      duration: 2.5,
+      ease: "easeOut" as const,
     },
   },
 };
@@ -41,112 +47,90 @@ type HeroBlockProps = {
 };
 
 export function HeroBlock({ hero, className }: HeroBlockProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const mediaRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  useLayoutEffect(() => {
-    if (prefersReducedMotion) return;
-
-    const section = sectionRef.current;
-    const media = mediaRef.current;
-    if (!section || !media) return;
-
-    const context = gsap.context(() => {
-      gsap.to(media, {
-        yPercent: 15,
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 0.5,
-        },
-      });
-    }, section);
-
-    return () => context.revert();
-  }, [prefersReducedMotion]);
+  const motionEnabled = !prefersReducedMotion;
 
   return (
     <section
-      ref={sectionRef}
       className={cn(
-        "relative min-h-svh overflow-hidden bg-surface",
+        "relative flex h-[90vh] w-full items-center justify-center overflow-hidden bg-black lg:h-screen",
         className,
       )}
       aria-label="Editorial hero"
     >
-      <div className="mx-auto grid min-h-svh max-w-content grid-cols-1 items-center gap-12 px-5 py-24 md:px-8 lg:grid-cols-12 lg:gap-16 lg:px-20 lg:py-32">
-        <motion.div
-          className="flex flex-col gap-6 lg:col-span-5"
-          variants={prefersReducedMotion ? undefined : containerVariants}
-          initial={prefersReducedMotion ? false : "hidden"}
-          animate={prefersReducedMotion ? undefined : "visible"}
+      {/* Background image — Z-0 */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        variants={motionEnabled ? backgroundReveal : undefined}
+        initial={motionEnabled ? "hidden" : false}
+        animate={motionEnabled ? "visible" : undefined}
+      >
+        {hero.media.src ? (
+          <Image
+            src={hero.media.src}
+            alt={hero.media.alt}
+            fill
+            priority
+            className="h-full w-full object-cover"
+            sizes="100vw"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-neutral-950" aria-hidden="true" />
+        )}
+      </motion.div>
+
+      {/* Cinematic overlay — Z-10 */}
+      <div
+        className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-black/30 to-black/80"
+        aria-hidden="true"
+      />
+
+      {/* Content — Z-20 */}
+      <motion.div
+        className="relative z-20 mx-auto flex max-w-5xl flex-col items-center px-4 text-center"
+        variants={motionEnabled ? textContainerVariants : undefined}
+        initial={motionEnabled ? "hidden" : false}
+        animate={motionEnabled ? "visible" : undefined}
+      >
+        <motion.p
+          className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] sm:text-sm"
+          variants={motionEnabled ? textItemVariants : undefined}
         >
-          <motion.p
-            className="text-overline uppercase text-saffron"
-            variants={prefersReducedMotion ? undefined : itemVariants}
-          >
-            {hero.eyebrow}
-          </motion.p>
+          {hero.eyebrow}
+        </motion.p>
 
-          <motion.h1
-            className="font-serif text-display-xl text-balance text-text-primary"
-            variants={prefersReducedMotion ? undefined : itemVariants}
-          >
-            {hero.title}
-          </motion.h1>
+        <motion.h1
+          className="mt-6 font-serif text-5xl font-light leading-tight tracking-tight text-white md:text-7xl lg:text-8xl"
+          variants={motionEnabled ? textItemVariants : undefined}
+        >
+          {hero.title}
+        </motion.h1>
 
-          <motion.p
-            className="max-w-prose text-body-lg text-text-muted"
-            variants={prefersReducedMotion ? undefined : itemVariants}
-          >
-            {hero.description}
-          </motion.p>
+        <motion.p
+          className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-300"
+          variants={motionEnabled ? textItemVariants : undefined}
+        >
+          {hero.description}
+        </motion.p>
 
-          <motion.div
-            className="flex flex-col gap-4 pt-2 sm:flex-row"
-            variants={prefersReducedMotion ? undefined : itemVariants}
+        <motion.div
+          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5"
+          variants={motionEnabled ? textItemVariants : undefined}
+        >
+          <Link
+            href={hero.ctaPrimary.href}
+            className="inline-flex h-12 min-w-[160px] items-center justify-center bg-white px-8 font-sans text-sm font-medium tracking-wide text-black transition-opacity duration-300 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
-            <Link
-              href={hero.ctaPrimary.href}
-              className="inline-flex h-11 items-center justify-center rounded-md bg-text-primary px-8 text-body font-sans text-surface transition-colors duration-base ease-luxury hover:bg-peacock focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-peacock focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-            >
-              {hero.ctaPrimary.label}
-            </Link>
-            <Link
-              href={hero.ctaSecondary.href}
-              className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-transparent px-8 text-body font-sans text-text-primary transition-colors duration-base ease-luxury hover:border-peacock hover:text-peacock focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-peacock focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-            >
-              {hero.ctaSecondary.label}
-            </Link>
-          </motion.div>
+            {hero.ctaPrimary.label}
+          </Link>
+          <Link
+            href={hero.ctaSecondary.href}
+            className="inline-flex h-12 min-w-[160px] items-center justify-center border border-white bg-transparent px-8 font-sans text-sm font-medium tracking-wide text-white backdrop-blur-sm transition-all duration-300 hover:border-white/80 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          >
+            {hero.ctaSecondary.label}
+          </Link>
         </motion.div>
-
-        <div className="relative lg:col-span-7">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-border shadow-soft">
-            <div
-              ref={mediaRef}
-              className="absolute inset-0 will-change-transform"
-            >
-              <Image
-                src={hero.media.src}
-                alt={hero.media.alt}
-                width={hero.media.width}
-                height={hero.media.height}
-                priority
-                className="h-full w-full object-cover"
-                sizes="(max-width: 1024px) 100vw, 55vw"
-              />
-              <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface/30 via-transparent to-transparent"
-                aria-hidden="true"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
