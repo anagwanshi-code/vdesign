@@ -30,6 +30,7 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
     },
     heroImages: [],
   },
+  featuredCollections: [],
   services: [
     {
       id: "service-packaging",
@@ -156,6 +157,7 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
       return {
         hero: mapped.hero,
         services: mapped.services,
+        featuredCollections: mapped.featuredCollections,
         products:
           mapped.products.length > 0 ? mapped.products : sanityProducts,
         source: "sanity",
@@ -167,6 +169,7 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
         ...mock,
         products: sanityProducts,
         services: [],
+        featuredCollections: [],
         source: "sanity",
       };
     }

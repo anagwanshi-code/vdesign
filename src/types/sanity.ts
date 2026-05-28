@@ -45,6 +45,7 @@ export type SanityService = {
 export type SanityHomePage = {
   hero: SanityHeroBlock | null;
   services: SanityService[] | null;
+  featuredCollections?: SanityCollectionSummary[] | null;
 };
 
 export type SanityProductSize = {

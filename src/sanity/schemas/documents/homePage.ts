@@ -17,6 +17,19 @@ export const homePage = defineType({
       type: "array",
       of: [{ type: "service" }],
     }),
+    defineField({
+      name: "featuredCollections",
+      title: "Featured Collections",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "collection" }],
+        },
+      ],
+      description:
+        "Curated collections shown on the homepage in a 4-column cinematic grid.",
+    }),
   ],
   preview: {
     prepare: () => ({

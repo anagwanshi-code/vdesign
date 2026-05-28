@@ -232,6 +232,53 @@ export const HOME_PAGE_WITH_CATALOG_QUERY = groq`
           }
         }
       }
+    },
+    featuredCollections[]->{
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      heroImage {
+        alt,
+        asset->{
+          url,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
+          }
+        }
+      },
+      coverImage {
+        alt,
+        asset->{
+          url,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
+          }
+        }
+      },
+      "coverImageUrl": coverImage.asset->url,
+      "heroImageUrl": heroImage.asset->url,
+      "firstProductImage": coalesce(
+        products[0]->image.asset->url,
+        products[0]->images[0].asset->url,
+        products[0]->gallery[0].image.asset->url,
+        *[
+          _type == "product" &&
+          collection._ref == ^._id &&
+          coalesce(status, "active") != "archived"
+        ] | order(_createdAt desc)[0].image.asset->url,
+        *[
+          _type == "product" &&
+          collection._ref == ^._id &&
+          coalesce(status, "active") != "archived"
+        ] | order(_createdAt desc)[0].images[0].asset->url
+      )
     }
   },
   "products": *[

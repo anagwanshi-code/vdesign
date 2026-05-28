@@ -259,6 +259,24 @@ export function mapSanityProductToShowcaseItem(
   };
 }
 
+export function mapSanityFeaturedCollections(
+  collections: SanityCollectionSummary[] | null | undefined,
+  fallbackImage: HeroMedia,
+): CollectionCard[] {
+  if (!collections?.length) {
+    return [];
+  }
+
+  return collections
+    .filter((collection) => Boolean(collection.slug?.trim()))
+    .map((collection) =>
+      mapSanityCollectionToCard(
+        { ...collection, productCount: collection.productCount ?? 0 },
+        fallbackImage,
+      ),
+    );
+}
+
 export function mapSanityCollectionToCard(
   collection: SanityCollectionSummary,
   fallbackImage: HeroMedia,
@@ -323,6 +341,7 @@ export function mapSanityHomePageWithCatalog(
 ): {
   hero: HeroEditorialParams;
   services: ServiceStory[];
+  featuredCollections: CollectionCard[];
   products: ProductShowcaseItem[];
 } | null {
   const editorial = content.editorial;
@@ -331,6 +350,10 @@ export function mapSanityHomePageWithCatalog(
     : fallback.hero;
   const services = mapSanityServicesToStories(
     editorial?.services,
+    fallback.hero.media,
+  );
+  const featuredCollections = mapSanityFeaturedCollections(
+    editorial?.featuredCollections,
     fallback.hero.media,
   );
 
@@ -344,15 +367,17 @@ export function mapSanityHomePageWithCatalog(
 
   const hasHero = Boolean(editorial?.hero?.headline);
   const hasServices = services.length > 0;
+  const hasFeaturedCollections = featuredCollections.length > 0;
   const hasProducts = sanityProducts.length > 0;
 
-  if (!hasHero && !hasServices && !hasProducts) {
+  if (!hasHero && !hasServices && !hasFeaturedCollections && !hasProducts) {
     return null;
   }
 
   return {
     hero,
     services,
+    featuredCollections,
     products: sanityProducts,
   };
 }

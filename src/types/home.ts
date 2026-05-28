@@ -84,6 +84,7 @@ export type CollectionCard = {
 export type HomePageData = {
   hero: HeroEditorialParams;
   services: ServiceStory[];
+  featuredCollections: CollectionCard[];
   products: ProductShowcaseItem[];
 };
 
