@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 
 type AppChromeProps = {
   children: ReactNode;
+  footer?: ReactNode;
 };
 
 export function AppChrome({ children, footer }: AppChromeProps) {
