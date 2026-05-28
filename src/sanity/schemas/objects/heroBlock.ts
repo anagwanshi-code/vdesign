@@ -24,10 +24,31 @@ export const heroBlock = defineType({
       rows: 3,
     }),
     defineField({
+      name: "heroImages",
+      title: "Hero Slider Images",
+      type: "array",
+      of: [
+        {
+          type: "image",
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alternative text",
+              type: "string",
+            }),
+          ],
+        },
+      ],
+      description:
+        "Cinematic full-screen slider. Add multiple images for a 5-second cross-fade.",
+    }),
+    defineField({
       name: "media",
-      title: "Hero Media",
+      title: "Hero Media (Legacy)",
       type: "image",
       options: { hotspot: true },
+      hidden: true,
       fields: [
         defineField({
           name: "alt",
@@ -35,6 +56,7 @@ export const heroBlock = defineType({
           type: "string",
         }),
       ],
+      description: "Legacy single image. Prefer Hero Slider Images.",
     }),
     defineField({
       name: "ctaPrimary",

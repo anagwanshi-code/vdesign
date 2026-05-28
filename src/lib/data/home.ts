@@ -28,6 +28,7 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
       width: 1600,
       height: 2000,
     },
+    heroImages: [],
   },
   services: [
     {
@@ -147,15 +148,25 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
 
     const mapped = mapSanityHomePageWithCatalog(content, {
       hero: mock.hero,
-      services: mock.services,
+      services: [],
       products: [],
     });
 
-    if (sanityProducts.length > 0 || mapped) {
+    if (mapped) {
       return {
-        hero: mapped?.hero ?? mock.hero,
-        services: mapped?.services ?? mock.services,
+        hero: mapped.hero,
+        services: mapped.services,
+        products:
+          mapped.products.length > 0 ? mapped.products : sanityProducts,
+        source: "sanity",
+      };
+    }
+
+    if (sanityProducts.length > 0) {
+      return {
+        ...mock,
         products: sanityProducts,
+        services: [],
         source: "sanity",
       };
     }

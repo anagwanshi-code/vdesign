@@ -26,21 +26,18 @@ export type SanityHeroBlock = {
   eyebrow?: string | null;
   headline: string;
   subheadline?: string | null;
+  heroImages?: SanityImage[] | null;
   media?: SanityImage | null;
   ctaPrimary?: SanityCta | null;
   ctaSecondary?: SanityCta | null;
 };
 
-export type SanityServiceVertical = "packaging" | "ecommerce" | "agency";
-
-export type SanityServiceAccent = "peacock" | "saffron" | "purple";
-
 export type SanityService = {
   _key: string;
   title: string;
   description: string;
-  vertical?: SanityServiceVertical | null;
-  accent?: SanityServiceAccent | null;
+  vertical?: string | null;
+  accent?: string | null;
   href?: string | null;
   coverImage?: SanityImage | null;
 };

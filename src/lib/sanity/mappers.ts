@@ -24,7 +24,6 @@ import type {
   HeroEditorialParams,
   ServiceAccent,
   ServiceStory,
-  ServiceVertical,
 } from "@/types/home";
 
 function mapSanityImageToHeroMedia(
@@ -50,25 +49,61 @@ function mapSanityImageToHeroMedia(
   };
 }
 
-function isServiceVertical(value: string | null | undefined): value is ServiceVertical {
-  return value === "packaging" || value === "ecommerce" || value === "agency";
+function isServiceAccent(value: string | null | undefined): value is ServiceAccent {
+  const normalized = value?.trim().toLowerCase();
+  return (
+    normalized === "peacock" ||
+    normalized === "saffron" ||
+    normalized === "purple" ||
+    normalized === "gold"
+  );
 }
 
-function isServiceAccent(value: string | null | undefined): value is ServiceAccent {
-  return value === "peacock" || value === "saffron" || value === "purple";
+function resolveServiceAccent(value: string | null | undefined): ServiceAccent | string {
+  if (!value?.trim()) {
+    return "gold";
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (isServiceAccent(normalized)) {
+    return normalized;
+  }
+
+  return value.trim();
 }
 
 export function mapSanityHeroToEditorial(
   hero: SanityHeroBlock,
   fallback: HeroEditorialParams,
 ): HeroEditorialParams {
+  const fallbackMedia = fallback.media;
+
+  const heroImages = (hero.heroImages ?? [])
+    .map((image) => mapSanityImageToHeroMedia(image, fallbackMedia))
+    .filter((image) => Boolean(image.src));
+
+  const legacyMedia = mapSanityImageToHeroMedia(hero.media, fallbackMedia);
+  const slides =
+    heroImages.length > 0
+      ? heroImages
+      : legacyMedia.src
+        ? [legacyMedia]
+        : fallback.heroImages.length > 0
+          ? fallback.heroImages
+          : fallbackMedia.src
+            ? [fallbackMedia]
+            : [];
+
+  const media = slides[0] ?? fallbackMedia;
+
   return {
     eyebrow: hero.eyebrow ?? fallback.eyebrow,
     title: hero.headline,
     description: hero.subheadline ?? fallback.description,
     ctaPrimary: hero.ctaPrimary ?? fallback.ctaPrimary,
     ctaSecondary: hero.ctaSecondary ?? fallback.ctaSecondary,
-    media: mapSanityImageToHeroMedia(hero.media, fallback.media),
+    media,
+    heroImages: slides,
   };
 }
 
@@ -76,17 +111,30 @@ export function mapSanityServiceToStory(
   service: NonNullable<SanityHomePage["services"]>[number],
   fallbackMedia: HeroMedia,
 ): ServiceStory {
+  const coverImage = service.coverImage
+    ? mapSanityImageToHeroMedia(service.coverImage, fallbackMedia)
+    : undefined;
+
   return {
     id: service._key,
-    vertical: isServiceVertical(service.vertical) ? service.vertical : "packaging",
+    vertical: service.vertical?.trim() || undefined,
     title: service.title,
     description: service.description,
-    accent: isServiceAccent(service.accent) ? service.accent : "peacock",
-    href: service.href ?? "/collections",
-    coverImage: service.coverImage
-      ? mapSanityImageToHeroMedia(service.coverImage, fallbackMedia)
-      : undefined,
+    accent: resolveServiceAccent(service.accent),
+    href: service.href?.trim() || "/collections",
+    coverImage: coverImage?.src ? coverImage : undefined,
   };
+}
+
+export function mapSanityServicesToStories(
+  services: NonNullable<SanityHomePage["services"]> | null | undefined,
+  fallbackMedia: HeroMedia,
+): ServiceStory[] {
+  if (!services?.length) {
+    return [];
+  }
+
+  return services.map((service) => mapSanityServiceToStory(service, fallbackMedia));
 }
 
 function resolveProductStartingPrice(product: SanityProduct): number {
@@ -240,17 +288,18 @@ export function mapSanityHomePageToEditorial(
     services: ServiceStory[];
   },
 ): { hero: HeroEditorialParams; services: ServiceStory[] } | null {
-  if (!content.hero?.headline) {
+  const services = mapSanityServicesToStories(
+    content.services,
+    fallback.hero.media,
+  );
+
+  if (!content.hero?.headline && services.length === 0) {
     return null;
   }
 
-  const hero = mapSanityHeroToEditorial(content.hero, fallback.hero);
-  const services =
-    content.services && content.services.length > 0
-      ? content.services.map((service) =>
-          mapSanityServiceToStory(service, fallback.hero.media),
-        )
-      : fallback.services;
+  const hero = content.hero?.headline
+    ? mapSanityHeroToEditorial(content.hero, fallback.hero)
+    : fallback.hero;
 
   return { hero, services };
 }
@@ -276,9 +325,14 @@ export function mapSanityHomePageWithCatalog(
   services: ServiceStory[];
   products: ProductShowcaseItem[];
 } | null {
-  const editorial = content.editorial
-    ? mapSanityHomePageToEditorial(content.editorial, fallback)
-    : null;
+  const editorial = content.editorial;
+  const hero = editorial?.hero?.headline
+    ? mapSanityHeroToEditorial(editorial.hero, fallback.hero)
+    : fallback.hero;
+  const services = mapSanityServicesToStories(
+    editorial?.services,
+    fallback.hero.media,
+  );
 
   const sanityProducts =
     content.products && content.products.length > 0
@@ -288,16 +342,17 @@ export function mapSanityHomePageWithCatalog(
         )
       : [];
 
-  const hasEditorial = Boolean(content.editorial?.hero?.headline);
+  const hasHero = Boolean(editorial?.hero?.headline);
+  const hasServices = services.length > 0;
   const hasProducts = sanityProducts.length > 0;
 
-  if (!hasEditorial && !hasProducts) {
+  if (!hasHero && !hasServices && !hasProducts) {
     return null;
   }
 
   return {
-    hero: editorial?.hero ?? fallback.hero,
-    services: editorial?.services ?? fallback.services,
+    hero,
+    services,
     products: sanityProducts,
   };
 }

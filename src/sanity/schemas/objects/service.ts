@@ -1,3 +1,4 @@
+import { ServiceDescriptionFieldWithAi } from "@/sanity/components/ServiceDescriptionFieldWithAi";
 import { defineField, defineType } from "sanity";
 
 export const service = defineType({
@@ -15,34 +16,27 @@ export const service = defineType({
       name: "description",
       title: "Description",
       type: "text",
-      rows: 4,
+      rows: 5,
+      components: {
+        field: ServiceDescriptionFieldWithAi,
+      },
+      description:
+        "Free-form service copy. Use AI Generate to draft editorial text from the title.",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "vertical",
-      title: "Vertical",
+      title: "Category Label",
       type: "string",
-      options: {
-        list: [
-          { title: "Packaging", value: "packaging" },
-          { title: "Ecommerce", value: "ecommerce" },
-          { title: "Agency", value: "agency" },
-        ],
-        layout: "radio",
-      },
+      description:
+        "Optional short label above the title (e.g. Packaging, Commerce, Atelier). Fully custom—no presets.",
     }),
     defineField({
       name: "accent",
       title: "Accent Color",
       type: "string",
-      options: {
-        list: [
-          { title: "Peacock", value: "peacock" },
-          { title: "Saffron", value: "saffron" },
-          { title: "Purple", value: "purple" },
-        ],
-        layout: "radio",
-      },
+      description:
+        "Optional accent token for the card label: peacock, saffron, purple, or gold.",
     }),
     defineField({
       name: "href",

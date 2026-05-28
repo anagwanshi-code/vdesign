@@ -18,19 +18,21 @@ export type HeroEditorialParams = {
   description: string;
   ctaPrimary: HeroCta;
   ctaSecondary: HeroCta;
+  /** Primary slide (first slider image or legacy media). */
   media: HeroMedia;
+  /** Full-screen hero slider frames from Sanity. */
+  heroImages: HeroMedia[];
 };
 
-export type ServiceVertical = "packaging" | "ecommerce" | "agency";
-
-export type ServiceAccent = "peacock" | "saffron" | "purple";
+export type ServiceAccent = "peacock" | "saffron" | "purple" | "gold";
 
 export type ServiceStory = {
   id: string;
-  vertical: ServiceVertical;
+  /** Optional custom label (formerly constrained vertical). */
+  vertical?: string;
   title: string;
   description: string;
-  accent: ServiceAccent;
+  accent: ServiceAccent | string;
   href: string;
   coverImage?: HeroMedia;
 };

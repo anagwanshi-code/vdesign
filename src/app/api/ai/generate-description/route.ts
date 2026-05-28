@@ -1,11 +1,13 @@
 import { generateProductContent } from "@/lib/ai/generate-product-content";
 import { generateProductDescription } from "@/lib/ai/generate-product-description";
+import { generateServiceDescription } from "@/lib/ai/generate-service-description";
 import { type NextRequest, NextResponse } from "next/server";
 
 type GenerateDescriptionRequest = {
   title?: string;
   subtitle?: string;
   imageUrl?: string | null;
+  context?: "product" | "service";
 };
 
 export async function POST(req: NextRequest) {
@@ -27,6 +29,11 @@ export async function POST(req: NextRequest) {
       { error: "Product title is required" },
       { status: 400 },
     );
+  }
+
+  if (body.context === "service") {
+    const description = await generateServiceDescription({ title });
+    return NextResponse.json({ description });
   }
 
   if (body.imageUrl) {

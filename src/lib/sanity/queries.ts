@@ -179,6 +179,19 @@ export const HOME_PAGE_WITH_CATALOG_QUERY = groq`
       eyebrow,
       headline,
       subheadline,
+      heroImages[] {
+        _key,
+        alt,
+        asset->{
+          url,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
+          }
+        }
+      },
       media {
         alt,
         asset->{

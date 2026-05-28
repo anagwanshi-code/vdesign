@@ -1,12 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
-import type { HeroEditorialParams } from "@/types/home";
-import { motion, useReducedMotion } from "framer-motion";
+import type { HeroEditorialParams, HeroMedia } from "@/types/home";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 const CINEMATIC_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const SLIDE_INTERVAL_MS = 5000;
 
 const textContainerVariants = {
   hidden: {},
@@ -30,15 +32,10 @@ const textItemVariants = {
   },
 };
 
-const backgroundReveal = {
-  hidden: { scale: 1.1 },
-  visible: {
-    scale: 1,
-    transition: {
-      duration: 2.5,
-      ease: "easeOut" as const,
-    },
-  },
+const slideVariants = {
+  initial: { opacity: 0, scale: 1.05 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0 },
 };
 
 type HeroBlockProps = {
@@ -46,9 +43,41 @@ type HeroBlockProps = {
   className?: string;
 };
 
+function resolveHeroSlides(hero: HeroEditorialParams): HeroMedia[] {
+  const fromSlider = hero.heroImages.filter((image) => Boolean(image.src?.trim()));
+  if (fromSlider.length > 0) {
+    return fromSlider;
+  }
+  if (hero.media.src?.trim()) {
+    return [hero.media];
+  }
+  return [];
+}
+
 export function HeroBlock({ hero, className }: HeroBlockProps) {
   const prefersReducedMotion = useReducedMotion();
   const motionEnabled = !prefersReducedMotion;
+  const slides = useMemo(() => resolveHeroSlides(hero), [hero]);
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (slides.length <= 1 || prefersReducedMotion) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCurrentImageIndex((previous) => (previous + 1) % slides.length);
+    }, SLIDE_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [slides.length, prefersReducedMotion]);
+
+  const activeSlide = slides[currentImageIndex];
 
   return (
     <section
@@ -58,26 +87,37 @@ export function HeroBlock({ hero, className }: HeroBlockProps) {
       )}
       aria-label="Editorial hero"
     >
-      {/* Background image — Z-0 */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        variants={motionEnabled ? backgroundReveal : undefined}
-        initial={motionEnabled ? "hidden" : false}
-        animate={motionEnabled ? "visible" : undefined}
-      >
-        {hero.media.src ? (
-          <Image
-            src={hero.media.src}
-            alt={hero.media.alt}
-            fill
-            priority
-            className="h-full w-full object-cover"
-            sizes="100vw"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-neutral-950" aria-hidden="true" />
-        )}
-      </motion.div>
+      {/* Background slider — Z-0 */}
+      <div className="absolute inset-0 z-0">
+        <AnimatePresence mode="sync">
+          {activeSlide ? (
+            <motion.div
+              key={currentImageIndex}
+              className="absolute inset-0"
+              variants={slideVariants}
+              initial={motionEnabled ? "initial" : false}
+              animate={motionEnabled ? "animate" : undefined}
+              exit={motionEnabled ? "exit" : undefined}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+            >
+              <Image
+                src={activeSlide.src}
+                alt={activeSlide.alt}
+                fill
+                priority={currentImageIndex === 0}
+                className="h-full w-full object-cover"
+                sizes="100vw"
+              />
+            </motion.div>
+          ) : (
+            <div
+              key="hero-empty"
+              className="absolute inset-0 bg-neutral-950"
+              aria-hidden="true"
+            />
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Cinematic overlay — Z-10 */}
       <div
