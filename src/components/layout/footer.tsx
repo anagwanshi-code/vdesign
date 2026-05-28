@@ -71,21 +71,20 @@ function FooterLinkColumn({ title, links }: FooterLinkColumnProps) {
 function buildConnectLinks(
   settings: Awaited<ReturnType<typeof getSiteSettings>>,
 ): FooterLink[] {
-  const links: FooterLink[] =
-    settings?.socialLinks
-      ?.map((link) => {
-        const platform = link.platform?.trim();
-        const url = link.url?.trim();
-        if (!platform || !url) {
-          return null;
-        }
-        return {
-          label: platform,
-          href: url,
-          external: true,
-        };
-      })
-      .filter((link): link is FooterLink => link !== null) ?? [];
+  const links = (settings?.socialLinks ?? [])
+    .map((link): FooterLink | null => {
+      const platform = link.platform?.trim();
+      const url = link.url?.trim();
+      if (!platform || !url) {
+        return null;
+      }
+      return {
+        label: platform,
+        href: url,
+        external: true,
+      };
+    })
+    .filter((link): link is FooterLink => link !== null);
 
   const email = settings?.contactEmail?.trim();
   if (email) {
