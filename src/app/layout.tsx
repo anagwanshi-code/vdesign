@@ -1,4 +1,5 @@
 import { AppChrome } from "@/components/layout/app-chrome";
+import { Footer } from "@/components/layout/footer";
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "@/styles/globals.css";
@@ -36,7 +37,7 @@ export default function RootLayout({
       className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="flex min-h-screen flex-col bg-surface font-sans text-text-primary selection:bg-saffron/30 selection:text-text-primary">
-        <AppChrome>{children}</AppChrome>
+        <AppChrome footer={<Footer />}>{children}</AppChrome>
       </body>
     </html>
   );

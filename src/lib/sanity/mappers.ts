@@ -9,10 +9,15 @@ import {
   formatInr,
   mapSanityVariantsToDetail,
 } from "@/lib/product/variants";
-import type { CollectionCard, ProductShowcaseItem } from "@/types/home";
+import type {
+  AboutStudioContent,
+  CollectionCard,
+  ProductShowcaseItem,
+} from "@/types/home";
 import type { HeroMedia } from "@/types/home";
 import type { ProductDetail } from "@/types/product";
 import type {
+  SanityAboutStudio,
   SanityCollectionSummary,
   SanityHeroBlock,
   SanityHomePage,
@@ -259,6 +264,19 @@ export function mapSanityProductToShowcaseItem(
   };
 }
 
+export function mapSanityFeaturedProducts(
+  products: SanityProduct[] | null | undefined,
+  fallbackImage: HeroMedia,
+): ProductShowcaseItem[] {
+  if (!products?.length) {
+    return [];
+  }
+
+  return mapSanityCatalogToShowcaseItems(products, fallbackImage).filter(
+    (product) => Boolean(product.handle?.trim()),
+  );
+}
+
 export function mapSanityFeaturedCollections(
   collections: SanityCollectionSummary[] | null | undefined,
   fallbackImage: HeroMedia,
@@ -322,6 +340,62 @@ export function mapSanityHomePageToEditorial(
   return { hero, services };
 }
 
+const ABOUT_STUDIO_IMAGE_FALLBACK: HeroMedia = {
+  src: "",
+  alt: "V Design atelier craftsmanship",
+  width: 1600,
+  height: 1200,
+};
+
+export function mapSanityAboutStudio(
+  aboutStudio: SanityAboutStudio | null | undefined,
+): AboutStudioContent | null {
+  if (!aboutStudio) {
+    return null;
+  }
+
+  const eyebrow = aboutStudio.eyebrow?.trim() ?? "";
+  const headline = aboutStudio.headline?.trim() ?? "";
+  const description = aboutStudio.description?.trim() ?? "";
+  const ctaLabel = aboutStudio.ctaLabel?.trim() ?? "";
+  const ctaLink = aboutStudio.ctaLink?.trim() || "/about";
+
+  const image = mapSanityImageToHeroMedia(aboutStudio.image, {
+    ...ABOUT_STUDIO_IMAGE_FALLBACK,
+    alt:
+      aboutStudio.image?.alt?.trim() || ABOUT_STUDIO_IMAGE_FALLBACK.alt,
+  });
+  const hasImage = Boolean(image.src);
+
+  if (!eyebrow && !headline && !description && !hasImage) {
+    return null;
+  }
+
+  return {
+    eyebrow,
+    headline,
+    description,
+    ctaLabel,
+    ctaLink,
+    image: hasImage ? image : null,
+  };
+}
+
+export function hasAboutStudioContent(
+  content: AboutStudioContent | null | undefined,
+): content is AboutStudioContent {
+  if (!content) {
+    return false;
+  }
+
+  return Boolean(
+    content.eyebrow ||
+      content.headline ||
+      content.description ||
+      content.image?.src,
+  );
+}
+
 export function mapSanityCatalogToShowcaseItems(
   products: SanityProduct[],
   fallbackImage: HeroMedia,
@@ -342,6 +416,8 @@ export function mapSanityHomePageWithCatalog(
   hero: HeroEditorialParams;
   services: ServiceStory[];
   featuredCollections: CollectionCard[];
+  featuredProducts: ProductShowcaseItem[];
+  aboutStudio: AboutStudioContent | null;
   products: ProductShowcaseItem[];
 } | null {
   const editorial = content.editorial;
@@ -356,6 +432,11 @@ export function mapSanityHomePageWithCatalog(
     editorial?.featuredCollections,
     fallback.hero.media,
   );
+  const featuredProducts = mapSanityFeaturedProducts(
+    editorial?.featuredProducts,
+    fallback.hero.media,
+  );
+  const aboutStudio = mapSanityAboutStudio(editorial?.aboutStudio);
 
   const sanityProducts =
     content.products && content.products.length > 0
@@ -368,9 +449,16 @@ export function mapSanityHomePageWithCatalog(
   const hasHero = Boolean(editorial?.hero?.headline);
   const hasServices = services.length > 0;
   const hasFeaturedCollections = featuredCollections.length > 0;
+  const hasFeaturedProducts = featuredProducts.length > 0;
   const hasProducts = sanityProducts.length > 0;
 
-  if (!hasHero && !hasServices && !hasFeaturedCollections && !hasProducts) {
+  if (
+    !hasHero &&
+    !hasServices &&
+    !hasFeaturedCollections &&
+    !hasFeaturedProducts &&
+    !hasProducts
+  ) {
     return null;
   }
 
@@ -378,6 +466,8 @@ export function mapSanityHomePageWithCatalog(
     hero,
     services,
     featuredCollections,
+    featuredProducts,
+    aboutStudio,
     products: sanityProducts,
   };
 }

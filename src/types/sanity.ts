@@ -42,10 +42,21 @@ export type SanityService = {
   coverImage?: SanityImage | null;
 };
 
+export type SanityAboutStudio = {
+  eyebrow?: string | null;
+  headline?: string | null;
+  description?: string | null;
+  ctaLabel?: string | null;
+  ctaLink?: string | null;
+  image?: SanityImage | null;
+};
+
 export type SanityHomePage = {
   hero: SanityHeroBlock | null;
   services: SanityService[] | null;
   featuredCollections?: SanityCollectionSummary[] | null;
+  featuredProducts?: SanityProduct[] | null;
+  aboutStudio?: SanityAboutStudio | null;
 };
 
 export type SanityProductSize = {
@@ -151,6 +162,18 @@ export type SanityProduct = {
   availableFrames?: SanityProductFrame[] | null;
   frameLabels?: string[] | null;
   variants?: SanityProductVariant[] | null;
+};
+
+export type SanitySocialLink = {
+  _key?: string;
+  platform?: string | null;
+  url?: string | null;
+};
+
+export type SanitySiteSettings = {
+  socialLinks?: SanitySocialLink[] | null;
+  contactEmail?: string | null;
+  copyrightText?: string | null;
 };
 
 export type SanityHomePageWithCatalog = {

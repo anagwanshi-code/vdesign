@@ -1,98 +1,173 @@
+import { getSiteSettings } from "@/lib/sanity/queries";
 import Link from "next/link";
 
-export function Footer() {
+const DEFAULT_COPYRIGHT = "© 2026 V Design. All rights reserved.";
+
+const STUDIO_LINKS = [
+  { label: "About", href: "/about" },
+  { label: "Work", href: "/work" },
+  { label: "Careers", href: "/about" },
+] as const;
+
+const COLLECTION_LINKS = [
+  { label: "Wedding", href: "/collections/wedding" },
+  { label: "Retail", href: "/collections/retail" },
+  { label: "Corporate", href: "/collections/corporate" },
+] as const;
+
+const LEGAL_LINKS = [
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+] as const;
+
+type FooterLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
+
+type FooterLinkColumnProps = {
+  title: string;
+  links: FooterLink[];
+};
+
+function FooterLinkColumn({ title, links }: FooterLinkColumnProps) {
   return (
-    <footer className="border-t border-border/50 bg-background px-6 pb-12 pt-24 md:px-12 lg:px-24">
-      <div className="mx-auto mb-24 flex max-w-[1440px] flex-col items-start justify-between gap-12 md:flex-row">
-        <div className="max-w-sm">
-          <h2 className="mb-6 font-serif text-3xl tracking-widest text-foreground">
-            V DESIGN
+    <div>
+      <h3 className="mb-6 text-xs uppercase tracking-[0.2em] text-white">
+        {title}
+      </h3>
+      <ul className="list-none p-0">
+        {links.map((link, index) => (
+          <li key={`${title}-${link.label}-${index}`}>
+            {link.external ? (
+              <a
+                href={link.href}
+                target={link.href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={
+                  link.href.startsWith("mailto:")
+                    ? undefined
+                    : "noopener noreferrer"
+                }
+                className="mb-3 block text-sm text-gray-400 transition-colors duration-300 hover:text-white"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                href={link.href}
+                className="mb-3 block text-sm text-gray-400 transition-colors duration-300 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function buildConnectLinks(
+  settings: Awaited<ReturnType<typeof getSiteSettings>>,
+): FooterLink[] {
+  const links: FooterLink[] =
+    settings?.socialLinks
+      ?.map((link) => {
+        const platform = link.platform?.trim();
+        const url = link.url?.trim();
+        if (!platform || !url) {
+          return null;
+        }
+        return {
+          label: platform,
+          href: url,
+          external: true,
+        };
+      })
+      .filter((link): link is FooterLink => link !== null) ?? [];
+
+  const email = settings?.contactEmail?.trim();
+  if (email) {
+    links.push({
+      label: "Email",
+      href: `mailto:${email}`,
+      external: true,
+    });
+  }
+
+  return links;
+}
+
+export async function Footer() {
+  const settings = await getSiteSettings();
+  const connectLinks = buildConnectLinks(settings);
+  const copyrightText =
+    settings?.copyrightText?.trim() || DEFAULT_COPYRIGHT;
+
+  return (
+    <footer className="border-t border-white/10 bg-black text-white">
+      <section className="px-6 py-24 text-center">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="font-serif text-3xl font-light md:text-4xl">
+            Join the Atelier
           </h2>
-          <p className="font-sans text-sm leading-relaxed text-muted">
-            Elevating brands through luxury packaging, bespoke wedding stationery,
-            and cinematic visual identities.
+          <p className="mt-4 text-gray-400">
+            Receive quiet updates on new collections, atelier openings, and
+            limited releases—curated, never crowded.
           </p>
-        </div>
 
-        <div className="flex gap-16">
-          <div className="flex flex-col gap-4">
-            <h3 className="mb-2 font-sans text-xs uppercase tracking-[0.2em] text-foreground">
-              Explore
-            </h3>
-            <Link
-              href="/collections"
-              className="font-sans text-sm text-muted transition-colors hover:text-saffron"
+          <form
+            className="mx-auto mt-10 flex w-full max-w-md flex-col items-center gap-6 sm:flex-row sm:items-end sm:justify-center"
+            action="#"
+            aria-label="Newsletter subscription"
+          >
+            <label className="sr-only" htmlFor="footer-email">
+              Email address
+            </label>
+            <input
+              id="footer-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="your@email.com"
+              className="w-full flex-1 border-0 border-b border-gray-600 bg-transparent px-0 py-2 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-white"
+            />
+            <button
+              type="submit"
+              className="shrink-0 text-sm uppercase tracking-widest text-gray-400 transition-colors duration-300 hover:text-white"
             >
-              Shop
-            </Link>
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-t border-white/10 px-6 py-16 md:grid-cols-4">
+        <FooterLinkColumn
+          title="Studio"
+          links={[...STUDIO_LINKS]}
+        />
+        <FooterLinkColumn title="Collections" links={[...COLLECTION_LINKS]} />
+        <FooterLinkColumn title="Legal" links={[...LEGAL_LINKS]} />
+        <FooterLinkColumn title="Connect" links={connectLinks} />
+      </section>
+
+      <section className="border-t border-white/10 px-6 py-6">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-xs text-gray-500 md:flex-row">
+          <p>{copyrightText}</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:justify-end">
+            <p className="text-gray-600">Crafted with precision.</p>
             <Link
-              href="/atelier"
-              className="font-sans text-sm text-muted transition-colors hover:text-saffron"
+              href="/studio"
+              className="text-xs text-gray-600 transition-colors hover:text-white"
             >
-              Services
-            </Link>
-            <Link
-              href="/work"
-              className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-            >
-              Portfolio
+              Studio Access
             </Link>
           </div>
-          <div className="flex flex-col gap-4">
-            <h3 className="mb-2 font-sans text-xs uppercase tracking-[0.2em] text-foreground">
-              Connect
-            </h3>
-            <Link
-              href="/about"
-              className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-            >
-              Contact
-            </Link>
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-            >
-              Instagram
-            </a>
-            <a
-              href="https://www.behance.net/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-            >
-              Behance
-            </a>
-          </div>
         </div>
-      </div>
-
-      <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between border-t border-border/50 pt-8 md:flex-row">
-        <p className="font-sans text-xs text-muted">
-          &copy; {new Date().getFullYear()} V Design. All rights reserved.
-        </p>
-        <div className="mt-4 flex items-center gap-6 md:mt-0">
-          <Link
-            href="/about"
-            className="font-sans text-xs text-muted transition-colors hover:text-foreground"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/about"
-            className="font-sans text-xs text-muted transition-colors hover:text-foreground"
-          >
-            Terms of Service
-          </Link>
-          <Link
-            href="/studio"
-            className="font-sans text-xs text-muted/40 transition-colors hover:text-foreground"
-          >
-            Admin Login
-          </Link>
-        </div>
-      </div>
+      </section>
     </footer>
   );
 }

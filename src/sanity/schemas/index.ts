@@ -1,5 +1,6 @@
 import collection from './documents/collection';
 import { homePage } from './documents/homePage';
+import { siteSettings } from './documents/siteSettings';
 import { product } from './documents/product';
 import { productFrame } from './documents/productFrame';
 import { productSize } from './documents/productSize';
@@ -12,6 +13,7 @@ import { SchemaTypeDefinition } from 'sanity';
 
 export const schemaTypes: SchemaTypeDefinition[] = [
   homePage,
+  siteSettings,
   collection,
   product,
   productSize,

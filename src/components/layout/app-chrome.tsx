@@ -1,7 +1,6 @@
 "use client";
 
 import { CartDrawer } from "@/components/layout/cart-drawer";
-import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { CartProvider } from "@/components/providers/cart-provider";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
@@ -12,7 +11,7 @@ type AppChromeProps = {
   children: ReactNode;
 };
 
-export function AppChrome({ children }: AppChromeProps) {
+export function AppChrome({ children, footer }: AppChromeProps) {
   const pathname = usePathname();
   const isStudioRoute = pathname.startsWith("/studio");
 
@@ -27,7 +26,7 @@ export function AppChrome({ children }: AppChromeProps) {
           <Header />
           <CartDrawer />
           <main className="relative z-10 flex grow flex-col">{children}</main>
-          <Footer />
+          {footer}
         </CartProvider>
       </div>
     </SmoothScroll>

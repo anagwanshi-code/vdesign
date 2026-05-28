@@ -31,6 +31,8 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
     heroImages: [],
   },
   featuredCollections: [],
+  featuredProducts: [],
+  aboutStudio: null,
   services: [
     {
       id: "service-packaging",
@@ -158,6 +160,8 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
         hero: mapped.hero,
         services: mapped.services,
         featuredCollections: mapped.featuredCollections,
+        featuredProducts: mapped.featuredProducts,
+        aboutStudio: mapped.aboutStudio,
         products:
           mapped.products.length > 0 ? mapped.products : sanityProducts,
         source: "sanity",
@@ -170,6 +174,8 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
         products: sanityProducts,
         services: [],
         featuredCollections: [],
+        featuredProducts: [],
+        aboutStudio: null,
         source: "sanity",
       };
     }

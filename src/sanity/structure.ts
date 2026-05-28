@@ -1,6 +1,7 @@
 import type { StructureResolver } from "sanity/structure";
 
 const HOME_PAGE_DOCUMENT_ID = "homePageV2";
+const SITE_SETTINGS_DOCUMENT_ID = "siteSettings";
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -13,6 +14,14 @@ export const structure: StructureResolver = (S) =>
           S.document()
             .schemaType("homePage")
             .documentId(HOME_PAGE_DOCUMENT_ID),
+        ),
+      S.listItem()
+        .title("Site Settings")
+        .id(SITE_SETTINGS_DOCUMENT_ID)
+        .child(
+          S.document()
+            .schemaType("siteSettings")
+            .documentId(SITE_SETTINGS_DOCUMENT_ID),
         ),
       S.divider(),
       S.listItem()

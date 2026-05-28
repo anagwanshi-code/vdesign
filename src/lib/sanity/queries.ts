@@ -5,6 +5,7 @@ import type {
   SanityCollectionSummary,
   SanityHomePageQueryResult,
   SanityProduct,
+  SanitySiteSettings,
 } from "@/types/sanity";
 
 const PRODUCT_CATALOG_FIELDS = groq`
@@ -279,6 +280,28 @@ export const HOME_PAGE_WITH_CATALOG_QUERY = groq`
           coalesce(status, "active") != "archived"
         ] | order(_createdAt desc)[0].images[0].asset->url
       )
+    },
+    featuredProducts[]->{
+      ${PRODUCT_CATALOG_FIELDS}
+    },
+    aboutStudio {
+      eyebrow,
+      headline,
+      description,
+      ctaLabel,
+      ctaLink,
+      image {
+        alt,
+        asset->{
+          url,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
+          }
+        }
+      }
     }
   },
   "products": *[
@@ -435,6 +458,27 @@ export async function getHomePageContent(): Promise<SanityHomePageQueryResult> {
 }
 
 export const HOME_PAGE_QUERY = HOME_PAGE_WITH_CATALOG_QUERY;
+
+export const SITE_SETTINGS_QUERY = groq`
+*[_type == "siteSettings"][0] {
+  socialLinks[] {
+    _key,
+    platform,
+    url
+  },
+  contactEmail,
+  copyrightText
+}
+`;
+
+export async function getSiteSettings(): Promise<SanitySiteSettings | null> {
+  try {
+    return await sanityFetch<SanitySiteSettings | null>(SITE_SETTINGS_QUERY);
+  } catch (error) {
+    console.error("[Sanity] Failed to fetch site settings:", error);
+    return null;
+  }
+}
 
 export async function getProductBySlug(
   slug: string,

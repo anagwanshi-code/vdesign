@@ -81,10 +81,21 @@ export type CollectionCard = {
   productCount: number;
 };
 
+export type AboutStudioContent = {
+  eyebrow: string;
+  headline: string;
+  description: string;
+  ctaLabel: string;
+  ctaLink: string;
+  image: HeroMedia | null;
+};
+
 export type HomePageData = {
   hero: HeroEditorialParams;
   services: ServiceStory[];
   featuredCollections: CollectionCard[];
+  featuredProducts: ProductShowcaseItem[];
+  aboutStudio: AboutStudioContent | null;
   products: ProductShowcaseItem[];
 };
 
