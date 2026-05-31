@@ -8,6 +8,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        "brand-pink": "#E91E63",
+        "brand-orange": "#FF9800",
+        "brand-dark": "#0B1120",
+        "luxury-bg": "#FCFAF7",
+        "luxury-surface": "#FFF7F2",
+        "luxury-border": "#E9E1D8",
+        "luxury-text": "#1A1A1A",
+        "luxury-muted": "#666666",
+        "royal-magenta": "#D91E63",
+        "peacock-blue": "#0088A9",
+        "saffron-gold": "#E2A03F",
         surface: "hsl(var(--color-surface) / <alpha-value>)",
         border: "hsl(var(--color-border) / <alpha-value>)",
         "text-primary": "hsl(var(--color-text-primary) / <alpha-value>)",
@@ -27,6 +38,7 @@ const config: Config = {
         serif: ["var(--font-serif)", "Georgia", "Times New Roman", "serif"],
         sans: ["var(--font-sans)", "Satoshi", "system-ui", "sans-serif"],
         display: ["var(--font-serif)", "Georgia", "serif"],
+        dancing: ["var(--font-dancing)", "cursive"],
       },
       fontSize: {
         "display-xl": [

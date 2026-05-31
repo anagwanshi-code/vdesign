@@ -165,12 +165,21 @@ function resolvePrimaryProductImage(
   return product.image ?? product.images?.[0] ?? null;
 }
 
+function resolveGalleryEntryImage(
+  entry: NonNullable<SanityProduct["gallery"]>[number],
+): SanityImage | null | undefined {
+  if (entry && "asset" in entry && entry.asset?.url) {
+    return entry as SanityImage;
+  }
+  return entry.image;
+}
+
 function resolveProductGalleryImages(
   product: SanityProduct,
 ): SanityImage[] {
   if (product.gallery?.length) {
     return product.gallery
-      .map((entry) => entry.image)
+      .map((entry) => resolveGalleryEntryImage(entry))
       .filter((image): image is SanityImage => Boolean(image?.asset?.url));
   }
 
@@ -185,7 +194,9 @@ function resolveProductHoverImage(
   fallbackImage: HeroMedia,
 ): HeroMedia | undefined {
   const galleryImage =
-    product.gallery?.[0]?.image ?? product.images?.[1] ?? undefined;
+    (product.gallery?.[0]
+      ? resolveGalleryEntryImage(product.gallery[0])
+      : undefined) ?? product.images?.[1] ?? undefined;
 
   if (!galleryImage) {
     return undefined;
@@ -324,20 +335,13 @@ export function mapSanityHomePageToEditorial(
     services: ServiceStory[];
   },
 ): { hero: HeroEditorialParams; services: ServiceStory[] } | null {
-  const services = mapSanityServicesToStories(
-    content.services,
-    fallback.hero.media,
-  );
-
-  if (!content.hero?.headline && services.length === 0) {
+  if (!content.hero?.headline) {
     return null;
   }
 
-  const hero = content.hero?.headline
-    ? mapSanityHeroToEditorial(content.hero, fallback.hero)
-    : fallback.hero;
+  const hero = mapSanityHeroToEditorial(content.hero, fallback.hero);
 
-  return { hero, services };
+  return { hero, services: [] };
 }
 
 const ABOUT_STUDIO_IMAGE_FALLBACK: HeroMedia = {
@@ -424,10 +428,6 @@ export function mapSanityHomePageWithCatalog(
   const hero = editorial?.hero?.headline
     ? mapSanityHeroToEditorial(editorial.hero, fallback.hero)
     : fallback.hero;
-  const services = mapSanityServicesToStories(
-    editorial?.services,
-    fallback.hero.media,
-  );
   const featuredCollections = mapSanityFeaturedCollections(
     editorial?.featuredCollections,
     fallback.hero.media,
@@ -447,14 +447,12 @@ export function mapSanityHomePageWithCatalog(
       : [];
 
   const hasHero = Boolean(editorial?.hero?.headline);
-  const hasServices = services.length > 0;
   const hasFeaturedCollections = featuredCollections.length > 0;
   const hasFeaturedProducts = featuredProducts.length > 0;
   const hasProducts = sanityProducts.length > 0;
 
   if (
     !hasHero &&
-    !hasServices &&
     !hasFeaturedCollections &&
     !hasFeaturedProducts &&
     !hasProducts
@@ -464,7 +462,7 @@ export function mapSanityHomePageWithCatalog(
 
   return {
     hero,
-    services,
+    services: [],
     featuredCollections,
     featuredProducts,
     aboutStudio,

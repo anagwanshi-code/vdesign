@@ -10,11 +10,13 @@ export {
 
 export {
   getAllCollections,
+  getCollectionsForIndex,
   getCollectionBySlug,
   getHomePageContent,
   getHomePageWithCatalog,
   getProductBySlug,
   ALL_COLLECTIONS_QUERY,
+  COLLECTIONS_INDEX_QUERY,
   COLLECTION_BY_SLUG_QUERY,
   HOME_PAGE_QUERY,
   HOME_PAGE_WITH_CATALOG_QUERY,

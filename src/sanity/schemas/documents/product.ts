@@ -3,6 +3,7 @@ import { ProductAiAssistInput } from "@/sanity/components/ProductAiAssistInput";
 import { ProductDescriptionFieldWithAi } from "@/sanity/components/ProductDescriptionFieldWithAi";
 import { ProductFieldWithAi } from "@/sanity/components/ProductFieldWithAi";
 import { ProductSeoFieldWithAi } from "@/sanity/components/ProductSeoFieldWithAi";
+import { SANITY_IMAGE_GRID_CARD } from "@/sanity/lib/image-field-descriptions";
 import { slugify } from "@/sanity/lib/slugify";
 import { defineField, defineType } from "sanity";
 
@@ -32,14 +33,18 @@ export const product = defineType({
       type: "image",
       group: "media",
       options: { hotspot: true },
-      description: "The main image for the product.",
+      description: `Primary shop/PDP image. ${SANITY_IMAGE_GRID_CARD}`,
     }),
     defineField({
       name: "gallery",
-      title: "Gallery",
+      title: "Product Gallery (Multiple Photos)",
       type: "array",
       group: "media",
       of: [
+        {
+          type: "image",
+          options: { hotspot: true },
+        },
         {
           type: "object",
           fields: [
@@ -52,7 +57,7 @@ export const product = defineType({
           ],
         },
       ],
-      description: "Additional product images.",
+      description: `Additional PDP and shop card images. ${SANITY_IMAGE_GRID_CARD}`,
     }),
     defineField({
       name: "images",
@@ -73,8 +78,7 @@ export const product = defineType({
           ],
         },
       ],
-      description:
-        "Legacy field kept for existing cloud data. Prefer Primary Image + Gallery.",
+      description: `Legacy field for existing cloud data. Prefer Primary Image + Gallery. ${SANITY_IMAGE_GRID_CARD}`,
     }),
 
     // ==========================================
@@ -143,9 +147,9 @@ export const product = defineType({
       title: "Category",
       type: "reference",
       group: "catalog",
-      to: [{ type: "collection" }],
+      to: [{ type: "category" }],
       description:
-        "Primary browse category. Similar products match here first on the PDP.",
+        "Product category for shop filters and catalog grouping (manage under Product Category).",
     }),
     defineField({
       name: "collection",
@@ -159,6 +163,35 @@ export const product = defineType({
         ),
       description:
         "Required. Collection slug drives `/collections/[slug]` routing and catalog listings.",
+    }),
+    defineField({
+      name: "industries",
+      title: "Related Industries",
+      type: "array",
+      group: "catalog",
+      of: [{ type: "reference", to: [{ type: "industry" }] }],
+      description: "Industries this product is relevant for (e.g. Wedding, Pharma).",
+    }),
+    defineField({
+      name: "rating",
+      title: "Rating (1–5)",
+      type: "number",
+      group: "catalog",
+      validation: (Rule) => Rule.min(1).max(5),
+    }),
+    defineField({
+      name: "reviewsCount",
+      title: "Number of Reviews",
+      type: "number",
+      group: "catalog",
+      validation: (Rule) => Rule.min(0),
+    }),
+    defineField({
+      name: "isBestSeller",
+      title: "Is Best Seller?",
+      type: "boolean",
+      group: "catalog",
+      initialValue: false,
     }),
 
     // ==========================================

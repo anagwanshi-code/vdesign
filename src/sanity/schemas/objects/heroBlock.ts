@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { SANITY_IMAGE_HERO } from "../../lib/image-field-descriptions";
+
 export const heroBlock = defineType({
   name: "heroBlock",
   title: "Hero",
@@ -40,8 +42,7 @@ export const heroBlock = defineType({
           ],
         },
       ],
-      description:
-        "Cinematic full-screen slider. Add multiple images for a 5-second cross-fade.",
+      description: `Cinematic full-screen slider (5-second cross-fade). ${SANITY_IMAGE_HERO}`,
     }),
     defineField({
       name: "media",
@@ -56,7 +57,7 @@ export const heroBlock = defineType({
           type: "string",
         }),
       ],
-      description: "Legacy single image. Prefer Hero Slider Images.",
+      description: `Legacy single image. Prefer Hero Slider Images. ${SANITY_IMAGE_HERO}`,
     }),
     defineField({
       name: "ctaPrimary",

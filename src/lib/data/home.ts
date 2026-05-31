@@ -158,7 +158,7 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
     if (mapped) {
       return {
         hero: mapped.hero,
-        services: mapped.services,
+        services: [],
         featuredCollections: mapped.featuredCollections,
         featuredProducts: mapped.featuredProducts,
         aboutStudio: mapped.aboutStudio,

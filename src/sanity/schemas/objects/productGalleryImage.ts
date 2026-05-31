@@ -1,3 +1,4 @@
+import { SANITY_IMAGE_GRID_CARD } from "@/sanity/lib/image-field-descriptions";
 import { defineField, defineType } from "sanity";
 
 export const productGalleryImage = defineType({
@@ -10,6 +11,7 @@ export const productGalleryImage = defineType({
       title: "Image",
       type: "image",
       options: { hotspot: true },
+      description: SANITY_IMAGE_GRID_CARD,
       validation: (Rule) => Rule.required(),
       fields: [
         defineField({

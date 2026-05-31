@@ -1,3 +1,4 @@
+import { SANITY_IMAGE_GRID_CARD } from "@/sanity/lib/image-field-descriptions";
 import { defineField, defineType } from "sanity";
 
 export const homePage = defineType({
@@ -10,12 +11,6 @@ export const homePage = defineType({
       title: "Hero",
       type: "heroBlock",
       validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "services",
-      title: "Services",
-      type: "array",
-      of: [{ type: "service" }],
     }),
     defineField({
       name: "featuredCollections",
@@ -99,6 +94,7 @@ export const homePage = defineType({
           title: "Studio Image",
           type: "image",
           options: { hotspot: true },
+          description: SANITY_IMAGE_GRID_CARD,
           fields: [
             defineField({
               name: "alt",

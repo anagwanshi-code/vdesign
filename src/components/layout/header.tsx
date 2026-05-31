@@ -4,8 +4,9 @@ import { ProductSearchModal } from "@/components/catalog/product-search-modal";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils/cn";
 import { useLenis } from "@studio-freight/react-lenis";
-import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, ShoppingBag } from "lucide-react";
+import { motion } from "framer-motion";
+import { Search, ShoppingBag } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,25 +14,47 @@ import { useEffect, useState } from "react";
 const CINEMATIC_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
 const NAV_LINKS = [
-  { name: "Collections", href: "/collections", hasMegaMenu: true },
-  { name: "Work", href: "/work", hasMegaMenu: false },
-  { name: "About", href: "/about", hasMegaMenu: false },
-  { name: "Studio", href: "/atelier", hasMegaMenu: true },
+  { name: "Home", href: "/" },
+  { name: "Services", href: "/services" },
+  { name: "Products", href: "/products" },
+  { name: "Shop", href: "/shop" },
+  { name: "PORTFOLIO ", href: "/portfolio" },
+  { name: "Industries", href: "/industries" },
+  { name: "Resources", href: "/resources" },
+  { name: "About Us", href: "/about" },
+  { name: "Contact", href: "/contact" },
 ] as const;
+
+function isNavLinkActive(pathname: string, href: string): boolean {
+  if (href === "/") {
+    return pathname === "/";
+  }
+  if (href.startsWith("/#")) {
+    return pathname === "/";
+  }
+  const basePath = href.split("#")[0];
+  return pathname === basePath || pathname.startsWith(`${basePath}/`);
+}
 
 export function Header() {
   const pathname = usePathname();
   const lenis = useLenis();
   const { openCart, totalQuantity } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [showMobileNavRow, setShowMobileNavRow] = useState(true);
   const [isSearchModalOpen, setSearchModalOpen] = useState(false);
+  const hideMobileNavRow =
+    pathname === "/" ||
+    pathname === "/contact" ||
+    pathname === "/resources";
 
   useEffect(() => {
     const getThreshold = () => window.innerHeight * 0.85;
+    const mobileNavCollapseOffset = 80;
 
     const updateScrollState = (scrollY: number) => {
       setIsScrolled(scrollY > getThreshold());
+      setShowMobileNavRow(scrollY < mobileNavCollapseOffset);
     };
 
     if (lenis) {
@@ -66,172 +89,108 @@ export function Header() {
         animate={{ y: 0 }}
         transition={{ duration: 1, ease: CINEMATIC_EASE }}
         className={cn(
-          "fixed left-0 right-0 top-0 z-40 transition-colors duration-500",
-          isScrolled || activeMenu
-            ? "border-b border-border/50 bg-background/95 shadow-sm backdrop-blur-md"
-            : "border-b border-transparent bg-transparent",
+          "fixed left-0 right-0 top-0 z-50 border-b border-zinc-100 bg-white shadow-sm transition-shadow duration-500",
+          isScrolled ? "shadow-md" : "shadow-sm",
         )}
-        onMouseLeave={() => setActiveMenu(null)}
       >
-        <div className="mx-auto flex h-24 max-w-[1440px] items-center justify-between px-6 md:px-12">
-          <nav className="hidden flex-1 items-center gap-8 lg:flex">
-            {NAV_LINKS.map((link) => (
-              <div
-                key={link.name}
-                onMouseEnter={() => link.hasMegaMenu && setActiveMenu(link.name)}
-                className="flex h-full cursor-pointer items-center py-8"
-              >
+        <div className="mx-auto max-w-[1440px] px-6 md:px-12">
+          <div className="flex h-20 items-center justify-between lg:h-24">
+            <nav
+              className="hidden flex-1 items-center gap-4 lg:flex xl:gap-5"
+              aria-label="Main navigation"
+            >
+              {NAV_LINKS.map((link) => (
                 <Link
+                  key={link.name}
                   href={link.href}
                   className={cn(
-                    "font-sans text-xs uppercase tracking-[0.15em] transition-colors duration-300",
-                    pathname === link.href || pathname.startsWith(`${link.href}/`)
-                      ? "text-saffron"
-                      : "text-foreground hover:text-saffron",
+                    "whitespace-nowrap font-sans text-xs uppercase tracking-[0.15em] transition-colors duration-300",
+                    isNavLinkActive(pathname, link.href)
+                      ? "text-brand-pink"
+                      : "text-zinc-800 hover:text-brand-pink",
                   )}
                 >
                   {link.name}
                 </Link>
-              </div>
+              ))}
+            </nav>
+
+            <div className="flex flex-1 justify-center lg:justify-center">
+              <Link href="/" className="group flex flex-col items-center">
+                <Image
+                  src="/logo.png"
+                  alt="V Design - The Printing Magician"
+                  width={240}
+                  height={80}
+                  className="h-10 w-auto object-contain md:h-14"
+                  priority
+                />
+              </Link>
+            </div>
+
+            <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
+              <Link
+                href="/consultation"
+                className="hidden rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg md:inline-flex"
+              >
+                Book Consultation
+              </Link>
+
+              <button
+                type="button"
+                onClick={openCart}
+                className="relative rounded-full border border-zinc-200 p-2 text-zinc-800 transition-colors duration-300 hover:border-brand-pink hover:bg-royal-magenta/5 hover:text-brand-pink"
+                aria-label={
+                  totalQuantity > 0
+                    ? `Open cart, ${totalQuantity} items`
+                    : "Open shopping cart"
+                }
+              >
+                <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
+                {totalQuantity > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-pink text-[9px] font-bold text-white">
+                    {totalQuantity > 9 ? "9+" : totalQuantity}
+                  </span>
+                ) : null}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSearchModalOpen(true)}
+                className="text-zinc-800 transition-colors duration-300 hover:text-brand-pink"
+                aria-label="Open search"
+              >
+                <Search className="h-5 w-5" strokeWidth={1.5} />
+              </button>
+            </div>
+          </div>
+
+          <nav
+            className={cn(
+              "flex items-center gap-3 overflow-x-auto border-t border-zinc-100 py-3 transition-[max-height,opacity,padding] duration-300 lg:hidden",
+              showMobileNavRow && !hideMobileNavRow
+                ? "max-h-16 opacity-100"
+                : "pointer-events-none max-h-0 overflow-hidden border-transparent py-0 opacity-0",
+            )}
+            aria-label="Mobile navigation"
+            aria-hidden={!showMobileNavRow || hideMobileNavRow}
+          >
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={cn(
+                  "shrink-0 font-sans text-[10px] uppercase tracking-[0.12em] transition-colors duration-300",
+                  isNavLinkActive(pathname, link.href)
+                    ? "text-brand-pink"
+                    : "text-zinc-800 hover:text-brand-pink",
+                )}
+              >
+                {link.name}
+              </Link>
             ))}
           </nav>
-
-          <div className="flex flex-1 justify-center lg:justify-center">
-            <Link href="/" className="group flex flex-col items-center">
-              <span className="font-serif text-3xl tracking-widest text-foreground transition-colors duration-300 md:text-4xl">
-                V DESIGN
-              </span>
-            </Link>
-          </div>
-
-          <div className="flex flex-1 items-center justify-end gap-6">
-            <button
-              type="button"
-              onClick={() => setSearchModalOpen(true)}
-              className="text-foreground transition-colors duration-300 hover:text-saffron"
-              aria-label="Open search"
-            >
-              <Search className="h-5 w-5" strokeWidth={1.5} />
-            </button>
-
-            <button
-              type="button"
-              onClick={openCart}
-              className="relative text-foreground transition-colors duration-300 hover:text-saffron"
-              aria-label={
-                totalQuantity > 0
-                  ? `Open cart, ${totalQuantity} items`
-                  : "Open cart"
-              }
-            >
-              <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
-              {totalQuantity > 0 ? (
-                <span className="absolute -right-2 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-saffron text-[9px] font-bold text-surface">
-                  {totalQuantity > 9 ? "9+" : totalQuantity}
-                </span>
-              ) : null}
-            </button>
-
-            <Link
-              href="/collections"
-              className="text-foreground transition-colors duration-300 hover:text-saffron lg:hidden"
-              aria-label="Shop"
-            >
-              <Menu className="h-6 w-6" strokeWidth={1.5} />
-            </Link>
-          </div>
         </div>
-
-        <AnimatePresence>
-          {activeMenu ? (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.6, ease: CINEMATIC_EASE }}
-              className="absolute left-0 top-full w-full overflow-hidden border-b border-border bg-background shadow-lift"
-            >
-              <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-8 px-12 py-16">
-                <div className="col-span-4 flex flex-col gap-4">
-                  <h3 className="mb-4 font-serif text-2xl text-foreground">
-                    {activeMenu === "Collections"
-                      ? "Curated Collections"
-                      : "Our Expertise"}
-                  </h3>
-                  {activeMenu === "Collections" ? (
-                    <>
-                      <Link
-                        href="/collections"
-                        className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-                      >
-                        View All Collections
-                      </Link>
-                      <Link
-                        href="/collections"
-                        className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-                      >
-                        Luxury Packaging
-                      </Link>
-                      <Link
-                        href="/collections"
-                        className="mt-4 font-sans text-sm text-foreground underline transition-colors hover:text-saffron"
-                      >
-                        Shop the Edit
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        href="/atelier"
-                        className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-                      >
-                        Atelier & Craft
-                      </Link>
-                      <Link
-                        href="/work"
-                        className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-                      >
-                        Portfolio
-                      </Link>
-                      <Link
-                        href="/about"
-                        className="font-sans text-sm text-muted transition-colors hover:text-saffron"
-                      >
-                        About V Design
-                      </Link>
-                    </>
-                  )}
-                </div>
-                <div className="group col-span-4 cursor-pointer">
-                  <Link href="/collections">
-                    <div className="mb-4 aspect-[4/3] overflow-hidden rounded-sm bg-border/30">
-                      <div className="h-full w-full bg-muted/20 transition-transform duration-700 ease-out group-hover:scale-105" />
-                    </div>
-                    <p className="font-serif text-lg text-foreground">
-                      Curated Collection
-                    </p>
-                    <p className="mt-1 font-sans text-xs uppercase tracking-widest text-muted">
-                      Discover
-                    </p>
-                  </Link>
-                </div>
-                <div className="group col-span-4 cursor-pointer">
-                  <Link href="/atelier">
-                    <div className="mb-4 aspect-[4/3] overflow-hidden rounded-sm bg-border/30">
-                      <div className="h-full w-full bg-muted/20 transition-transform duration-700 ease-out group-hover:scale-105" />
-                    </div>
-                    <p className="font-serif text-lg text-foreground">
-                      Bespoke Studio
-                    </p>
-                    <p className="mt-1 font-sans text-xs uppercase tracking-widest text-muted">
-                      Explore
-                    </p>
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
       </motion.header>
 
       <ProductSearchModal

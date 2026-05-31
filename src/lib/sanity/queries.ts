@@ -1,5 +1,6 @@
 import { groq } from "next-sanity";
 import { sanityFetch } from "@/lib/sanity/client";
+import type { CollectionIndexItem } from "@/types/collection";
 import type {
   SanityCollection,
   SanityCollectionSummary,
@@ -214,26 +215,6 @@ export const HOME_PAGE_WITH_CATALOG_QUERY = groq`
         href
       }
     },
-    services[] {
-      _key,
-      title,
-      description,
-      vertical,
-      accent,
-      href,
-      coverImage {
-        alt,
-        asset->{
-          url,
-          metadata {
-            dimensions {
-              width,
-              height
-            }
-          }
-        }
-      }
-    },
     featuredCollections[]->{
       _id,
       title,
@@ -311,6 +292,21 @@ export const HOME_PAGE_WITH_CATALOG_QUERY = groq`
   ] | order(_createdAt desc) {
     ${PRODUCT_CATALOG_FIELDS}
   }
+}
+`;
+
+/** Lightweight projection for the premium /collections index page. */
+export const COLLECTIONS_INDEX_QUERY = groq`
+*[_type == "collection"] | order(title asc) {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  "image": coalesce(
+    coverImage.asset->url,
+    heroImage.asset->url
+  ),
+  "alt": coalesce(coverImage.alt, heroImage.alt)
 }
 `;
 
@@ -504,6 +500,17 @@ export async function getAllCollections(): Promise<
     return await sanityFetch<SanityCollectionSummary[]>(ALL_COLLECTIONS_QUERY);
   } catch (error) {
     console.error("[Sanity] Failed to fetch collections:", error);
+    return null;
+  }
+}
+
+export async function getCollectionsForIndex(): Promise<
+  CollectionIndexItem[] | null
+> {
+  try {
+    return await sanityFetch<CollectionIndexItem[]>(COLLECTIONS_INDEX_QUERY);
+  } catch (error) {
+    console.error("[Sanity] Failed to fetch collections index:", error);
     return null;
   }
 }

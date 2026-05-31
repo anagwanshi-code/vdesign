@@ -1,7 +1,9 @@
 import { AppChrome } from "@/components/layout/app-chrome";
 import { Footer } from "@/components/layout/footer";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { Toaster } from "sonner";
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Cormorant_Garamond, Dancing_Script, Inter } from "next/font/google";
 import "@/styles/globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -14,6 +16,12 @@ const cormorant = Cormorant_Garamond({
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-dancing",
   display: "swap",
 });
 
@@ -34,10 +42,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${inter.variable} ${dancingScript.variable} h-full antialiased`}
     >
-      <body className="flex min-h-screen flex-col bg-surface font-sans text-text-primary selection:bg-saffron/30 selection:text-text-primary">
+      <body className="flex min-h-screen flex-col bg-white font-sans text-zinc-600 selection:bg-brand-pink/20 selection:text-zinc-900">
         <AppChrome footer={<Footer />}>{children}</AppChrome>
+        <Toaster position="top-center" richColors closeButton />
+        <ScrollToTop />
       </body>
     </html>
   );

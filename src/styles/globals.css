@@ -11,11 +11,11 @@
 }
 
 :root {
-  /* ── Surfaces & Text ── */
-  --color-surface: 24 100% 97%;
-  --color-border: 32 29% 88%;
-  --color-text-primary: 0 0% 10%;
-  --color-text-muted: 0 0% 40%;
+  /* ── Surfaces & Text (vibrant light luxury) ── */
+  --color-surface: 0 0% 100%;
+  --color-border: 240 6% 90%;
+  --color-text-primary: 240 10% 10%;
+  --color-text-muted: 240 5% 40%;
 
   /* ── Accents ── */
   --color-peacock: 192 100% 33%;
@@ -107,8 +107,8 @@
   }
 
   body {
-    background-color: hsl(var(--color-surface));
-    color: hsl(var(--color-text-primary));
+    background-color: #ffffff;
+    color: rgb(82 82 91); /* zinc-600 */
     font-family: var(--font-sans-stack);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -121,6 +121,7 @@
     font-family: var(--font-serif-stack);
     font-weight: 500;
     letter-spacing: -0.01em;
+    color: rgb(24 24 27); /* zinc-900 */
   }
 }
 
@@ -131,6 +132,10 @@
 
   .font-sans {
     font-family: var(--font-sans-stack);
+  }
+
+  .font-dancing {
+    font-family: var(--font-dancing), cursive;
   }
 
   .text-balance {

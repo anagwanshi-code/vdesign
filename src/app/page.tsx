@@ -1,30 +1,57 @@
-import { AboutStudioSection } from "@/components/blocks/about-studio-section";
-import { FeaturedCollectionsGrid } from "@/components/blocks/featured-collections-grid";
+import { CreativeProcess } from "@/components/blocks/creative-process";
+import { FounderStory } from "@/components/blocks/founder-story";
+import { InsightsSection } from "@/components/blocks/insights-section";
+import { PremiumCta } from "@/components/blocks/premium-cta";
 import { HeroBlock } from "@/components/blocks/hero-block";
+import { IndustrySolutions } from "@/components/blocks/industry-solutions";
+import { PortfolioSection } from "@/components/blocks/portfolio-section";
 import { ProductShowcase } from "@/components/blocks/product-showcase";
-import { ServiceStoryGrid } from "@/components/blocks/service-story-grid";
-import { SignaturePiecesGrid } from "@/components/blocks/signature-pieces-grid";
+import { ServicesSection } from "@/components/blocks/services-section";
+import { TrustStrip } from "@/components/blocks/trust-strip";
+import { WhyChooseUs } from "@/components/blocks/why-choose-us";
 import { resolveHomePageContent } from "@/lib/data/home";
+import { client } from "@/sanity/lib/client";
+import {
+  FOUNDER_QUERY,
+  HOME_FEATURED_PRODUCTS_QUERY,
+  PORTFOLIO_QUERY,
+  LATEST_POSTS_QUERY,
+  SERVICES_QUERY,
+} from "@/sanity/lib/queries";
+import type { PortfolioCardProject } from "@/types/portfolio";
+import type { ServiceDocument } from "@/types/service";
 
 export default async function HomePage() {
-  const {
-    hero,
-    services,
-    featuredCollections,
-    featuredProducts,
-    aboutStudio,
-    products,
-    source,
-  } = await resolveHomePageContent();
+  const [{ hero }, featuredProducts, portfolioProjects, founder, latestPosts, services] =
+    await Promise.all([
+      resolveHomePageContent(),
+      client.fetch(HOME_FEATURED_PRODUCTS_QUERY),
+      client.fetch<PortfolioCardProject[]>(PORTFOLIO_QUERY),
+      client.fetch(FOUNDER_QUERY),
+      client.fetch(LATEST_POSTS_QUERY),
+      client.fetch<ServiceDocument[]>(SERVICES_QUERY),
+    ]);
+
+  const homepageServices = (services ?? []).slice(0, 6);
 
   return (
     <>
       <HeroBlock hero={hero} />
-      <ServiceStoryGrid services={services} />
-      <FeaturedCollectionsGrid collections={featuredCollections} />
-      <SignaturePiecesGrid products={featuredProducts} />
-      <AboutStudioSection content={aboutStudio} />
-      <ProductShowcase products={products} dataSource={source} />
+      <TrustStrip />
+      <ServicesSection services={homepageServices} />
+      <ProductShowcase products={featuredProducts ?? []} />
+      <PortfolioSection projects={portfolioProjects ?? []} />
+      <WhyChooseUs />
+      <IndustrySolutions />
+      <CreativeProcess />
+      <FounderStory founder={founder} />
+      <InsightsSection posts={latestPosts ?? []} />
+      <PremiumCta
+        title="Ready to Start Your Project?"
+        description="Tell us about your brand, packaging, or print goals—we'll respond with clarity, craft, and a plan tailored to you."
+        href="/contact"
+        buttonLabel="Get in Touch →"
+      />
     </>
   );
 }

@@ -8,7 +8,6 @@ import { cta } from './objects/cta';
 import { heroBlock } from './objects/heroBlock';
 import { productGalleryImage } from './objects/productGalleryImage';
 import { productVariant } from './objects/productVariant';
-import { service } from './objects/service';
 import { SchemaTypeDefinition } from 'sanity';
 
 export const schemaTypes: SchemaTypeDefinition[] = [
@@ -19,7 +18,6 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   productSize,
   productFrame,
   heroBlock,
-  service,
   cta,
   productGalleryImage,
   productVariant,

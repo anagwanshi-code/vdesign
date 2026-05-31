@@ -53,7 +53,6 @@ export type SanityAboutStudio = {
 
 export type SanityHomePage = {
   hero: SanityHeroBlock | null;
-  services: SanityService[] | null;
   featuredCollections?: SanityCollectionSummary[] | null;
   featuredProducts?: SanityProduct[] | null;
   aboutStudio?: SanityAboutStudio | null;

@@ -1,4 +1,8 @@
 import { GenerateDescriptionAction } from "@/sanity/components/GenerateDescriptionAction";
+import {
+  SANITY_IMAGE_GRID_CARD,
+  SANITY_IMAGE_HERO,
+} from "@/sanity/lib/image-field-descriptions";
 import { defineField, defineType } from "sanity";
 
 export default defineType({
@@ -43,8 +47,7 @@ export default defineType({
           type: "string",
         }),
       ],
-      description:
-        "Optional. If left blank, the system uses the first product image automatically.",
+      description: `Optional. If left blank, the first product image is used. ${SANITY_IMAGE_GRID_CARD}`,
     }),
     defineField({
       name: "heroImage",
@@ -58,6 +61,7 @@ export default defineType({
           type: "string",
         }),
       ],
+      description: SANITY_IMAGE_HERO,
     }),
     defineField({
       name: "products",
