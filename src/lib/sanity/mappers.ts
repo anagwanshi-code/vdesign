@@ -25,11 +25,7 @@ import type {
   SanityImage,
   SanityProduct,
 } from "@/types/sanity";
-import type {
-  HeroEditorialParams,
-  ServiceAccent,
-  ServiceStory,
-} from "@/types/home";
+import type { HeroEditorialParams } from "@/types/home";
 
 function mapSanityImageToHeroMedia(
   image: SanityImage | null | undefined,
@@ -52,29 +48,6 @@ function mapSanityImageToHeroMedia(
     width: image?.asset?.metadata?.dimensions?.width ?? fallback.width,
     height: image?.asset?.metadata?.dimensions?.height ?? fallback.height,
   };
-}
-
-function isServiceAccent(value: string | null | undefined): value is ServiceAccent {
-  const normalized = value?.trim().toLowerCase();
-  return (
-    normalized === "peacock" ||
-    normalized === "saffron" ||
-    normalized === "purple" ||
-    normalized === "gold"
-  );
-}
-
-function resolveServiceAccent(value: string | null | undefined): ServiceAccent | string {
-  if (!value?.trim()) {
-    return "gold";
-  }
-
-  const normalized = value.trim().toLowerCase();
-  if (isServiceAccent(normalized)) {
-    return normalized;
-  }
-
-  return value.trim();
 }
 
 export function mapSanityHeroToEditorial(
@@ -112,36 +85,6 @@ export function mapSanityHeroToEditorial(
   };
 }
 
-export function mapSanityServiceToStory(
-  service: NonNullable<SanityHomePage["services"]>[number],
-  fallbackMedia: HeroMedia,
-): ServiceStory {
-  const coverImage = service.coverImage
-    ? mapSanityImageToHeroMedia(service.coverImage, fallbackMedia)
-    : undefined;
-
-  return {
-    id: service._key,
-    vertical: service.vertical?.trim() || undefined,
-    title: service.title,
-    description: service.description,
-    accent: resolveServiceAccent(service.accent),
-    href: service.href?.trim() || "/collections",
-    coverImage: coverImage?.src ? coverImage : undefined,
-  };
-}
-
-export function mapSanityServicesToStories(
-  services: NonNullable<SanityHomePage["services"]> | null | undefined,
-  fallbackMedia: HeroMedia,
-): ServiceStory[] {
-  if (!services?.length) {
-    return [];
-  }
-
-  return services.map((service) => mapSanityServiceToStory(service, fallbackMedia));
-}
-
 function resolveProductStartingPrice(product: SanityProduct): number {
   if (Number.isFinite(product.priceInInr) && product.priceInInr > 0) {
     return product.priceInInr;
@@ -168,10 +111,7 @@ function resolvePrimaryProductImage(
 function resolveGalleryEntryImage(
   entry: NonNullable<SanityProduct["gallery"]>[number],
 ): SanityImage | null | undefined {
-  if (entry && "asset" in entry && entry.asset?.url) {
-    return entry as SanityImage;
-  }
-  return entry.image;
+  return entry.image ?? null;
 }
 
 function resolveProductGalleryImages(
@@ -332,16 +272,15 @@ export function mapSanityHomePageToEditorial(
   content: SanityHomePage,
   fallback: {
     hero: HeroEditorialParams;
-    services: ServiceStory[];
   },
-): { hero: HeroEditorialParams; services: ServiceStory[] } | null {
+): { hero: HeroEditorialParams } | null {
   if (!content.hero?.headline) {
     return null;
   }
 
   const hero = mapSanityHeroToEditorial(content.hero, fallback.hero);
 
-  return { hero, services: [] };
+  return { hero };
 }
 
 const ABOUT_STUDIO_IMAGE_FALLBACK: HeroMedia = {
@@ -413,12 +352,10 @@ export function mapSanityHomePageWithCatalog(
   content: SanityHomePageWithCatalog,
   fallback: {
     hero: HeroEditorialParams;
-    services: ServiceStory[];
     products: ProductShowcaseItem[];
   },
 ): {
   hero: HeroEditorialParams;
-  services: ServiceStory[];
   featuredCollections: CollectionCard[];
   featuredProducts: ProductShowcaseItem[];
   aboutStudio: AboutStudioContent | null;
@@ -462,7 +399,6 @@ export function mapSanityHomePageWithCatalog(
 
   return {
     hero,
-    services: [],
     featuredCollections,
     featuredProducts,
     aboutStudio,

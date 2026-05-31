@@ -151,7 +151,6 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
 
     const mapped = mapSanityHomePageWithCatalog(content, {
       hero: mock.hero,
-      services: [],
       products: [],
     });
 

@@ -32,16 +32,6 @@ export type SanityHeroBlock = {
   ctaSecondary?: SanityCta | null;
 };
 
-export type SanityService = {
-  _key: string;
-  title: string;
-  description: string;
-  vertical?: string | null;
-  accent?: string | null;
-  href?: string | null;
-  coverImage?: SanityImage | null;
-};
-
 export type SanityAboutStudio = {
   eyebrow?: string | null;
   headline?: string | null;

@@ -31,5 +31,4 @@ export {
   mapSanityHomePageWithCatalog,
   mapSanityProductToDetail,
   mapSanityProductToShowcaseItem,
-  mapSanityServiceToStory,
 } from "./mappers";

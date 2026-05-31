@@ -10,9 +10,9 @@ import { useEffect, useMemo, useState } from "react";
 const CINEMATIC_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const SLIDER_IMAGES = [
-  "https://picsum.photos/seed/h1/800/1000",
-  "https://picsum.photos/seed/h2/800/1000",
-  "https://picsum.photos/seed/h3/800/1000",
+  "https://picsum.photos/seed/h1/1920/1080",
+  "https://picsum.photos/seed/h2/1920/1080",
+  "https://picsum.photos/seed/h3/1920/1080",
 ] as const;
 
 const SLIDER_INTERVAL_MS = 4000;
@@ -60,7 +60,7 @@ export function HeroBlock({ hero, className }: HeroBlockProps) {
       className={cn("w-full overflow-hidden bg-white", className)}
       aria-label="Editorial hero"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 pb-16 pt-24 lg:grid-cols-2 lg:pt-32">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-16 pt-24 lg:grid-cols-2 lg:gap-12 lg:pt-32">
         <motion.div
           initial={motionEnabled ? { opacity: 0, y: 24 } : false}
           animate={motionEnabled ? { opacity: 1, y: 0 } : undefined}
@@ -99,7 +99,7 @@ export function HeroBlock({ hero, className }: HeroBlockProps) {
         </motion.div>
 
         <motion.div
-          className="relative aspect-square w-full overflow-hidden rounded-2xl md:aspect-[4/3] lg:aspect-[3/4]"
+          className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-lg"
           initial={motionEnabled ? { opacity: 0, scale: 0.98 } : false}
           animate={
             motionEnabled
@@ -135,7 +135,7 @@ export function HeroBlock({ hero, className }: HeroBlockProps) {
               fill
               priority={index === 0}
               className={cn(
-                "absolute inset-0 object-cover object-center transition-opacity duration-1000 ease-in-out",
+                "absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out",
                 index === currentIndex ? "opacity-100" : "opacity-0",
               )}
               sizes="(max-width: 1024px) 100vw, 50vw"
