@@ -40,7 +40,7 @@ const TRUST_BADGES = [
 export default function ConsultationPage() {
   return (
     <div className="bg-luxury-bg">
-      <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 pb-16 pt-28 lg:grid-cols-2 lg:pt-32">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 pb-16 pt-10 lg:grid-cols-2 lg:pt-16">
         <div>
           <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-royal-magenta">
             Book a Consultation

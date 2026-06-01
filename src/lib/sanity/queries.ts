@@ -23,6 +23,10 @@ const PRODUCT_CATALOG_FIELDS = groq`
   subtitle,
   description,
   featured,
+  occasion,
+  isNewArrival,
+  isOnSale,
+  isCustomizable,
   status,
   saleType,
   "minOrderQuantity": coalesce(minOrderQuantity, minimumOrderQuantity, 100),
@@ -61,6 +65,13 @@ const PRODUCT_CATALOG_FIELDS = groq`
       }
     }
   },
+  "imageUrl": image.asset->url,
+  "galleryUrls": array::compact(
+    coalesce(gallery[]{"url": coalesce(asset->url, image.asset->url)}.url, [])
+    + coalesce(gallery[].asset->url, [])
+    + coalesce(images[].asset->url, [])
+    + coalesce(productGallery[].asset->url, [])
+  ),
   images[] {
     _key,
     alt,
@@ -77,17 +88,28 @@ const PRODUCT_CATALOG_FIELDS = groq`
   gallery[] {
     _key,
     caption,
-    image {
-      alt,
-      asset->{
-        url,
-        metadata {
-          dimensions {
-            width,
-            height
+    "image": {
+      "alt": coalesce(alt, image.alt),
+      "asset": coalesce(
+        asset->{
+          url,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
+          }
+        },
+        image.asset->{
+          url,
+          metadata {
+            dimensions {
+              width,
+              height
+            }
           }
         }
-      }
+      )
     }
   },
   "gallery": coalesce(
@@ -109,17 +131,28 @@ const PRODUCT_CATALOG_FIELDS = groq`
     gallery[] {
       _key,
       caption,
-      image {
-        alt,
-        asset->{
-          url,
-          metadata {
-            dimensions {
-              width,
-              height
+      "image": {
+        "alt": coalesce(alt, image.alt),
+        "asset": coalesce(
+          asset->{
+            url,
+            metadata {
+              dimensions {
+                width,
+                height
+              }
+            }
+          },
+          image.asset->{
+            url,
+            metadata {
+              dimensions {
+                width,
+                height
+              }
             }
           }
-        }
+        )
       }
     }
   ),
@@ -177,10 +210,17 @@ const PRODUCT_CATALOG_FIELDS = groq`
 export const HOME_PAGE_WITH_CATALOG_QUERY = groq`
 {
   "editorial": *[_type == "homePage" && _id == "homePageV2"][0] {
+    brandLogosTitle,
+    "brandLogoUrls": brandLogos[].asset->url,
+    homeStats[] {
+      value,
+      label
+    },
     hero {
       eyebrow,
       headline,
       subheadline,
+      "heroImageUrls": heroImages[].asset->url,
       heroImages[] {
         _key,
         alt,
@@ -432,7 +472,13 @@ export const COLLECTION_BY_SLUG_QUERY = groq`
 
 export const PRODUCT_BY_SLUG_QUERY = groq`
 *[_type == "product" && slug.current == $slug][0] {
-  ${PRODUCT_CATALOG_FIELDS}
+  ${PRODUCT_CATALOG_FIELDS},
+  "galleryUrls": array::compact(
+    coalesce(gallery[]{"url": coalesce(asset->url, image.asset->url)}.url, [])
+    + coalesce(gallery[].asset->url, [])
+    + coalesce(images[].asset->url, [])
+    + coalesce(productGallery[].asset->url, [])
+  )
 }
 `;
 

@@ -45,7 +45,7 @@ export default async function ResourcesPage() {
   const heroImageUrl = pageContent?.heroImageUrl?.trim();
 
   return (
-    <div className="bg-white pt-32">
+    <div className="bg-white pt-10 lg:pt-16">
       <section className="relative overflow-hidden bg-luxury-bg pb-16 md:pb-20">
         <div
           className="pointer-events-none absolute -right-16 top-12 h-80 w-80 rounded-full bg-royal-magenta/10 blur-3xl"

@@ -52,7 +52,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   const heroImageUrl = resolveCollectionImageOrNull(collection);
 
   return (
-    <section className="mx-auto w-full max-w-content px-5 py-16 md:px-8 lg:px-20 lg:py-24">
+    <section className="mx-auto w-full max-w-content px-5 pb-16 pt-10 md:px-8 lg:px-20 lg:pb-24 lg:pt-16">
       <nav
         className="mb-10 text-caption text-text-muted"
         aria-label="Breadcrumb"

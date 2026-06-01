@@ -1,47 +1,85 @@
 "use client";
 
 import EcommerceGrid from "@/components/blocks/ecommerce-grid";
-import ShopSidebar from "@/components/blocks/shop-sidebar";
+import ShopSidebar, {
+  EMPTY_TYPE_FILTERS,
+  type ShopTypeFilters,
+} from "@/components/blocks/shop-sidebar";
+import type { ShopProductItem } from "@/types/shop";
 import { useMemo, useState } from "react";
 
 const ALL_PRODUCTS_LABEL = "All Products";
 
 type ShopCatalogSectionProps = {
-  products: {
-    _id: string;
-    title: string;
-    slug?: string;
-    price?: number;
-    rating?: number;
-    reviewsCount?: number;
-    isBestSeller?: boolean;
-    imageUrl?: string | null;
-    categoryName?: string | null;
-    _createdAt?: string;
-  }[];
+  products: ShopProductItem[];
   categories: { _id?: string; title: string; slug?: string }[];
+  initialActiveCategory?: string;
 };
+
+function matchesTypeFilters(
+  product: ShopProductItem,
+  filters: ShopTypeFilters,
+): boolean {
+  if (filters.bestSellers && !product.isBestSeller) {
+    return false;
+  }
+  if (filters.newArrivals && !product.isNewArrival) {
+    return false;
+  }
+  if (filters.onSale && !product.isOnSale) {
+    return false;
+  }
+  if (filters.customizable && !product.isCustomizable) {
+    return false;
+  }
+  return true;
+}
+
+function matchesOccasionFilter(
+  product: ShopProductItem,
+  selectedOccasions: string[],
+): boolean {
+  if (selectedOccasions.length === 0) {
+    return true;
+  }
+
+  return (
+    product.occasion?.some((occ) => selectedOccasions.includes(occ)) ?? false
+  );
+}
 
 export default function ShopCatalogSection({
   products,
   categories,
+  initialActiveCategory,
 }: ShopCatalogSectionProps) {
-  const [activeCategory, setActiveCategory] = useState(ALL_PRODUCTS_LABEL);
-  const [productTypes, setProductTypes] = useState<string[]>([]);
+  const [activeCategory, setActiveCategory] = useState(
+    initialActiveCategory?.trim() || ALL_PRODUCTS_LABEL,
+  );
+  const [typeFilters, setTypeFilters] =
+    useState<ShopTypeFilters>(EMPTY_TYPE_FILTERS);
+  const [occasions, setOccasions] = useState<string[]>([]);
 
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    return products.filter((product) => {
+      if (
+        activeCategory !== ALL_PRODUCTS_LABEL &&
+        product.categoryName !== activeCategory
+      ) {
+        return false;
+      }
 
-    if (activeCategory !== ALL_PRODUCTS_LABEL) {
-      result = result.filter((p) => p.categoryName === activeCategory);
-    }
+      if (!matchesTypeFilters(product, typeFilters)) {
+        return false;
+      }
 
-    if (productTypes.includes("Best Sellers")) {
-      result = result.filter((p) => p.isBestSeller === true);
-    }
+      if (!matchesOccasionFilter(product, occasions)) {
+        return false;
+      }
 
-    return result;
-  }, [products, activeCategory, productTypes]);
+      return true;
+    });
+  }, [products, activeCategory, typeFilters, occasions]);
 
   return (
     <section
@@ -52,10 +90,15 @@ export default function ShopCatalogSection({
         categories={categories}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
-        productTypes={productTypes}
-        onProductTypesChange={setProductTypes}
+        typeFilters={typeFilters}
+        onTypeFiltersChange={setTypeFilters}
+        occasions={occasions}
+        onOccasionsChange={setOccasions}
       />
-      <EcommerceGrid products={filteredProducts} totalCount={products.length} />
+      <EcommerceGrid
+        products={filteredProducts}
+        totalCount={products.length}
+      />
     </section>
   );
 }

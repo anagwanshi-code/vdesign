@@ -28,7 +28,7 @@ export function PortfolioProjectCard({
     <Link
       href={href}
       className={cn(
-        "group relative block overflow-hidden",
+        "group relative block overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl",
         compact ? "rounded-xl" : "rounded-2xl",
         aspectClassName,
       )}

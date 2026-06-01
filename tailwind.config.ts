@@ -105,6 +105,7 @@ const config: Config = {
           "fadeIn var(--duration-base) var(--ease-luxury) forwards",
         "reveal-line":
           "revealLine var(--duration-slow) var(--ease-luxury) forwards",
+        marquee: "marquee 40s linear infinite",
       },
       keyframes: {
         fadeUp: {
@@ -118,6 +119,10 @@ const config: Config = {
         revealLine: {
           "0%": { transform: "scaleX(0)" },
           "100%": { transform: "scaleX(1)" },
+        },
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
       },
     },

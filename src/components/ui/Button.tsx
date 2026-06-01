@@ -12,7 +12,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-text-primary text-surface hover:bg-peacock focus-visible:ring-peacock",
   secondary:
     "border border-border bg-transparent text-text-primary hover:border-peacock hover:text-peacock focus-visible:ring-peacock",
-  accent: "bg-magenta text-surface hover:opacity-90 focus-visible:ring-magenta",
+  accent:
+    "bg-magenta text-surface shadow-md hover:-translate-y-0.5 hover:opacity-90 hover:shadow-xl focus-visible:ring-magenta",
 };
 
 export function Button({
@@ -25,7 +26,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex h-11 items-center justify-center rounded-md px-6 text-body font-sans transition-colors duration-base ease-luxury focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-11 items-center justify-center rounded-md px-6 text-body font-sans transition-all duration-300 ease-luxury focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50",
         variantClasses[variant],
         className,
       )}

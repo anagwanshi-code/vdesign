@@ -12,16 +12,12 @@ export const product = defineType({
   title: "Product",
   type: "document",
   groups: [
-    { name: "media", title: "1. Media", default: true },
-    { name: "basic", title: "2. Basic Information" },
-    { name: "pricing", title: "3. Pricing" },
-    { name: "manufacturing", title: "4. Sales & Manufacturing Controls" },
-    { name: "specifications", title: "5. Product Specifications" },
-    { name: "finishing", title: "6. Finishing Options" },
-    { name: "seo", title: "7. SEO" },
-    { name: "inventory", title: "8. Inventory" },
-    { name: "customization", title: "9. Customization" },
-    { name: "catalog", title: "10. Variants & Catalog" },
+    { name: "main", title: "1. Basic Info", default: true },
+    { name: "media", title: "2. Media & AI" },
+    { name: "taxonomy", title: "3. Categories & Filters" },
+    { name: "pricing", title: "4. Price & Inventory" },
+    { name: "specs", title: "5. Technical Specs" },
+    { name: "customization", title: "6. Customization & Variants" },
   ],
   fields: [
     // ==========================================
@@ -88,7 +84,7 @@ export const product = defineType({
       name: "aiAssist",
       title: "AI Content Assistant",
       type: "string",
-      group: "basic",
+      group: "media",
       readOnly: true,
       components: {
         input: ProductAiAssistInput,
@@ -100,7 +96,7 @@ export const product = defineType({
       name: "title",
       title: "Product Title",
       type: "string",
-      group: "basic",
+      group: "main",
       components: {
         field: ProductFieldWithAi,
       },
@@ -110,7 +106,7 @@ export const product = defineType({
       name: "slug",
       title: "Slug",
       type: "slug",
-      group: "basic",
+      group: "main",
       readOnly: true,
       description: "Auto-generated from the product title.",
       options: {
@@ -127,14 +123,14 @@ export const product = defineType({
       name: "subtitle",
       title: "Subtitle",
       type: "string",
-      group: "basic",
+      group: "main",
       description: "Short line shown on product cards and the PDP header.",
     }),
     defineField({
       name: "description",
       title: "Luxury Description",
       type: "text",
-      group: "basic",
+      group: "main",
       rows: 6,
       components: {
         field: ProductDescriptionFieldWithAi,
@@ -146,7 +142,7 @@ export const product = defineType({
       name: "category",
       title: "Category",
       type: "reference",
-      group: "catalog",
+      group: "taxonomy",
       to: [{ type: "category" }],
       description:
         "Product category for shop filters and catalog grouping (manage under Product Category).",
@@ -155,7 +151,7 @@ export const product = defineType({
       name: "collection",
       title: "Collection",
       type: "reference",
-      group: "catalog",
+      group: "taxonomy",
       to: [{ type: "collection" }],
       validation: (Rule) =>
         Rule.required().error(
@@ -168,29 +164,60 @@ export const product = defineType({
       name: "industries",
       title: "Related Industries",
       type: "array",
-      group: "catalog",
+      group: "taxonomy",
       of: [{ type: "reference", to: [{ type: "industry" }] }],
       description: "Industries this product is relevant for (e.g. Wedding, Pharma).",
     }),
     defineField({
-      name: "rating",
-      title: "Rating (1–5)",
-      type: "number",
-      group: "catalog",
-      validation: (Rule) => Rule.min(1).max(5),
+      name: "occasion",
+      title: "Occasion",
+      description: "Used for frontend Shop filters.",
+      type: "array",
+      of: [{ type: "string" }],
+      options: {
+        list: [
+          { title: "Wedding", value: "wedding" },
+          { title: "Corporate", value: "corporate" },
+          { title: "Festival", value: "festival" },
+          { title: "Personal", value: "personal" },
+        ],
+        layout: "grid",
+      },
+      group: "taxonomy",
     }),
     defineField({
-      name: "reviewsCount",
-      title: "Number of Reviews",
-      type: "number",
-      group: "catalog",
-      validation: (Rule) => Rule.min(0),
+      name: "isNewArrival",
+      title: "New Arrival",
+      type: "boolean",
+      initialValue: false,
+      group: "taxonomy",
+    }),
+    defineField({
+      name: "isOnSale",
+      title: "On Sale",
+      type: "boolean",
+      initialValue: false,
+      group: "taxonomy",
+    }),
+    defineField({
+      name: "isCustomizable",
+      title: "Customizable",
+      type: "boolean",
+      initialValue: false,
+      group: "taxonomy",
     }),
     defineField({
       name: "isBestSeller",
       title: "Is Best Seller?",
       type: "boolean",
-      group: "catalog",
+      group: "taxonomy",
+      initialValue: false,
+    }),
+    defineField({
+      name: "featured",
+      title: "Featured",
+      type: "boolean",
+      group: "taxonomy",
       initialValue: false,
     }),
 
@@ -215,14 +242,29 @@ export const product = defineType({
       validation: (Rule) => Rule.min(0),
     }),
 
+    defineField({
+      name: "rating",
+      title: "Rating (1–5)",
+      type: "number",
+      group: "pricing",
+      validation: (Rule) => Rule.min(1).max(5),
+    }),
+    defineField({
+      name: "reviewsCount",
+      title: "Number of Reviews",
+      type: "number",
+      group: "pricing",
+      validation: (Rule) => Rule.min(0),
+    }),
+
     // ==========================================
-    // 4. SALES & MANUFACTURING CONTROLS
+    // 5. TECHNICAL SPECS
     // ==========================================
     defineField({
       name: "saleType",
       title: "Sale Type",
       type: "string",
-      group: "manufacturing",
+      group: "specs",
       options: {
         list: [
           { title: "Bulk Manufacturing", value: "bulk" },
@@ -237,30 +279,17 @@ export const product = defineType({
       name: "minOrderQuantity",
       title: "Minimum Order Quantity (MOQ)",
       type: "number",
-      group: "manufacturing",
+      group: "specs",
       initialValue: 100,
       description:
         "Bulk: customers must order in multiples of this value. Flexible: minimum units only.",
       validation: (Rule) => Rule.required().integer().min(1),
     }),
     defineField({
-      name: "logoUploadRequired",
-      title: "Logo/Artwork Upload Required",
-      type: "boolean",
-      group: "manufacturing",
-      initialValue: true,
-      description:
-        "Mandates the customer to upload their brand assets before checkout.",
-    }),
-
-    // ==========================================
-    // 5. PRODUCT SPECIFICATIONS
-    // ==========================================
-    defineField({
       name: "paperType",
       title: "Paper Type",
       type: "string",
-      group: "specifications",
+      group: "specs",
       options: {
         list: [
           "300 GSM Art Card",
@@ -276,7 +305,7 @@ export const product = defineType({
       name: "printMethod",
       title: "Print Method",
       type: "string",
-      group: "specifications",
+      group: "specs",
       options: {
         list: [
           "Offset Printing",
@@ -292,14 +321,14 @@ export const product = defineType({
       name: "machineType",
       title: "Machine Type",
       type: "string",
-      group: "specifications",
+      group: "specs",
       description: "e.g., Heidelberg Offset, Konica Minolta Digital",
     }),
     defineField({
       name: "laminationType",
       title: "Lamination Type",
       type: "string",
-      group: "specifications",
+      group: "specs",
       options: {
         list: ["Matte", "Gloss", "Velvet", "Soft-touch", "None"],
       },
@@ -309,7 +338,7 @@ export const product = defineType({
       name: "techFinishingOptions",
       title: "Technical Finishing Options",
       type: "array",
-      group: "specifications",
+      group: "specs",
       of: [{ type: "string" }],
       options: {
         list: [
@@ -328,35 +357,35 @@ export const product = defineType({
       name: "embossing",
       title: "Embossing Available",
       type: "boolean",
-      group: "finishing",
+      group: "specs",
       initialValue: false,
     }),
     defineField({
       name: "spotUV",
       title: "Spot UV Available",
       type: "boolean",
-      group: "finishing",
+      group: "specs",
       initialValue: false,
     }),
     defineField({
       name: "goldFoiling",
       title: "Gold Foiling Available",
       type: "boolean",
-      group: "finishing",
+      group: "specs",
       initialValue: false,
     }),
     defineField({
       name: "velvetLamination",
       title: "Velvet Lamination Available",
       type: "boolean",
-      group: "finishing",
+      group: "specs",
       initialValue: false,
     }),
     defineField({
       name: "paperGsm",
       title: "Paper GSM Options",
       type: "string",
-      group: "finishing",
+      group: "specs",
       options: {
         list: [
           "300 GSM",
@@ -375,7 +404,7 @@ export const product = defineType({
       name: "seoTitle",
       title: "SEO Title",
       type: "string",
-      group: "seo",
+      group: "main",
       components: {
         field: ProductSeoFieldWithAi,
       },
@@ -386,7 +415,7 @@ export const product = defineType({
       name: "seoDescription",
       title: "SEO Description",
       type: "text",
-      group: "seo",
+      group: "main",
       components: {
         field: ProductSeoFieldWithAi,
       },
@@ -401,20 +430,20 @@ export const product = defineType({
       name: "sku",
       title: "SKU (Stock Keeping Unit)",
       type: "string",
-      group: "inventory",
+      group: "pricing",
     }),
     defineField({
       name: "inStock",
       title: "In Stock / Available for Order",
       type: "boolean",
-      group: "inventory",
+      group: "pricing",
       initialValue: true,
     }),
     defineField({
       name: "status",
       title: "Publish Status",
       type: "string",
-      group: "inventory",
+      group: "pricing",
       options: {
         list: [
           { title: "Active", value: "active" },
@@ -428,8 +457,17 @@ export const product = defineType({
     }),
 
     // ==========================================
-    // 9. CUSTOMIZATION
+    // 6. CUSTOMIZATION & VARIANTS
     // ==========================================
+    defineField({
+      name: "logoUploadRequired",
+      title: "Logo/Artwork Upload Required",
+      type: "boolean",
+      group: "customization",
+      initialValue: true,
+      description:
+        "Mandates the customer to upload their brand assets before checkout.",
+    }),
     defineField({
       name: "customizationNotes",
       title: "Customization Instructions",
@@ -439,21 +477,11 @@ export const product = defineType({
         "Internal notes or customer-facing instructions regarding bespoke modifications.",
     }),
 
-    // ==========================================
-    // 10. VARIANTS & CATALOG (storefront matrix)
-    // ==========================================
-    defineField({
-      name: "featured",
-      title: "Featured",
-      type: "boolean",
-      group: "catalog",
-      initialValue: false,
-    }),
     defineField({
       name: "availableSizes",
       title: "Available Sizes",
       type: "array",
-      group: "catalog",
+      group: "customization",
       of: [{ type: "reference", to: [{ type: "productSize" }] }],
       description: "Preset sizes offered for this artwork.",
     }),
@@ -461,7 +489,7 @@ export const product = defineType({
       name: "sizeLabels",
       title: "Additional Size Labels",
       type: "array",
-      group: "catalog",
+      group: "customization",
       of: [{ type: "string" }],
       description:
         "Optional custom size strings when a shared preset is not needed.",
@@ -470,7 +498,7 @@ export const product = defineType({
       name: "availableFrames",
       title: "Available Framing Options",
       type: "array",
-      group: "catalog",
+      group: "customization",
       of: [{ type: "reference", to: [{ type: "productFrame" }] }],
       description: "Preset framing finishes offered for this artwork.",
     }),
@@ -478,7 +506,7 @@ export const product = defineType({
       name: "frameLabels",
       title: "Additional Frame Labels",
       type: "array",
-      group: "catalog",
+      group: "customization",
       of: [{ type: "string" }],
       description:
         "Optional custom frame strings when a shared preset is not needed.",
@@ -487,7 +515,7 @@ export const product = defineType({
       name: "variants",
       title: "Variants",
       type: "array",
-      group: "catalog",
+      group: "customization",
       of: [{ type: "productVariant" }],
       description:
         "Size × frame combinations with individual INR pricing (dt-brushstrokes style matrix).",

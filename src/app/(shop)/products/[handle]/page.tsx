@@ -73,7 +73,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   );
 
   return (
-    <article className="mx-auto w-full max-w-content px-5 py-16 md:px-8 lg:px-20 lg:py-24">
+    <article className="mx-auto w-full max-w-content px-5 pb-16 pt-10 md:px-8 lg:px-20 lg:pb-24 lg:pt-16">
       <nav className="mb-10 text-caption text-text-muted" aria-label="Breadcrumb">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
@@ -102,12 +102,15 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         </ol>
       </nav>
 
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
-        <ProductDetailGallery
-          primary={product.image}
-          gallery={product.gallery}
-          title={product.title}
-        />
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-20">
+        <div className="sticky top-32 z-10 lg:top-40">
+          <ProductDetailGallery
+            images={product.images}
+            primary={product.image}
+            gallery={product.gallery}
+            title={product.title}
+          />
+        </div>
 
         <div className="flex flex-col gap-8">
           <header className="flex flex-col gap-4">
@@ -140,7 +143,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       <SimilarProducts
         products={similarProducts}
         collectionTitle={product.collection?.title}
-        collectionSlug={product.collection?.slug}
       />
     </article>
   );

@@ -8,9 +8,15 @@ import type { ProductShowcaseItem } from "@/types/home";
 import Image from "next/image";
 import Link from "next/link";
 
+const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
+
 type ProductLinkGridProps = {
   products: ProductShowcaseItem[];
   maxColumns?: 3 | 4;
+};
+
+type ProductWithImageUrl = ProductShowcaseItem & {
+  imageUrl?: string | null;
 };
 
 function resolveProductHandle(
@@ -60,6 +66,15 @@ function getFinishingTags(product: ProductShowcaseItem): string[] {
   return buildFinishingTagsForShowcase(product);
 }
 
+function resolveCardImageUrl(product: ProductWithImageUrl): string {
+  return (
+    resolveShowcaseItemImage(product) ||
+    product.imageUrl?.trim() ||
+    product.image?.src?.trim() ||
+    PLACEHOLDER_IMAGE
+  );
+}
+
 export function ProductLinkGrid({
   products,
   maxColumns = 4,
@@ -78,13 +93,7 @@ export function ProductLinkGrid({
       )}
     >
       {products.map((product) => {
-        const resolvedImage = resolveShowcaseItemImage(product);
-        const hoverImageUrl = product.hoverImage?.src
-          ? resolveShowcaseItemImage({
-              title: product.title,
-              image: product.hoverImage,
-            })
-          : null;
+        const imageUrl = resolveCardImageUrl(product);
         const tags = getFinishingTags(product);
         const handle = resolveProductHandle(product);
         const priceLabel = resolveProductPriceLabel(product);
@@ -93,58 +102,45 @@ export function ProductLinkGrid({
           <li key={product.id}>
             <Link
               href={`/products/${handle}`}
-              className="group flex cursor-pointer flex-col items-center text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-peacock focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+              className="group flex flex-col overflow-hidden rounded-2xl bg-white transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-peacock focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             >
-              <span
-                className={
-                  resolvedImage
-                    ? "relative mb-6 aspect-[4/5] w-full overflow-hidden rounded-sm border border-border"
-                    : "mb-6 block w-full"
-                }
-              >
-                {resolvedImage ? (
-                  <Image
-                    src={resolvedImage}
-                    alt={resolveProductCardAlt(product)}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-700 ease-cinematic group-hover:scale-105"
-                  />
-                ) : null}
-                {hoverImageUrl && hoverImageUrl !== resolvedImage ? (
-                  <Image
-                    src={hoverImageUrl}
-                    alt={product.hoverImage?.alt ?? product.title}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    className="object-cover opacity-0 transition-all duration-700 ease-cinematic group-hover:scale-105 group-hover:opacity-100"
-                  />
-                ) : null}
-              </span>
+              <div className="relative aspect-[4/5] w-full overflow-hidden bg-zinc-100">
+                <Image
+                  src={imageUrl}
+                  alt={resolveProductCardAlt(product)}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              </div>
 
-              <h4 className="mb-2 line-clamp-1 font-serif text-lg text-foreground md:text-xl">
-                {product.title}
-              </h4>
+              <div className="p-6 text-center">
+                <h4 className="mb-2 line-clamp-1 font-serif text-lg text-foreground md:text-xl">
+                  {product.title}
+                </h4>
 
-              <span className="mb-4 font-sans text-sm text-muted">{priceLabel}</span>
-
-              {tags.length > 0 ? (
-                <span className="mt-auto flex flex-wrap justify-center gap-2">
-                  {tags.slice(0, 2).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-border/60 bg-background/50 px-3 py-1 font-sans text-[9px] uppercase tracking-widest text-muted"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {tags.length > 2 ? (
-                    <span className="rounded-full border border-border/60 bg-background/50 px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-muted">
-                      +{tags.length - 2}
-                    </span>
-                  ) : null}
+                <span className="mb-4 block font-sans text-sm text-muted">
+                  {priceLabel}
                 </span>
-              ) : null}
+
+                {tags.length > 0 ? (
+                  <span className="flex flex-wrap justify-center gap-2">
+                    {tags.slice(0, 2).map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-border/60 bg-background/50 px-3 py-1 font-sans text-[9px] uppercase tracking-widest text-muted"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {tags.length > 2 ? (
+                      <span className="rounded-full border border-border/60 bg-background/50 px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-muted">
+                        +{tags.length - 2}
+                      </span>
+                    ) : null}
+                  </span>
+                ) : null}
+              </div>
             </Link>
           </li>
         );

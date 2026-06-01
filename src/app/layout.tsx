@@ -46,7 +46,14 @@ export default function RootLayout({
     >
       <body className="flex min-h-screen flex-col bg-white font-sans text-zinc-600 selection:bg-brand-pink/20 selection:text-zinc-900">
         <AppChrome footer={<Footer />}>{children}</AppChrome>
-        <Toaster position="top-center" richColors closeButton />
+        <Toaster
+          position="top-center"
+          closeButton
+          toastOptions={{
+            className:
+              "bg-zinc-900 text-white border border-zinc-800 shadow-2xl rounded-lg font-sans",
+          }}
+        />
         <ScrollToTop />
       </body>
     </html>

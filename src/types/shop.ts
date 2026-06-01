@@ -12,6 +12,10 @@ export type ShopProductItem = {
   rating?: number | null;
   reviewsCount?: number | null;
   isBestSeller?: boolean | null;
+  occasion?: string[] | null;
+  isNewArrival?: boolean | null;
+  isOnSale?: boolean | null;
+  isCustomizable?: boolean | null;
   imageUrl?: string | null;
   categoryName?: string | null;
   categoryId?: string | null;

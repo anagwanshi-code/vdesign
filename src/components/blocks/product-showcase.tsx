@@ -66,10 +66,13 @@ export function ProductShowcase({ products }: ProductShowcaseProps) {
 
               return (
                 <li key={product._id}>
-                  <Link href={href} className="group block">
+                  <Link
+                    href={href}
+                    className="group block transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl"
+                  >
                     <div className="relative mb-6 aspect-[4/5] overflow-hidden rounded-lg border border-zinc-100 bg-luxury-surface shadow-sm">
                       <Image
-                        src={product.imageUrl || "/placeholder.png"}
+                        src={product.imageUrl || "/images/placeholder.svg"}
                         alt={product.title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"

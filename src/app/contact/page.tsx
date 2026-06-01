@@ -24,10 +24,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const content = await client.fetch<ContactPageContent | null>(
-    CONTACT_PAGE_QUERY,
-  );
+  const content = await client
+    .withConfig({ useCdn: false })
+    .fetch<ContactPageContent | null>(CONTACT_PAGE_QUERY);
 
+  const heroImageUrl = content?.heroImageUrl?.trim() || null;
   const email = content?.email?.trim() || DEFAULT_CONTACT_EMAIL;
   const phone = content?.phone?.trim() || DEFAULT_CONTACT_PHONE;
   const address = content?.address?.trim() || DEFAULT_CONTACT_ADDRESS;
@@ -39,7 +40,7 @@ export default async function ContactPage() {
 
   return (
     <div className="overflow-x-hidden bg-white">
-      <section className="relative overflow-hidden bg-luxury-bg pb-28 pt-32 md:pb-32 md:pt-40">
+      <section className="relative overflow-hidden bg-luxury-bg pb-28 pt-10 md:pb-32 lg:pt-16">
         <div
           className="pointer-events-none absolute -right-20 top-16 h-96 w-96 rounded-full bg-royal-magenta/10 blur-3xl"
           aria-hidden="true"
@@ -87,20 +88,33 @@ export default async function ContactPage() {
               aria-hidden="true"
             />
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-xl">
-              <div className="grid h-full grid-cols-2 gap-2 p-3">
-                <div className="rounded-xl bg-gradient-to-br from-peacock-blue/30 to-zinc-100" />
-                <div className="mt-6 rounded-xl bg-gradient-to-br from-royal-magenta/25 to-amber-50" />
-                <div className="rounded-xl bg-gradient-to-br from-saffron-gold/30 to-rose-50" />
-                <div className="rounded-xl bg-gradient-to-br from-zinc-100 to-peacock-blue/20" />
-              </div>
-              <Image
-                src="/logo.png"
-                alt=""
-                width={64}
-                height={64}
-                className="absolute left-1/2 top-1/2 h-14 w-auto -translate-x-1/2 -translate-y-1/2 opacity-25"
-                aria-hidden="true"
-              />
+              {heroImageUrl ? (
+                <Image
+                  src={heroImageUrl}
+                  alt="V Design studio and contact"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              ) : (
+                <>
+                  <div className="grid h-full grid-cols-2 gap-2 p-3">
+                    <div className="rounded-xl bg-gradient-to-br from-peacock-blue/30 to-zinc-100" />
+                    <div className="mt-6 rounded-xl bg-gradient-to-br from-royal-magenta/25 to-amber-50" />
+                    <div className="rounded-xl bg-gradient-to-br from-saffron-gold/30 to-rose-50" />
+                    <div className="rounded-xl bg-gradient-to-br from-zinc-100 to-peacock-blue/20" />
+                  </div>
+                  <Image
+                    src="/logo.png"
+                    alt=""
+                    width={64}
+                    height={64}
+                    className="absolute left-1/2 top-1/2 h-14 w-auto -translate-x-1/2 -translate-y-1/2 opacity-25"
+                    aria-hidden="true"
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>

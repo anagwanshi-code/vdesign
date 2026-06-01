@@ -5,13 +5,11 @@ import Link from "next/link";
 type SimilarProductsProps = {
   products: ProductShowcaseItem[];
   collectionTitle?: string;
-  collectionSlug?: string;
 };
 
 export function SimilarProducts({
   products,
   collectionTitle,
-  collectionSlug,
 }: SimilarProductsProps) {
   if (products.length === 0) {
     return null;
@@ -37,14 +35,12 @@ export function SimilarProducts({
             </p>
           ) : null}
         </div>
-        {collectionSlug ? (
-          <Link
-            href={`/collections/${collectionSlug}`}
-            className="text-caption uppercase tracking-widest text-text-muted transition-colors duration-base ease-luxury hover:text-peacock"
-          >
-            View collection
-          </Link>
-        ) : null}
+        <Link
+          href="/shop"
+          className="text-caption uppercase tracking-widest text-text-muted transition-colors duration-base ease-luxury hover:text-peacock"
+        >
+          View collection
+        </Link>
       </div>
 
       <ProductLinkGrid products={products} maxColumns={4} />

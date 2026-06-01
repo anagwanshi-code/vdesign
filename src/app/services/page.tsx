@@ -38,7 +38,7 @@ export default async function ServicesPage() {
   const videoLink = pageContent?.videoLink?.trim();
 
   return (
-    <div className="bg-luxury-surface/30 pt-32">
+    <div className="bg-luxury-surface/30 pt-10 lg:pt-16">
       <section className="relative overflow-hidden bg-luxury-bg pb-12 md:pb-16">
         <div
           className="pointer-events-none absolute -right-20 top-12 h-96 w-96 rounded-full bg-saffron-gold/10 blur-3xl"

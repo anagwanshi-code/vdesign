@@ -4,8 +4,10 @@ import { AboutStudio } from "@/components/blocks/about-studio";
 import { AboutValues } from "@/components/blocks/about-values";
 import { FounderStory } from "@/components/blocks/founder-story";
 import { PremiumCta } from "@/components/blocks/premium-cta";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/lib/sanity/client";
 import { ABOUT_PAGE_QUERY, FOUNDER_QUERY } from "@/sanity/lib/queries";
+import { client } from "@/sanity/lib/client";
+import type { AboutJourneyStatItem, AboutPageContent } from "@/types/about";
 import { Play } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -18,26 +20,63 @@ export const metadata: Metadata = {
 };
 
 const DEFAULT_HERO_TITLE = "Crafting Brands.";
-const DEFAULT_HERO_LINE = "Creating";
 const DEFAULT_HERO_HIGHLIGHT = "Impact.";
 const DEFAULT_HERO_DESCRIPTION =
   "For nearly two decades, V Design has transformed businesses through premium branding, luxury packaging, and print excellence—rooted in Surat and trusted across India.";
+const DEFAULT_JOURNEY_TITLE = "A Journey of Passion & Creativity";
+const DEFAULT_JOURNEY_STATS: AboutJourneyStatItem[] = [
+  { value: "5000+", label: "Projects" },
+  { value: "18+", label: "Years" },
+  { value: "100+", label: "Partners" },
+  { value: "25+", label: "Awards" },
+];
+const DEFAULT_VALUES_TITLE = "The Principles That Define Us";
+const DEFAULT_STUDIO_HEADING = "Where Ideas Come to Life";
+const DEFAULT_STUDIO_DESCRIPTION =
+  "Our studio is a perfect blend of creativity, technology, and craftsmanship—where brands are shaped, packaging is perfected, and every detail reflects the care your business deserves.";
 
 export default async function AboutPage() {
   const [founder, about] = await Promise.all([
     client.fetch(FOUNDER_QUERY),
-    client.fetch(ABOUT_PAGE_QUERY),
+    sanityFetch<AboutPageContent>(ABOUT_PAGE_QUERY),
   ]);
 
+  const heroTitle = about?.heroTitle?.trim() || DEFAULT_HERO_TITLE;
+  const heroHighlight = about?.heroHighlight?.trim() || DEFAULT_HERO_HIGHLIGHT;
   const heroDescription =
     about?.heroDescription?.trim() || DEFAULT_HERO_DESCRIPTION;
-  const heroImageUrl = about?.heroImageUrl;
-  const cmsHeroTitle = about?.heroTitle?.trim();
-  const cmsHeroHighlight = about?.heroHighlight?.trim();
+  const heroImageUrl = about?.heroImageUrl?.trim() || null;
+
+  const journeyTitle = about?.journeyTitle?.trim() || DEFAULT_JOURNEY_TITLE;
+  const journeyTimeline =
+    about?.journeyTimeline?.filter(
+      (item) => item.year?.trim() || item.description?.trim(),
+    ) ?? [];
+
+  const cmsJourneyStats =
+    about?.journeyStats?.filter(
+      (item) => item.value?.trim() || item.label?.trim(),
+    ) ?? [];
+  const journeyStats =
+    cmsJourneyStats.length > 0 ? cmsJourneyStats : DEFAULT_JOURNEY_STATS;
+
+  const valuesTitle = about?.valuesTitle?.trim() || DEFAULT_VALUES_TITLE;
+  const valuesList =
+    about?.valuesList?.filter(
+      (item) => item.title?.trim() || item.description?.trim(),
+    ) ?? [];
+
+  const studioHeading = about?.studioHeading?.trim() || DEFAULT_STUDIO_HEADING;
+  const studioDescription =
+    about?.studioDescription?.trim() || DEFAULT_STUDIO_DESCRIPTION;
+  const studioImageUrls =
+    about?.studioImageUrls?.filter((url): url is string =>
+      Boolean(url?.trim()),
+    ) ?? [];
 
   return (
     <>
-      <section className="relative overflow-hidden bg-luxury-bg pb-16 pt-32 md:pb-24 md:pt-40">
+      <section className="relative overflow-hidden bg-luxury-bg pb-16 pt-10 md:pb-24 lg:pt-16">
         <div
           className="pointer-events-none absolute -right-24 top-20 h-96 w-96 rounded-full bg-royal-magenta/10 blur-3xl"
           aria-hidden="true"
@@ -60,11 +99,8 @@ export default async function AboutPage() {
             </p>
             <h1 className="mb-6 font-serif text-5xl leading-tight text-luxury-text md:text-7xl">
               <AboutHeroHeading
-                title={cmsHeroTitle}
-                highlight={cmsHeroHighlight}
-                defaultTitle={DEFAULT_HERO_TITLE}
-                defaultLine={DEFAULT_HERO_LINE}
-                defaultHighlight={DEFAULT_HERO_HIGHLIGHT}
+                title={heroTitle}
+                highlight={heroHighlight}
               />
             </h1>
             <p className="mb-8 max-w-xl text-lg text-luxury-muted">
@@ -104,7 +140,6 @@ export default async function AboutPage() {
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
-                  unoptimized={!heroImageUrl.startsWith("http")}
                 />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-peacock-blue/25 via-zinc-50 to-royal-magenta/20 p-8 text-center">
@@ -112,36 +147,36 @@ export default async function AboutPage() {
                     Peacock &amp; Packaging
                   </span>
                   <span className="max-w-xs text-sm text-luxury-muted">
-                    Hero visual placeholder — premium brand &amp; print showcase
+                    Upload a hero image in About Page Content (Sanity Studio).
                   </span>
                 </div>
               )}
-              <Image
-                src="/logo.png"
-                alt=""
-                width={80}
-                height={80}
-                className="absolute bottom-6 right-6 h-16 w-auto opacity-20"
-                aria-hidden="true"
-              />
+              {!heroImageUrl ? (
+                <Image
+                  src="/logo.png"
+                  alt=""
+                  width={80}
+                  height={80}
+                  className="absolute bottom-6 right-6 h-16 w-auto opacity-20"
+                  aria-hidden="true"
+                />
+              ) : null}
             </div>
           </div>
         </div>
       </section>
 
       <AboutJourney
-        title={about?.journeyTitle}
-        timeline={about?.journeyTimeline}
+        title={journeyTitle}
+        timeline={journeyTimeline}
+        journeyStats={journeyStats}
       />
-      <AboutValues
-        title={about?.valuesTitle}
-        valuesList={about?.valuesList}
-      />
+      <AboutValues title={valuesTitle} valuesList={valuesList} />
       <FounderStory founder={founder} />
       <AboutStudio
-        heading={about?.studioHeading}
-        description={about?.studioDescription}
-        imageUrls={about?.studioImageUrls}
+        heading={studioHeading}
+        description={studioDescription}
+        imageUrls={studioImageUrls}
       />
       <PremiumCta />
     </>

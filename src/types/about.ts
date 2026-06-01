@@ -3,6 +3,11 @@ export type AboutJourneyTimelineItem = {
   description?: string;
 };
 
+export type AboutJourneyStatItem = {
+  value?: string;
+  label?: string;
+};
+
 export type AboutValueItem = {
   title?: string;
   description?: string;
@@ -15,6 +20,7 @@ export type AboutPageContent = {
   heroImageUrl?: string | null;
   journeyTitle?: string;
   journeyTimeline?: AboutJourneyTimelineItem[];
+  journeyStats?: AboutJourneyStatItem[];
   valuesTitle?: string;
   valuesList?: AboutValueItem[];
   studioHeading?: string;

@@ -2,26 +2,14 @@
 
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils/cn";
+import type { ShopProductItem } from "@/types/shop";
 import { ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-type ShopProduct = {
-  _id: string;
-  title: string;
-  slug?: string;
-  price?: number;
-  rating?: number;
-  reviewsCount?: number;
-  isBestSeller?: boolean;
-  imageUrl?: string | null;
-  categoryName?: string | null;
-  _createdAt?: string;
-};
-
 type EcommerceGridProps = {
-  products: ShopProduct[];
+  products: ShopProductItem[];
   totalCount?: number;
 };
 
@@ -88,7 +76,7 @@ export default function EcommerceGrid({
   const showingFrom = sortedProducts.length > 0 ? 1 : 0;
   const showingTo = sortedProducts.length;
 
-  const handleAddToCart = (product: ShopProduct) => {
+  const handleAddToCart = (product: ShopProductItem) => {
     const priceInInr = product.price ?? 0;
     addItem({
       productId: product._id,
@@ -143,7 +131,7 @@ export default function EcommerceGrid({
                   className="relative block aspect-square overflow-hidden bg-zinc-50"
                 >
                   <Image
-                    src={product.imageUrl || "/placeholder.png"}
+                    src={product.imageUrl || "/images/placeholder.svg"}
                     alt={product.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"

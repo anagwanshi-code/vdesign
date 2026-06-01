@@ -6,6 +6,7 @@ export type ContactOffice = {
 export type ContactPageContent = {
   heading?: string | null;
   subheading?: string | null;
+  heroImageUrl?: string | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;

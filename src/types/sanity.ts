@@ -26,6 +26,7 @@ export type SanityHeroBlock = {
   eyebrow?: string | null;
   headline: string;
   subheadline?: string | null;
+  heroImageUrls?: (string | null)[] | null;
   heroImages?: SanityImage[] | null;
   media?: SanityImage | null;
   ctaPrimary?: SanityCta | null;
@@ -43,6 +44,9 @@ export type SanityAboutStudio = {
 
 export type SanityHomePage = {
   hero: SanityHeroBlock | null;
+  brandLogosTitle?: string | null;
+  brandLogoUrls?: (string | null)[] | null;
+  homeStats?: { value?: string | null; label?: string | null }[] | null;
   featuredCollections?: SanityCollectionSummary[] | null;
   featuredProducts?: SanityProduct[] | null;
   aboutStudio?: SanityAboutStudio | null;
@@ -82,8 +86,8 @@ export type SanityProductVariant = {
 };
 
 export type SanityProductGalleryImage = {
-  _key: string;
-  image: SanityImage;
+  _key?: string;
+  image?: SanityImage | null;
   caption?: string | null;
 };
 
@@ -142,9 +146,15 @@ export type SanityProduct = {
   customizationNotes?: string | null;
   categoryRef?: string | null;
   collectionRef?: string | null;
+  occasion?: string[] | null;
+  isNewArrival?: boolean | null;
+  isOnSale?: boolean | null;
+  isCustomizable?: boolean | null;
   collection?: Pick<SanityCollection, "_id" | "title" | "slug"> | null;
   images?: SanityImage[] | null;
   image?: SanityImage | null;
+  imageUrl?: string | null;
+  galleryUrls?: (string | null)[] | null;
   gallery?: SanityProductGalleryImage[] | null;
   availableSizes?: SanityProductSize[] | null;
   sizeLabels?: string[] | null;

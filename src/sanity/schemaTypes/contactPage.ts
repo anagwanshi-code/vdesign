@@ -19,6 +19,14 @@ export const contactPage = defineType({
         "Ready to elevate your brand? Fill out the form below or reach out directly.",
     }),
     defineField({
+      name: "heroImage",
+      title: "Hero Image",
+      type: "image",
+      options: { hotspot: true },
+      description:
+        "Recommended size: 1920x1080px (16:9 aspect ratio) or a square high-quality image for the contact page hero section.",
+    }),
+    defineField({
       name: "email",
       title: "Contact Email",
       type: "string",

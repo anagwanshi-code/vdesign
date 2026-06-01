@@ -109,13 +109,19 @@ export const resolveCollectionAlt = resolveProductCardAlt;
 export function resolveShowcaseItemImage(product: {
   title: string;
   image?: { src?: string; alt?: string };
+  imageUrl?: string | null;
 }): string | null {
-  if (!product.image?.src) {
+  const imageUrl =
+    product.imageUrl?.trim() ||
+    product.image?.src?.trim() ||
+    null;
+
+  if (!imageUrl) {
     return null;
   }
 
   return resolveProductCardImageOrNull({
     title: product.title,
-    image: { asset: { url: product.image.src }, alt: product.image.alt },
+    image: { asset: { url: imageUrl }, alt: product.image?.alt },
   });
 }

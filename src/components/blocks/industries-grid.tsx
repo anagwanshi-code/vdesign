@@ -29,7 +29,7 @@ type IndustryDisplayItem = IndustryCardStyle & {
   id: string;
   title: string;
   description: string;
-  imageUrl?: string | null;
+  landscapeImageUrl?: string | null;
 };
 
 const ICON_BY_KEY: Record<string, LucideIcon> = {
@@ -187,15 +187,15 @@ function mapCmsIndustries(industries: IndustryDocument[]): IndustryDisplayItem[]
       const iconFromCms = resolveIndustryIcon(item.icon);
       return {
         id: item._id,
-        title: item.title!.trim(),
+        title: (item.industryName ?? item.title)!.trim(),
         description: item.shortDescription?.trim() ?? "",
-        imageUrl: item.imageUrl,
+        landscapeImageUrl: item.landscapeImageUrl,
         icon: iconFromCms ?? style.icon,
         iconBg: style.iconBg,
         iconColor: style.iconColor,
         gradient: style.gradient,
         href: item.slug?.trim()
-          ? `/consultation?industry=${encodeURIComponent(item.slug.trim())}`
+          ? `/industries/${item.slug.trim()}`
           : style.href,
       };
     });
@@ -262,15 +262,15 @@ export function IndustriesGrid({ industries }: IndustriesGridProps) {
                     Explore Solutions →
                   </Link>
                 </div>
-                <div className="relative mt-auto h-32 overflow-hidden bg-zinc-50">
-                  {industry.imageUrl ? (
+                <div className="relative mt-auto aspect-video w-full overflow-hidden bg-zinc-50">
+                  {industry.landscapeImageUrl ? (
                     <Image
-                      src={industry.imageUrl}
+                      src={industry.landscapeImageUrl}
                       alt=""
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, 25vw"
-                      unoptimized={!industry.imageUrl.startsWith("http")}
+                      unoptimized={!industry.landscapeImageUrl.startsWith("http")}
                     />
                   ) : (
                     <div

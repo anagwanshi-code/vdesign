@@ -2,46 +2,77 @@
 
 import type { HeroMedia } from "@/types/home";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ProductDetailGalleryProps = {
-  primary: HeroMedia;
+  /** Flat image URLs from Sanity (primary first). */
+  images?: string[];
+  primary?: HeroMedia;
   gallery?: HeroMedia[];
   title: string;
 };
 
+function resolveUrl(value: string | HeroMedia | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+
+  const src = value.src?.trim();
+  return src || null;
+}
+
 export function ProductDetailGallery({
+  images: imageUrls,
   primary,
   gallery = [],
   title,
 }: ProductDetailGalleryProps) {
   const images = useMemo(() => {
-    const candidates = [primary, ...gallery];
+    if (imageUrls?.length) {
+      const seen = new Set<string>();
+      return imageUrls
+        .map((url) => url.trim())
+        .filter((url) => {
+          if (!url || seen.has(url)) {
+            return false;
+          }
+          seen.add(url);
+          return true;
+        });
+    }
+
     const seen = new Set<string>();
+    return [primary, ...gallery]
+      .map((item) => resolveUrl(item))
+      .filter((url): url is string => {
+        if (!url || seen.has(url)) {
+          return false;
+        }
+        seen.add(url);
+        return true;
+      });
+  }, [imageUrls, primary, gallery]);
 
-    return candidates.filter((image) => {
-      const src = image.src?.trim();
-      if (!src || seen.has(src)) {
-        return false;
-      }
-      seen.add(src);
-      return true;
-    });
-  }, [primary, gallery]);
+  const [mainImage, setMainImage] = useState(images[0] ?? "");
 
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeImage = images[activeIndex] ?? primary;
+  useEffect(() => {
+    setMainImage(images[0] ?? "");
+  }, [images]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <div className="relative aspect-[4/5] overflow-hidden rounded-md border border-border bg-border/30">
-        {activeImage?.src ? (
+        {mainImage ? (
           <Image
-            src={activeImage.src}
-            alt={activeImage.alt || "Product"}
-            width={activeImage.width}
-            height={activeImage.height}
-            className="h-full w-full object-cover"
+            src={mainImage}
+            alt={primary?.alt?.trim() || title}
+            fill
+            className="object-cover"
             sizes="(max-width: 1024px) 100vw, 50vw"
             priority
           />
@@ -54,36 +85,30 @@ export function ProductDetailGallery({
       </div>
 
       {images.length > 1 ? (
-        <ul className="grid grid-cols-4 gap-2">
-          {images.map((image, index) => (
-            <li key={`${image.src}-${index}`}>
-              <button
-                type="button"
-                aria-label={`View ${title} image ${index + 1}`}
-                aria-pressed={index === activeIndex}
-                onClick={() => setActiveIndex(index)}
-                className={`relative aspect-square overflow-hidden rounded-md border transition-colors duration-base ease-luxury ${
-                  index === activeIndex
-                    ? "border-peacock"
-                    : "border-border hover:border-peacock/60"
-                }`}
-              >
-                {image?.src ? (
-                  <Image
-                    src={image.src}
-                    alt={image.alt || "Product"}
-                    width={image.width}
-                    height={image.height}
-                    className="h-full w-full object-cover"
-                    sizes="120px"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-gray-200" aria-hidden="true" />
-                )}
-              </button>
-            </li>
+        <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
+          {images.map((url, idx) => (
+            <button
+              key={`${url}-${idx}`}
+              type="button"
+              aria-label={`View ${title} image ${idx + 1}`}
+              aria-pressed={mainImage === url}
+              onClick={() => setMainImage(url)}
+              className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
+                mainImage === url
+                  ? "border-zinc-900"
+                  : "border-transparent hover:border-zinc-300"
+              }`}
+            >
+              <Image
+                src={url}
+                alt={`Gallery image ${idx + 1}`}
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
+            </button>
           ))}
-        </ul>
+        </div>
       ) : null}
     </div>
   );

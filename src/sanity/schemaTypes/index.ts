@@ -9,9 +9,12 @@ import { founder } from "./founder";
 import { industry } from "./industry";
 import { portfolio } from "./portfolio";
 import { post } from "./post";
+import { industriesPage } from "./industriesPage";
+import { portfolioPage } from "./portfolioPage";
 import { resourcesPage } from "./resourcesPage";
 import { service } from "./service";
 import { servicesPage } from "./servicesPage";
+import { shopPage } from "./shopPage";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -27,5 +30,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     contactPage,
     service,
     servicesPage,
+    portfolioPage,
+    industriesPage,
+    shopPage,
   ],
 };

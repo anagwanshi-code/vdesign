@@ -30,6 +30,14 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
     },
     heroImages: [],
   },
+  brandLogosTitle: "TRUSTED BY GROWING BRANDS",
+  brandLogoUrls: [],
+  homeStats: [
+    { value: "18+", label: "Years Experience" },
+    { value: "5000+", label: "Projects Delivered" },
+    { value: "100+", label: "Business Partners" },
+    { value: "25+", label: "Awards & Recognition" },
+  ],
   featuredCollections: [],
   featuredProducts: [],
   aboutStudio: null,
@@ -157,6 +165,9 @@ export async function resolveHomePageContent(): Promise<HomePageContentResult> {
     if (mapped) {
       return {
         hero: mapped.hero,
+        brandLogosTitle: mapped.brandLogosTitle,
+        brandLogoUrls: mapped.brandLogoUrls,
+        homeStats: mapped.homeStats,
         services: [],
         featuredCollections: mapped.featuredCollections,
         featuredProducts: mapped.featuredProducts,

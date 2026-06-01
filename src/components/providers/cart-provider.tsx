@@ -20,6 +20,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { toast } from "sonner";
 
 export const CartContext = createContext<CartContextValue | null>(null);
 
@@ -110,6 +111,9 @@ export function CartProvider({ children }: CartProviderProps) {
           : entry,
       );
     });
+
+    const productName = item.title?.trim() || "Item";
+    toast.success(`${productName} added to your bag.`);
   }, []);
 
   const totalQuantity = useMemo(

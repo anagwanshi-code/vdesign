@@ -58,14 +58,10 @@ const COLLAGE_TILES = [
   },
 ] as const;
 
-const DEFAULT_STUDIO_HEADING = "Where Ideas Come to Life";
-const DEFAULT_STUDIO_DESCRIPTION =
-  "Our studio is a perfect blend of creativity, technology, and craftsmanship—where brands are shaped, packaging is perfected, and every detail reflects the care your business deserves.";
-
 type AboutStudioProps = {
-  heading?: string;
-  description?: string;
-  imageUrls?: (string | null)[];
+  heading: string;
+  description: string;
+  imageUrls: string[];
 };
 
 export function AboutStudio({
@@ -73,13 +69,7 @@ export function AboutStudio({
   description,
   imageUrls,
 }: AboutStudioProps) {
-  const studioHeading = heading?.trim() || DEFAULT_STUDIO_HEADING;
-  const studioDescription =
-    description?.trim() || DEFAULT_STUDIO_DESCRIPTION;
-
-  const cmsImages = (imageUrls ?? []).filter(
-    (url): url is string => Boolean(url?.trim()),
-  );
+  const cmsImages = imageUrls.filter((url) => url.trim());
 
   return (
     <section
@@ -96,10 +86,10 @@ export function AboutStudio({
             id="about-studio-heading"
             className="mb-6 font-serif text-4xl text-luxury-text md:text-5xl"
           >
-            {studioHeading}
+            {heading}
           </h2>
           <p className="mb-10 max-w-xl text-lg leading-relaxed text-luxury-muted">
-            {studioDescription}
+            {description}
           </p>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -145,7 +135,7 @@ export function AboutStudio({
                   {imageSrc ? (
                     <Image
                       src={imageSrc}
-                      alt={`${studioHeading} — ${tile.label}`}
+                      alt={`${heading} — ${tile.label}`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 1024px) 50vw, 25vw"

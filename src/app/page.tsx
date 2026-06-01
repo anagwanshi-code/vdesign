@@ -15,34 +15,53 @@ import {
   FOUNDER_QUERY,
   HOME_FEATURED_PRODUCTS_QUERY,
   PORTFOLIO_QUERY,
+  INDUSTRIES_QUERY,
   LATEST_POSTS_QUERY,
   SERVICES_QUERY,
 } from "@/sanity/lib/queries";
+import type { IndustryDocument } from "@/types/industry";
 import type { PortfolioCardProject } from "@/types/portfolio";
 import type { ServiceDocument } from "@/types/service";
 
 export default async function HomePage() {
-  const [{ hero }, featuredProducts, portfolioProjects, founder, latestPosts, services] =
-    await Promise.all([
-      resolveHomePageContent(),
-      client.fetch(HOME_FEATURED_PRODUCTS_QUERY),
-      client.fetch<PortfolioCardProject[]>(PORTFOLIO_QUERY),
-      client.fetch(FOUNDER_QUERY),
-      client.fetch(LATEST_POSTS_QUERY),
-      client.fetch<ServiceDocument[]>(SERVICES_QUERY),
-    ]);
+  const [
+    { hero, brandLogosTitle, brandLogoUrls, homeStats },
+    featuredProducts,
+    portfolioProjects,
+    founder,
+    latestPosts,
+    services,
+    industries,
+  ] = await Promise.all([
+    resolveHomePageContent(),
+    client.fetch(HOME_FEATURED_PRODUCTS_QUERY),
+    client.fetch<PortfolioCardProject[]>(PORTFOLIO_QUERY),
+    client.fetch(FOUNDER_QUERY),
+    client.fetch(LATEST_POSTS_QUERY),
+    client.fetch<ServiceDocument[]>(SERVICES_QUERY),
+    client.fetch<IndustryDocument[]>(INDUSTRIES_QUERY),
+  ]);
 
   const homepageServices = (services ?? []).slice(0, 6);
+  const homepageIndustries = (industries ?? []).slice(0, 8);
 
   return (
     <>
-      <HeroBlock hero={hero} />
-      <TrustStrip />
+      <div className="flex w-full flex-col">
+        <HeroBlock hero={hero} compact />
+        <TrustStrip
+          brandLogosTitle={brandLogosTitle}
+          brandLogoUrls={brandLogoUrls}
+          homeStats={homeStats}
+          compact
+          className="shrink-0 border-t border-zinc-100"
+        />
+      </div>
       <ServicesSection services={homepageServices} />
       <ProductShowcase products={featuredProducts ?? []} />
       <PortfolioSection projects={portfolioProjects ?? []} />
       <WhyChooseUs />
-      <IndustrySolutions />
+      <IndustrySolutions industries={homepageIndustries} />
       <CreativeProcess />
       <FounderStory founder={founder} />
       <InsightsSection posts={latestPosts ?? []} />

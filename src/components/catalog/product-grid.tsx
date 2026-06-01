@@ -60,7 +60,7 @@ export function ProductGrid({
 
         return (
         <li key={product.id}>
-          <article className="group flex h-full flex-col">
+          <article className="group flex h-full flex-col rounded-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
             {primaryImage ? (
             <Link
               href={`/products/${product.handle}`}
@@ -76,8 +76,8 @@ export function ProductGrid({
                 className={cn(
                   "object-cover",
                   hoverImageUrl
-                    ? "transition-opacity duration-slow ease-cinematic group-hover:opacity-0"
-                    : "transition-transform duration-slow ease-cinematic group-hover:scale-[1.02]",
+                    ? "transition-all duration-700 ease-cinematic group-hover:scale-105 group-hover:opacity-0"
+                    : "transition-transform duration-700 group-hover:scale-105",
                 )}
                 sizes={
                   maxColumns === 4
@@ -90,7 +90,7 @@ export function ProductGrid({
                   src={hoverImageUrl}
                   alt={product.hoverImage?.alt ?? product.title}
                   fill
-                  className="object-cover opacity-0 transition-all duration-slow ease-cinematic group-hover:scale-[1.02] group-hover:opacity-100"
+                  className="object-cover opacity-0 transition-all duration-700 ease-cinematic group-hover:scale-105 group-hover:opacity-100"
                   sizes={
                     maxColumns === 4
                       ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -158,9 +158,9 @@ export function ProductGrid({
                 </ul>
               ) : null}
 
-              {!isCompact && product.collectionHandle ? (
+              {!isCompact ? (
                 <Link
-                  href={`/collections/${product.collectionHandle}`}
+                  href="/shop"
                   className="text-caption uppercase tracking-widest text-text-muted transition-colors duration-base ease-luxury hover:text-peacock"
                 >
                   View collection
@@ -170,7 +170,7 @@ export function ProductGrid({
               {showAddToBag && !isCompact ? (
                 <Button
                   variant="secondary"
-                  className="mt-auto mt-4 w-full"
+                  className="mt-auto mt-4 w-full translate-y-1 opacity-80 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100"
                   onClick={() =>
                     addItem({
                       productId: product.id,

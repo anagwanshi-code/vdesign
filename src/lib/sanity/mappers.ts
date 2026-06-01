@@ -12,6 +12,8 @@ import {
 import type {
   AboutStudioContent,
   CollectionCard,
+  HomeStatItem,
+  HeroEditorialParams,
   ProductShowcaseItem,
 } from "@/types/home";
 import type { HeroMedia } from "@/types/home";
@@ -25,7 +27,32 @@ import type {
   SanityImage,
   SanityProduct,
 } from "@/types/sanity";
-import type { HeroEditorialParams } from "@/types/home";
+
+const DEFAULT_HOME_STATS: HomeStatItem[] = [
+  { value: "18+", label: "Years Experience" },
+  { value: "5000+", label: "Projects Delivered" },
+  { value: "100+", label: "Business Partners" },
+  { value: "25+", label: "Awards & Recognition" },
+];
+
+function mapSanityHomeStats(
+  stats: SanityHomePage["homeStats"],
+): HomeStatItem[] {
+  const items =
+    stats
+      ?.map((item) => ({
+        value: item.value?.trim() || "",
+        label: item.label?.trim() || "",
+      }))
+      .filter((item) => item.value || item.label)
+      .slice(0, 4)
+      .map((item) => ({
+        value: item.value || "—",
+        label: item.label || "—",
+      })) ?? [];
+
+  return items.length > 0 ? items : DEFAULT_HOME_STATS;
+}
 
 function mapSanityImageToHeroMedia(
   image: SanityImage | null | undefined,
@@ -56,14 +83,36 @@ export function mapSanityHeroToEditorial(
 ): HeroEditorialParams {
   const fallbackMedia = fallback.media;
 
-  const heroImages = (hero.heroImages ?? [])
+  const cmsUrls =
+    hero.heroImageUrls?.map((url) => url?.trim()).filter((url): url is string =>
+      Boolean(url),
+    ) ?? [];
+
+  const mappedImages = (hero.heroImages ?? [])
     .map((image) => mapSanityImageToHeroMedia(image, fallbackMedia))
     .filter((image) => Boolean(image.src));
 
+  const slidesFromUrls: HeroMedia[] =
+    cmsUrls.length > 0
+      ? cmsUrls.map((url, index) => ({
+          src: url,
+          alt:
+            hero.heroImages?.[index]?.alt?.trim() ||
+            fallbackMedia.alt ||
+            `V Design showcase ${index + 1}`,
+          width:
+            hero.heroImages?.[index]?.asset?.metadata?.dimensions?.width ??
+            fallbackMedia.width,
+          height:
+            hero.heroImages?.[index]?.asset?.metadata?.dimensions?.height ??
+            fallbackMedia.height,
+        }))
+      : mappedImages;
+
   const legacyMedia = mapSanityImageToHeroMedia(hero.media, fallbackMedia);
   const slides =
-    heroImages.length > 0
-      ? heroImages
+    slidesFromUrls.length > 0
+      ? slidesFromUrls
       : legacyMedia.src
         ? [legacyMedia]
         : fallback.heroImages.length > 0
@@ -82,6 +131,7 @@ export function mapSanityHeroToEditorial(
     ctaSecondary: hero.ctaSecondary ?? fallback.ctaSecondary,
     media,
     heroImages: slides,
+    heroImageUrls: cmsUrls.length > 0 ? cmsUrls : slides.map((s) => s.src),
   };
 }
 
@@ -111,7 +161,85 @@ function resolvePrimaryProductImage(
 function resolveGalleryEntryImage(
   entry: NonNullable<SanityProduct["gallery"]>[number],
 ): SanityImage | null | undefined {
-  return entry.image ?? null;
+  if (entry.image?.asset?.url) {
+    return entry.image;
+  }
+
+  const direct = entry as SanityImage;
+  if (direct.asset?.url) {
+    return direct;
+  }
+
+  return null;
+}
+
+function dedupeImageUrls(urls: (string | null | undefined)[]): string[] {
+  const seen = new Set<string>();
+
+  return urls
+    .map((url) => url?.trim())
+    .filter((url): url is string => {
+      if (!url || seen.has(url)) {
+        return false;
+      }
+      seen.add(url);
+      return true;
+    });
+}
+
+function urlToHeroMedia(
+  url: string,
+  alt: string,
+  fallback: HeroMedia,
+): HeroMedia {
+  return {
+    src: url,
+    alt,
+    width: fallback.width,
+    height: fallback.height,
+  };
+}
+
+function resolveProductDetailMedia(
+  product: SanityProduct,
+  fallbackImage: HeroMedia,
+): { image: HeroMedia; gallery: HeroMedia[]; images: string[] } {
+  const fromUrls = dedupeImageUrls([
+    product.imageUrl,
+    ...(product.galleryUrls ?? []),
+  ]);
+
+  const alt =
+    product.image?.alt?.trim() || product.title?.trim() || fallbackImage.alt;
+
+  if (fromUrls.length > 0) {
+    const [primaryUrl, ...restUrls] = fromUrls;
+
+    return {
+      images: fromUrls,
+      image: urlToHeroMedia(primaryUrl, alt, fallbackImage),
+      gallery: restUrls.map((url) => urlToHeroMedia(url, alt, fallbackImage)),
+    };
+  }
+
+  const image = mapSanityImageToHeroMedia(
+    resolvePrimaryProductImage(product),
+    fallbackImage,
+  );
+  const gallery = resolveProductGalleryImages(product)
+    .map((entry) => mapSanityImageToHeroMedia(entry, fallbackImage))
+    .filter((entry) => Boolean(entry.src));
+
+  const images = dedupeImageUrls([
+    image.src,
+    ...gallery.map((entry) => entry.src),
+  ]);
+
+  return {
+    images,
+    image,
+    gallery,
+  };
 }
 
 function resolveProductGalleryImages(
@@ -150,6 +278,7 @@ export function mapSanityProductToDetail(
   fallbackImage: HeroMedia,
 ): ProductDetail {
   const startingPrice = resolveProductStartingPrice(product);
+  const media = resolveProductDetailMedia(product, fallbackImage);
 
   return {
     id: product._id,
@@ -161,13 +290,9 @@ export function mapSanityProductToDetail(
     saleType: normalizeSaleType(product.saleType),
     minOrderQuantity: normalizeMoq(product.minOrderQuantity),
     logoUploadRequired: Boolean(product.logoUploadRequired),
-    image: mapSanityImageToHeroMedia(
-      resolvePrimaryProductImage(product),
-      fallbackImage,
-    ),
-    gallery: resolveProductGalleryImages(product).map((image) =>
-      mapSanityImageToHeroMedia(image, fallbackImage),
-    ),
+    image: media.image,
+    images: media.images,
+    gallery: media.gallery,
     sizes: buildSizeOptions(product),
     frames: buildFrameOptions(product),
     variants: mapSanityVariantsToDetail(product.variants),
@@ -356,12 +481,22 @@ export function mapSanityHomePageWithCatalog(
   },
 ): {
   hero: HeroEditorialParams;
+  brandLogosTitle: string;
+  brandLogoUrls: string[];
+  homeStats: HomeStatItem[];
   featuredCollections: CollectionCard[];
   featuredProducts: ProductShowcaseItem[];
   aboutStudio: AboutStudioContent | null;
   products: ProductShowcaseItem[];
 } | null {
   const editorial = content.editorial;
+  const brandLogosTitle =
+    editorial?.brandLogosTitle?.trim() || "TRUSTED BY GROWING BRANDS";
+  const brandLogoUrls =
+    editorial?.brandLogoUrls?.filter((url): url is string =>
+      Boolean(url?.trim()),
+    ) ?? [];
+  const homeStats = mapSanityHomeStats(editorial?.homeStats);
   const hero = editorial?.hero?.headline
     ? mapSanityHeroToEditorial(editorial.hero, fallback.hero)
     : fallback.hero;
@@ -399,6 +534,9 @@ export function mapSanityHomePageWithCatalog(
 
   return {
     hero,
+    brandLogosTitle,
+    brandLogoUrls,
+    homeStats,
     featuredCollections,
     featuredProducts,
     aboutStudio,

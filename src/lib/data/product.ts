@@ -28,6 +28,9 @@ function mapShowcaseItemToDetail(item: ProductShowcaseItem): ProductDetail {
     logoUploadRequired: item.logoUploadRequired,
     specifications: MOCK_PRODUCT_SPECIFICATIONS[item.handle] ?? null,
     image: item.image,
+    images: [item.image.src, item.hoverImage?.src]
+      .filter((url): url is string => Boolean(url?.trim()))
+      .filter((url, index, all) => all.indexOf(url) === index),
     gallery: item.hoverImage ? [item.hoverImage] : [],
     sizes: [],
     frames: [],

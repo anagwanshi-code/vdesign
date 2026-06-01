@@ -112,7 +112,7 @@ export function InsightsSection({ posts }: InsightsSectionProps) {
                         </div>
                       ) : (
                         <Image
-                          src={post.imageUrl || "/placeholder.png"}
+                          src={post.imageUrl || "/images/placeholder.svg"}
                           alt={post.title}
                           fill
                           className="object-cover transition-transform duration-700 group-hover:scale-105"

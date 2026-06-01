@@ -9,7 +9,7 @@ import { Search, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 const CINEMATIC_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
@@ -47,6 +47,17 @@ export function Header() {
     pathname === "/" ||
     pathname === "/contact" ||
     pathname === "/resources";
+
+  const handleHomeClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      if (lenis) {
+        lenis.scrollTo(0, { duration: 1.2 });
+        return;
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     const getThreshold = () => window.innerHeight * 0.85;
@@ -89,8 +100,8 @@ export function Header() {
         animate={{ y: 0 }}
         transition={{ duration: 1, ease: CINEMATIC_EASE }}
         className={cn(
-          "fixed left-0 right-0 top-0 z-50 border-b border-zinc-100 bg-white shadow-sm transition-shadow duration-500",
-          isScrolled ? "shadow-md" : "shadow-sm",
+          "sticky top-0 z-50 border-b border-zinc-200/50 bg-white/75 shadow-sm backdrop-blur-lg transition-all duration-300",
+          isScrolled && "shadow-md",
         )}
       >
         <div className="mx-auto max-w-[1440px] px-6 md:px-12">
@@ -103,6 +114,7 @@ export function Header() {
                 <Link
                   key={link.name}
                   href={link.href}
+                  onClick={link.href === "/" ? handleHomeClick : undefined}
                   className={cn(
                     "whitespace-nowrap font-sans text-xs uppercase tracking-[0.15em] transition-colors duration-300",
                     isNavLinkActive(pathname, link.href)
@@ -116,7 +128,11 @@ export function Header() {
             </nav>
 
             <div className="flex flex-1 justify-center lg:justify-center">
-              <Link href="/" className="group flex flex-col items-center">
+              <Link
+                href="/"
+                onClick={handleHomeClick}
+                className="group flex flex-col items-center"
+              >
                 <Image
                   src="/logo.png"
                   alt="V Design - The Printing Magician"
@@ -131,7 +147,7 @@ export function Header() {
             <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
               <Link
                 href="/consultation"
-                className="hidden rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg md:inline-flex"
+                className="hidden rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2 text-sm font-medium text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl md:inline-flex"
               >
                 Book Consultation
               </Link>
@@ -179,6 +195,7 @@ export function Header() {
               <Link
                 key={link.name}
                 href={link.href}
+                onClick={link.href === "/" ? handleHomeClick : undefined}
                 className={cn(
                   "shrink-0 font-sans text-[10px] uppercase tracking-[0.12em] transition-colors duration-300",
                   isNavLinkActive(pathname, link.href)

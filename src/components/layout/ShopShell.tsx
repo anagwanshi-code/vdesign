@@ -5,5 +5,5 @@ type ShopShellProps = {
 };
 
 export function ShopShell({ children }: ShopShellProps) {
-  return <div className="flex min-h-full flex-1 flex-col pt-16">{children}</div>;
+  return <div className="flex min-h-full flex-1 flex-col pt-0">{children}</div>;
 }

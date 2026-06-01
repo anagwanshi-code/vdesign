@@ -59,6 +59,30 @@ export const aboutPage = defineType({
       ],
     }),
     defineField({
+      name: "journeyStats",
+      title: "Journey Stats Bar",
+      type: "array",
+      description: "Up to 4 headline stats shown below the timeline (e.g. 5000+ Projects).",
+      validation: (Rule) => Rule.max(4),
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({
+              name: "value",
+              title: "Stat Value, e.g., 5000+",
+              type: "string",
+            }),
+            defineField({
+              name: "label",
+              title: "Stat Label, e.g., Projects",
+              type: "string",
+            }),
+          ],
+        },
+      ],
+    }),
+    defineField({
       name: "valuesTitle",
       title: "Values Section Title",
       type: "string",

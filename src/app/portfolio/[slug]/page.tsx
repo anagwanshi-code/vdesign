@@ -86,7 +86,7 @@ export default async function PortfolioCaseStudyPage({
           videoUrl={videoUrl}
         />
 
-        <div className="relative mx-auto flex min-h-[55vh] max-w-7xl flex-col justify-end px-6 pb-16 pt-36 md:min-h-[70vh] md:pb-20 md:pt-40">
+        <div className="relative mx-auto flex min-h-[55vh] max-w-7xl flex-col justify-end px-6 pb-16 pt-10 md:min-h-[70vh] md:pb-20 lg:pt-16">
           <Link
             href="/portfolio"
             className="mb-8 inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80 transition-colors hover:text-white"

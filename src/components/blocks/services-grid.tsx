@@ -211,7 +211,7 @@ export function ServicesGrid({ services }: ServicesGridProps) {
 
           return (
             <li key={service.id}>
-              <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
                 <span
                   className="absolute right-6 top-4 z-0 font-serif text-6xl font-bold text-zinc-50 transition-colors group-hover:text-royal-magenta/5"
                   aria-hidden="true"

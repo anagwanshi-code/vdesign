@@ -5,38 +5,61 @@ import { useState } from "react";
 
 const ALL_PRODUCTS_LABEL = "All Products";
 
-const PRODUCT_TYPES = [
-  "Best Sellers",
-  "New Arrivals",
-  "On Sale",
-  "Customizable",
+const TYPE_FILTERS = [
+  { label: "Best Sellers", key: "bestSellers" as const },
+  { label: "New Arrivals", key: "newArrivals" as const },
+  { label: "On Sale", key: "onSale" as const },
+  { label: "Customizable", key: "customizable" as const },
 ] as const;
 
-const OCCASIONS = ["Wedding", "Corporate", "Festival", "Personal"] as const;
+export type ShopTypeFilterKey = (typeof TYPE_FILTERS)[number]["key"];
+
+export type ShopTypeFilters = Record<ShopTypeFilterKey, boolean>;
+
+export const EMPTY_TYPE_FILTERS: ShopTypeFilters = {
+  bestSellers: false,
+  newArrivals: false,
+  onSale: false,
+  customizable: false,
+};
+
+const OCCASION_OPTIONS = [
+  { title: "Wedding", value: "wedding" },
+  { title: "Corporate", value: "corporate" },
+  { title: "Festival", value: "festival" },
+  { title: "Personal", value: "personal" },
+] as const;
 
 type ShopSidebarProps = {
   categories: { _id?: string; title: string; slug?: string }[];
   activeCategory?: string;
   onCategoryChange?: (category: string) => void;
-  productTypes?: string[];
-  onProductTypesChange?: (types: string[]) => void;
+  typeFilters?: ShopTypeFilters;
+  onTypeFiltersChange?: (filters: ShopTypeFilters) => void;
+  occasions?: string[];
+  onOccasionsChange?: (occasions: string[]) => void;
 };
 
 export default function ShopSidebar({
   categories,
   activeCategory: controlledCategory,
   onCategoryChange,
-  productTypes: controlledProductTypes,
-  onProductTypesChange,
+  typeFilters: controlledTypeFilters,
+  onTypeFiltersChange,
+  occasions: controlledOccasions,
+  onOccasionsChange,
 }: ShopSidebarProps) {
   const [internalCategory, setInternalCategory] = useState(ALL_PRODUCTS_LABEL);
-  const [internalProductTypes, setInternalProductTypes] = useState<string[]>([]);
-  const [occasions, setOccasions] = useState<string[]>([]);
+  const [internalTypeFilters, setInternalTypeFilters] =
+    useState<ShopTypeFilters>(EMPTY_TYPE_FILTERS);
+  const [internalOccasions, setInternalOccasions] = useState<string[]>([]);
 
   const activeCategory = controlledCategory ?? internalCategory;
   const setActiveCategory = onCategoryChange ?? setInternalCategory;
-  const productTypes = controlledProductTypes ?? internalProductTypes;
-  const setProductTypes = onProductTypesChange ?? setInternalProductTypes;
+  const typeFilters = controlledTypeFilters ?? internalTypeFilters;
+  const setTypeFilters = onTypeFiltersChange ?? setInternalTypeFilters;
+  const occasions = controlledOccasions ?? internalOccasions;
+  const setOccasions = onOccasionsChange ?? setInternalOccasions;
 
   const categoryList = [
     { key: "all", title: ALL_PRODUCTS_LABEL },
@@ -46,17 +69,25 @@ export default function ShopSidebar({
     })),
   ];
 
-  const toggleFilter = (
-    value: string,
-    list: string[],
-    setter: (next: string[]) => void,
-  ) => {
-    setter(
-      list.includes(value)
-        ? list.filter((item) => item !== value)
-        : [...list, value],
+  const toggleOccasion = (value: string) => {
+    setOccasions(
+      occasions.includes(value)
+        ? occasions.filter((item) => item !== value)
+        : [...occasions, value],
     );
   };
+
+  const toggleTypeFilter = (key: ShopTypeFilterKey) => {
+    setTypeFilters({ ...typeFilters, [key]: !typeFilters[key] });
+  };
+
+  const clearFilters = () => {
+    setTypeFilters(EMPTY_TYPE_FILTERS);
+    setOccasions([]);
+  };
+
+  const hasActiveFilters =
+    Object.values(typeFilters).some(Boolean) || occasions.length > 0;
 
   return (
     <aside className="flex w-full flex-col gap-8 pr-0 lg:w-1/4 lg:pr-8">
@@ -106,21 +137,19 @@ export default function ShopSidebar({
 
         <fieldset className="mb-6">
           <legend className="mb-3 text-xs font-medium uppercase tracking-wider text-luxury-text">
-            Product Type
+            Filter By Type
           </legend>
           <ul className="space-y-2">
-            {PRODUCT_TYPES.map((type) => (
-              <li key={type}>
+            {TYPE_FILTERS.map(({ label, key }) => (
+              <li key={key}>
                 <label className="flex cursor-pointer items-center gap-3 text-sm text-luxury-muted">
                   <input
                     type="checkbox"
-                    checked={productTypes.includes(type)}
-                    onChange={() =>
-                      toggleFilter(type, productTypes, setProductTypes)
-                    }
+                    checked={typeFilters[key]}
+                    onChange={() => toggleTypeFilter(key)}
                     className="h-4 w-4 rounded border-zinc-300 text-royal-magenta focus:ring-royal-magenta"
                   />
-                  {type}
+                  {label}
                 </label>
               </li>
             ))}
@@ -132,30 +161,31 @@ export default function ShopSidebar({
             Occasion
           </legend>
           <ul className="space-y-2">
-            {OCCASIONS.map((occasion) => (
-              <li key={occasion}>
+            {OCCASION_OPTIONS.map(({ title, value }) => (
+              <li key={value}>
                 <label className="flex cursor-pointer items-center gap-3 text-sm text-luxury-muted">
                   <input
                     type="checkbox"
-                    checked={occasions.includes(occasion)}
-                    onChange={() =>
-                      toggleFilter(occasion, occasions, setOccasions)
-                    }
+                    checked={occasions.includes(value)}
+                    onChange={() => toggleOccasion(value)}
                     className="h-4 w-4 rounded border-zinc-300 text-royal-magenta focus:ring-royal-magenta"
                   />
-                  {occasion}
+                  {title}
                 </label>
               </li>
             ))}
           </ul>
         </fieldset>
 
-        <button
-          type="button"
-          className="w-full rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 py-3 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
-        >
-          Apply Filters
-        </button>
+        {hasActiveFilters ? (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="w-full rounded-lg border border-zinc-200 py-3 text-sm font-semibold text-luxury-text transition-colors hover:border-royal-magenta hover:text-royal-magenta"
+          >
+            Clear Filters
+          </button>
+        ) : null}
       </div>
     </aside>
   );

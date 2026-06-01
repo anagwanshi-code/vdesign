@@ -36,6 +36,19 @@ const SIMILAR_PRODUCT_FIELDS = groq`
     title,
     "slug": slug.current
   },
+  image {
+    alt,
+    asset->{
+      url,
+      metadata {
+        dimensions {
+          width,
+          height
+        }
+      }
+    }
+  },
+  "imageUrl": image.asset->url,
   images[] {
     alt,
     asset->{

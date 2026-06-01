@@ -28,6 +28,8 @@ export type ProductDetail = {
   minOrderQuantity: number;
   logoUploadRequired: boolean;
   image: HeroMedia;
+  /** All PDP image URLs (primary first), deduplicated. */
+  images: string[];
   gallery: HeroMedia[];
   sizes: ProductOption[];
   frames: ProductOption[];

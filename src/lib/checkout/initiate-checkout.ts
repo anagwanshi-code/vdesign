@@ -8,11 +8,20 @@ import type {
   CheckoutErrorResponse,
   CheckoutOrderResponse,
 } from "@/types/checkout";
+import { normalizePhoneForRazorpay } from "@/lib/checkout/customer-notes";
 import type { RazorpayHandlerResponse } from "@/types/razorpay";
+
+export type RazorpayCheckoutPrefill = {
+  name: string;
+  email: string;
+  contact: string;
+};
 
 type InitiateCheckoutOptions = {
   items: CheckoutCartItem[];
   description?: string;
+  prefill?: RazorpayCheckoutPrefill;
+  extraNotes?: Record<string, string>;
   onSuccess?: (response: RazorpayHandlerResponse) => void;
   onDismiss?: () => void;
   onError?: (message: string) => void;
@@ -20,7 +29,9 @@ type InitiateCheckoutOptions = {
 
 export async function initiateRazorpayCheckout({
   items,
-  description = "V Design Luxury order",
+  description = "V Design order",
+  prefill,
+  extraNotes,
   onSuccess,
   onDismiss,
   onError,
@@ -59,18 +70,30 @@ export async function initiateRazorpayCheckout({
     key: order.keyId,
     amount: order.amount,
     currency: order.currency,
-    name: "V Design Luxury",
+    name: "V Design",
     description: `${description}\n${invoiceSummary}`,
     order_id: order.orderId,
     theme: { color: "#0088A9" },
     notes: {
       invoice: invoiceSummary,
+      ...extraNotes,
     },
+    ...(prefill
+      ? {
+          prefill: {
+            name: prefill.name,
+            email: prefill.email,
+            contact: normalizePhoneForRazorpay(prefill.contact),
+          },
+        }
+      : {}),
     handler(response: RazorpayHandlerResponse) {
-      window.alert(
-        `Payment successful!\n\n${invoiceSummary}\n\nPayment ID: ${response.razorpay_payment_id}`,
-      );
-      onSuccess?.(response);
+      try {
+        onSuccess?.(response);
+      } catch (error) {
+        console.error("Error in Razorpay success handler:", error);
+        window.location.href = "/checkout/success";
+      }
     },
     modal: {
       ondismiss() {

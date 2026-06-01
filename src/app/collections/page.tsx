@@ -76,7 +76,7 @@ export default async function CollectionsIndexPage() {
 
   return (
     <div className="bg-surface">
-      <header className="px-6 pb-16 pt-32">
+      <header className="px-6 pb-16 pt-10 lg:pt-16">
         <div className="mx-auto max-w-7xl">
           <p className="mb-4 text-sm uppercase tracking-[0.2em] text-[#D4AF37]">
             The Atelier Archive
@@ -92,7 +92,7 @@ export default async function CollectionsIndexPage() {
         </div>
       </header>
 
-      <section className="min-h-screen px-6 pb-24 pt-4">
+      <section className="px-6 pb-24 pt-10 lg:pt-16">
         <div className="mx-auto max-w-7xl">
           {items.length > 0 ? (
             <ul className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">

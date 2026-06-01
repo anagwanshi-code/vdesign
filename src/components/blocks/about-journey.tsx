@@ -2,7 +2,10 @@
 
 import { SectionDivider } from "@/components/blocks/section-divider";
 import { cn } from "@/lib/utils/cn";
-import type { AboutJourneyTimelineItem } from "@/types/about";
+import type {
+  AboutJourneyStatItem,
+  AboutJourneyTimelineItem,
+} from "@/types/about";
 import {
   Award,
   Flag,
@@ -14,15 +17,11 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-type JourneyMilestone = {
-  year: string;
-  text: string;
+const TIMELINE_ICON_CYCLE: {
   icon: LucideIcon;
   iconBg: string;
   iconColor: string;
-};
-
-const ICON_CYCLE: Pick<JourneyMilestone, "icon" | "iconBg" | "iconColor">[] = [
+}[] = [
   { icon: Flag, iconBg: "bg-rose-50", iconColor: "text-royal-magenta" },
   { icon: Star, iconBg: "bg-amber-50", iconColor: "text-saffron-gold" },
   { icon: Trophy, iconBg: "bg-sky-50", iconColor: "text-peacock-blue" },
@@ -31,104 +30,44 @@ const ICON_CYCLE: Pick<JourneyMilestone, "icon" | "iconBg" | "iconColor">[] = [
   { icon: Award, iconBg: "bg-orange-50", iconColor: "text-saffron-gold" },
 ];
 
-const DEFAULT_MILESTONES: JourneyMilestone[] = [
-  {
-    year: "2007",
-    text: "V Design founded with a vision for premium print and branding.",
-    ...ICON_CYCLE[0],
-  },
-  {
-    year: "2010",
-    text: "Expanded into luxury packaging for retail and hospitality brands.",
-    ...ICON_CYCLE[1],
-  },
-  {
-    year: "2014",
-    text: "Recognized regionally for craftsmanship and consistent delivery.",
-    ...ICON_CYCLE[2],
-  },
-  {
-    year: "2018",
-    text: "Built a multidisciplinary team across design, print, and digital.",
-    ...ICON_CYCLE[3],
-  },
-  {
-    year: "2021",
-    text: "Launched integrated brand systems for national and global clients.",
-    ...ICON_CYCLE[4],
-  },
-  {
-    year: "2024+",
-    text: "Scaling innovation in sustainable luxury and experiential retail.",
-    ...ICON_CYCLE[5],
-  },
-];
-
-const DEFAULT_JOURNEY_TITLE = "A Journey of Passion & Creativity";
-
-type StatItem = {
-  value: string;
-  label: string;
+const STAT_ICON_CYCLE: {
   icon: LucideIcon;
   iconBg: string;
   iconColor: string;
-};
-
-const STATS: StatItem[] = [
-  {
-    value: "5000+",
-    label: "Projects",
-    icon: Trophy,
-    iconBg: "bg-rose-100",
-    iconColor: "text-royal-magenta",
-  },
-  {
-    value: "18+",
-    label: "Years",
-    icon: Star,
-    iconBg: "bg-amber-100",
-    iconColor: "text-saffron-gold",
-  },
-  {
-    value: "100+",
-    label: "Partners",
-    icon: Handshake,
-    iconBg: "bg-sky-100",
-    iconColor: "text-peacock-blue",
-  },
-  {
-    value: "25+",
-    label: "Awards",
-    icon: Award,
-    iconBg: "bg-purple-100",
-    iconColor: "text-royal-magenta",
-  },
+}[] = [
+  { icon: Trophy, iconBg: "bg-rose-100", iconColor: "text-royal-magenta" },
+  { icon: Star, iconBg: "bg-amber-100", iconColor: "text-saffron-gold" },
+  { icon: Handshake, iconBg: "bg-sky-100", iconColor: "text-peacock-blue" },
+  { icon: Award, iconBg: "bg-purple-100", iconColor: "text-royal-magenta" },
 ];
 
-function buildMilestones(
-  timeline?: AboutJourneyTimelineItem[],
-): JourneyMilestone[] {
-  const items = timeline?.filter((item) => item.year || item.description);
-  if (!items?.length) return DEFAULT_MILESTONES;
-
-  return items.map((item, index) => {
-    const style = ICON_CYCLE[index % ICON_CYCLE.length];
-    return {
-      year: item.year?.trim() || "",
-      text: item.description?.trim() || "",
-      ...style,
-    };
-  });
-}
-
 type AboutJourneyProps = {
-  title?: string;
-  timeline?: AboutJourneyTimelineItem[];
+  title: string;
+  timeline: AboutJourneyTimelineItem[];
+  journeyStats: AboutJourneyStatItem[];
 };
 
-export function AboutJourney({ title, timeline }: AboutJourneyProps) {
-  const milestones = buildMilestones(timeline);
-  const sectionTitle = title?.trim() || DEFAULT_JOURNEY_TITLE;
+export function AboutJourney({
+  title,
+  timeline,
+  journeyStats,
+}: AboutJourneyProps) {
+  const milestones = timeline
+    .map((item, index) => ({
+      year: item.year?.trim() || "",
+      text: item.description?.trim() || "",
+      index,
+    }))
+    .filter((item) => item.year || item.text);
+
+  const stats = journeyStats
+    .slice(0, 4)
+    .map((item, index) => ({
+      value: item.value?.trim() || "",
+      label: item.label?.trim() || "",
+      index,
+    }))
+    .filter((item) => item.value || item.label);
 
   return (
     <section
@@ -143,74 +82,96 @@ export function AboutJourney({ title, timeline }: AboutJourneyProps) {
           id="about-journey-heading"
           className="font-serif text-4xl text-luxury-text md:text-5xl"
         >
-          {sectionTitle}
+          {title}
         </h2>
         <SectionDivider />
       </header>
 
-      <div className="relative mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-8 px-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-        {milestones.map((item) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={`${item.year}-${item.text}`}
-              className="flex flex-col items-center text-center"
-            >
-              <div
-                className={cn(
-                  "flex h-14 w-14 items-center justify-center rounded-full",
-                  item.iconBg,
-                )}
-              >
-                <Icon
-                  className={cn("h-6 w-6", item.iconColor)}
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-              </div>
-              <p className="mb-4 mt-6 text-2xl font-bold text-royal-magenta">
-                {item.year}
-              </p>
-              <p className="px-4 text-sm leading-relaxed text-gray-600 md:text-base">
-                {item.text}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+      {milestones.length > 0 ? (
+        <div className="mx-auto mt-16 grid max-w-7xl grid-cols-1 gap-6 px-6 md:grid-cols-2 lg:grid-cols-4">
+          {milestones.map((item) => {
+            const style =
+              TIMELINE_ICON_CYCLE[item.index % TIMELINE_ICON_CYCLE.length];
+            const Icon = style.icon;
 
-      <div className="mx-auto mt-24 grid max-w-6xl grid-cols-2 gap-8 divide-x divide-zinc-100 rounded-3xl border border-zinc-100 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] md:grid-cols-4">
-        {STATS.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="flex items-center gap-4 px-2 md:px-4"
-            >
-              <div
-                className={cn(
-                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-full",
-                  stat.iconBg,
-                )}
+            return (
+              <article
+                key={`${item.year}-${item.text}-${item.index}`}
+                className="flex flex-col items-center rounded-2xl border border-zinc-100 bg-white p-8 text-center shadow-sm transition-shadow hover:shadow-md"
               >
-                <Icon
-                  className={cn("h-5 w-5", stat.iconColor)}
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
+                <div
+                  className={cn(
+                    "mb-6 flex h-14 w-14 items-center justify-center rounded-full",
+                    style.iconBg,
+                  )}
+                >
+                  <Icon
+                    className={cn("h-6 w-6", style.iconColor)}
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
+                </div>
+                {item.year ? (
+                  <p className="mb-4 text-3xl font-bold text-royal-magenta">
+                    {item.year}
+                  </p>
+                ) : null}
+                {item.text ? (
+                  <p className="text-sm leading-relaxed text-luxury-muted md:text-base">
+                    {item.text}
+                  </p>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="mx-auto mt-12 max-w-lg px-6 text-center text-luxury-muted">
+          Add timeline events in About Page Content (Sanity Studio) to showcase
+          your journey here.
+        </p>
+      )}
+
+      {stats.length > 0 ? (
+        <div className="mx-auto mt-24 grid max-w-6xl grid-cols-2 gap-8 rounded-3xl border border-zinc-100 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] md:grid-cols-4">
+          {stats.map((item) => {
+            const style = STAT_ICON_CYCLE[item.index % STAT_ICON_CYCLE.length];
+            const Icon = style.icon;
+
+            return (
+              <div
+                key={`${item.value}-${item.label}-${item.index}`}
+                className="flex items-center gap-4"
+              >
+                <div
+                  className={cn(
+                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-full",
+                    style.iconBg,
+                  )}
+                >
+                  <Icon
+                    className={cn("h-5 w-5", style.iconColor)}
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
+                </div>
+                <div className="min-w-0 text-left">
+                  {item.value ? (
+                    <p className="font-serif text-2xl font-bold text-luxury-text md:text-3xl">
+                      {item.value}
+                    </p>
+                  ) : null}
+                  {item.label ? (
+                    <p className="text-sm uppercase tracking-wider text-luxury-muted">
+                      {item.label}
+                    </p>
+                  ) : null}
+                </div>
               </div>
-              <div className="text-left">
-                <p className="font-serif text-2xl font-bold text-luxury-text md:text-3xl">
-                  {stat.value}
-                </p>
-                <p className="text-sm uppercase tracking-wider text-luxury-muted">
-                  {stat.label}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -12,6 +12,11 @@ export type HeroMedia = {
   height: number;
 };
 
+export type HomeStatItem = {
+  value: string;
+  label: string;
+};
+
 export type HeroEditorialParams = {
   eyebrow: string;
   title: string;
@@ -22,6 +27,8 @@ export type HeroEditorialParams = {
   media: HeroMedia;
   /** Full-screen hero slider frames from Sanity. */
   heroImages: HeroMedia[];
+  /** Resolved CDN URLs from Sanity (when provided alongside heroImages). */
+  heroImageUrls?: string[];
 };
 
 export type ServiceAccent = "peacock" | "saffron" | "purple" | "gold";
@@ -92,6 +99,9 @@ export type AboutStudioContent = {
 
 export type HomePageData = {
   hero: HeroEditorialParams;
+  brandLogosTitle: string;
+  brandLogoUrls: string[];
+  homeStats: HomeStatItem[];
   services: ServiceStory[];
   featuredCollections: CollectionCard[];
   featuredProducts: ProductShowcaseItem[];

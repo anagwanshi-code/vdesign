@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { SANITY_IMAGE_GRID_CARD } from "../lib/image-field-descriptions";
+
 export const category = defineType({
   name: "category",
   title: "Product Category",
@@ -21,6 +23,14 @@ export const category = defineType({
       name: "description",
       title: "Description",
       type: "text",
+      rows: 3,
+    }),
+    defineField({
+      name: "coverImage",
+      title: "Cover Image",
+      type: "image",
+      options: { hotspot: true },
+      description: SANITY_IMAGE_GRID_CARD,
     }),
   ],
 });

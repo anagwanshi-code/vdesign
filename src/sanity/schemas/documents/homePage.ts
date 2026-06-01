@@ -13,6 +13,43 @@ export const homePage = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "brandLogosTitle",
+      title: "Brands Section Title",
+      type: "string",
+      initialValue: "TRUSTED BY GROWING BRANDS",
+    }),
+    defineField({
+      name: "brandLogos",
+      title: "Client Brand Logos",
+      type: "array",
+      of: [{ type: "image", options: { hotspot: true } }],
+      description:
+        "Upload logos of clients/companies. Transparent PNGs with a consistent color (like solid black, white, or dark grey) work best for marquees.",
+    }),
+    defineField({
+      name: "homeStats",
+      title: "Homepage Stats (e.g., 18+ Years)",
+      type: "array",
+      validation: (Rule) => Rule.max(4),
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({
+              name: "value",
+              type: "string",
+              title: "Stat Value (e.g. 5000+)",
+            }),
+            defineField({
+              name: "label",
+              type: "string",
+              title: "Stat Label (e.g. Projects Delivered)",
+            }),
+          ],
+        },
+      ],
+    }),
+    defineField({
       name: "featuredCollections",
       title: "Featured Collections",
       type: "array",

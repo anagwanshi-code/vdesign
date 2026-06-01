@@ -2,70 +2,52 @@
 
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/hooks/use-cart";
-import { initiateRazorpayCheckout } from "@/lib/checkout/initiate-checkout";
 import { calculateOrderTotals, labelOrderTotals } from "@/lib/checkout/totals";
 import { formatInr } from "@/lib/product/variants";
-import type { RazorpayHandlerResponse } from "@/types/razorpay";
 import { AnimatePresence, motion } from "framer-motion";
 import { ShoppingBag, Trash2, X } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-const CINEMATIC_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
+const drawerSpring = { type: "spring" as const, damping: 25, stiffness: 200 };
 
-const panelVariants = {
-  closed: { x: "100%" },
-  open: {
-    x: 0,
-    transition: { duration: 0.45, ease: CINEMATIC_EASE },
+const cartListVariants = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
   },
 };
 
-const overlayVariants = {
-  closed: { opacity: 0 },
-  open: {
-    opacity: 1,
-    transition: { duration: 0.35, ease: CINEMATIC_EASE },
-  },
+const cartItemVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
 };
 
 export function CartDrawer() {
+  const router = useRouter();
   const {
     isOpen,
     cartItems,
     closeCart,
-    clearCart,
     removeItem,
-    subtotalLabel,
     subtotalInInr,
     totalQuantity,
     meetsMoqForCheckout,
     moqMessage,
   } = useCart();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const estimatedTotals = labelOrderTotals(
     calculateOrderTotals(subtotalInInr),
   );
 
-  const resetCheckoutState = useCallback(() => {
-    setIsCheckingOut(false);
-  }, []);
-
-  const handlePaymentSuccess = useCallback(
-    (_response: RazorpayHandlerResponse) => {
-      clearCart();
-      closeCart();
-      resetCheckoutState();
-      setCheckoutError(null);
-    },
-    [clearCart, closeCart, resetCheckoutState],
-  );
-
-  const handleModalDismiss = useCallback(() => {
-    resetCheckoutState();
-  }, [resetCheckoutState]);
+  const handleGoToCheckout = () => {
+    if (cartItems.length === 0 || !meetsMoqForCheckout) return;
+    closeCart();
+    router.push("/checkout");
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -83,48 +65,6 @@ export function CartDrawer() {
     };
   }, [isOpen, closeCart]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setCheckoutError(null);
-      resetCheckoutState();
-    }
-  }, [isOpen, resetCheckoutState]);
-
-  const handleCheckout = async () => {
-    if (cartItems.length === 0 || isCheckingOut || !meetsMoqForCheckout) return;
-
-    setIsCheckingOut(true);
-    setCheckoutError(null);
-
-    try {
-      await initiateRazorpayCheckout({
-        items: cartItems.map((item) => ({
-          productId: item.productId,
-          title: item.title,
-          quantity: item.quantity,
-          priceInInr: item.priceInInr,
-          sku: item.sku,
-          saleType: item.saleType,
-          minOrderQuantity: item.minOrderQuantity,
-          logoFileName: item.logoFileName,
-          uploadInstructions: item.uploadInstructions,
-        })),
-        description: "V Design Luxury · Bag checkout",
-        onSuccess: handlePaymentSuccess,
-        onDismiss: handleModalDismiss,
-        onError: (message) => setCheckoutError(message),
-      });
-    } catch (error) {
-      setCheckoutError(
-        error instanceof Error
-          ? error.message
-          : "Checkout unavailable. Please try again.",
-      );
-    } finally {
-      setIsCheckingOut(false);
-    }
-  };
-
   return (
     <AnimatePresence mode="wait">
       {isOpen ? (
@@ -133,10 +73,10 @@ export function CartDrawer() {
             type="button"
             aria-label="Close cart overlay"
             className="fixed inset-0 z-[60] bg-text-primary/10 backdrop-blur-[2px]"
-            variants={overlayVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             onClick={closeCart}
           />
 
@@ -145,10 +85,10 @@ export function CartDrawer() {
             aria-modal="true"
             aria-label="Shopping cart"
             className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-md flex-col border-l border-border bg-surface shadow-lift"
-            variants={panelVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={drawerSpring}
           >
             <header className="flex items-center justify-between border-b border-border px-6 py-5">
               <div className="flex items-center gap-3">
@@ -192,10 +132,16 @@ export function CartDrawer() {
                   </p>
                 </div>
               ) : (
-                <ul className="flex flex-col gap-6">
+                <motion.ul
+                  className="flex flex-col gap-6"
+                  variants={cartListVariants}
+                  initial="initial"
+                  animate="animate"
+                >
                   {cartItems.map((item) => (
-                    <li
+                    <motion.li
                       key={item.id}
+                      variants={cartItemVariants}
                       className="flex gap-4 border-b border-border pb-6 last:border-b-0 last:pb-0"
                     >
                       <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-md border border-border bg-border">
@@ -264,9 +210,9 @@ export function CartDrawer() {
                           </p>
                         </div>
                       </div>
-                    </li>
+                    </motion.li>
                   ))}
-                </ul>
+                </motion.ul>
               )}
             </div>
 
@@ -302,22 +248,13 @@ export function CartDrawer() {
                   {moqMessage}
                 </p>
               ) : null}
-              {checkoutError ? (
-                <p className="mb-4 text-center text-caption text-magenta">
-                  {checkoutError}
-                </p>
-              ) : null}
               <Button
                 variant="accent"
                 className="w-full"
-                disabled={
-                  cartItems.length === 0 ||
-                  isCheckingOut ||
-                  !meetsMoqForCheckout
-                }
-                onClick={handleCheckout}
+                disabled={cartItems.length === 0 || !meetsMoqForCheckout}
+                onClick={handleGoToCheckout}
               >
-                {isCheckingOut ? "Preparing Checkout…" : "Continue to Checkout"}
+                Continue to Checkout
               </Button>
               <p className="mt-3 text-center text-caption text-text-muted">
                 Secure UPI · Cards · Netbanking via Razorpay

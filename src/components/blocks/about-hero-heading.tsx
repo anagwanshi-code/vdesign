@@ -2,34 +2,14 @@ const HIGHLIGHT_CLASS =
   "font-dancing bg-gradient-to-r from-saffron-gold to-orange-500 bg-clip-text text-transparent";
 
 type AboutHeroHeadingProps = {
-  title?: string;
-  highlight?: string;
-  defaultTitle?: string;
-  defaultLine?: string;
-  defaultHighlight?: string;
+  title: string;
+  highlight: string;
 };
 
-export function AboutHeroHeading({
-  title,
-  highlight,
-  defaultTitle = "Crafting Brands.",
-  defaultLine = "Creating",
-  defaultHighlight = "Impact.",
-}: AboutHeroHeadingProps) {
-  const highlightWord = highlight?.trim() || defaultHighlight;
+export function AboutHeroHeading({ title, highlight }: AboutHeroHeadingProps) {
   const highlightSpan = (
-    <span className={HIGHLIGHT_CLASS}>{highlightWord}</span>
+    <span className={HIGHLIGHT_CLASS}>{highlight}</span>
   );
-
-  if (!title?.trim()) {
-    return (
-      <>
-        {defaultTitle}
-        <br />
-        {defaultLine} {highlightSpan}
-      </>
-    );
-  }
 
   const cmsTitle = title.trim();
   const newlineLines = cmsTitle.split("\n").map((l) => l.trim()).filter(Boolean);

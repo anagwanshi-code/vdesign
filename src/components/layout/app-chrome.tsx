@@ -25,9 +25,11 @@ export function AppChrome({ children, footer }: AppChromeProps) {
       <SmoothScroll>
         {/* Inside Lenis so scroll-driven header state matches smooth-scroll position */}
         <Header />
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-1 flex-col pt-0">
           <CartDrawer />
-          <main className="relative z-0 flex flex-col">{children}</main>
+          <main className="relative z-0 flex flex-1 flex-col pt-0">
+            {children}
+          </main>
           {footer}
         </div>
       </SmoothScroll>

@@ -92,7 +92,7 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
 
               return (
                 <li key={service.id}>
-                  <article className="group overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-500 hover:-translate-y-2 hover:shadow-xl">
+                  <article className="group overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
                     <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-zinc-100">
                       {service.imageUrl ? (
                         <Image

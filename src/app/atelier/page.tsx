@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AtelierPage() {
   return (
-    <section className="mx-auto w-full max-w-content px-5 pb-24 pt-28 md:px-8 lg:px-20 lg:pb-32 lg:pt-36">
+    <section className="mx-auto w-full max-w-content px-5 pb-24 pt-10 md:px-8 lg:px-20 lg:pb-32 lg:pt-16">
       <p className="text-overline uppercase text-saffron">Studio</p>
       <h1 className="mt-4 font-serif text-display-lg text-text-primary">
         The atelier
