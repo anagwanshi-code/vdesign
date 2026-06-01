@@ -21,6 +21,7 @@ const HIDDEN_DOCUMENT_TYPES = new Set([
   "post",
   "founder",
   "downloadResource",
+  "order",
 ]);
 
 function singletonDocument(
@@ -126,6 +127,7 @@ export const structure: StructureResolver = (S) =>
               documentTypeListItem(S, "collection", "Collection"),
               documentTypeListItem(S, "productSize", "Product Size"),
               documentTypeListItem(S, "productFrame", "Framing Option"),
+              documentTypeListItem(S, "order", "Orders"),
             ]),
         ),
 

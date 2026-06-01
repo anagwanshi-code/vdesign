@@ -1,5 +1,5 @@
+import { createMailTransporter } from "@/lib/email/transporter";
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 
 export async function POST(request: Request) {
   try {
@@ -33,13 +33,14 @@ export async function POST(request: Request) {
       });
     }
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
+    const transporter = createMailTransporter();
+
+    if (!transporter || !process.env.GMAIL_USER) {
+      return NextResponse.json(
+        { error: "Email service is not configured" },
+        { status: 503 },
+      );
+    }
 
     const htmlContent = `
       <h2>New Consultation Request</h2>

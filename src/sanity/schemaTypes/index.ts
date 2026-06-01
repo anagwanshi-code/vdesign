@@ -10,6 +10,7 @@ import { industry } from "./industry";
 import { portfolio } from "./portfolio";
 import { post } from "./post";
 import { industriesPage } from "./industriesPage";
+import { order } from "./order";
 import { portfolioPage } from "./portfolioPage";
 import { resourcesPage } from "./resourcesPage";
 import { service } from "./service";
@@ -33,5 +34,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     portfolioPage,
     industriesPage,
     shopPage,
+    order,
   ],
 };

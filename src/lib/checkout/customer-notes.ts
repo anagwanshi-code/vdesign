@@ -8,10 +8,10 @@ export function normalizePhoneForRazorpay(phone: string): string {
   return digits;
 }
 
-export function customerDetailsToRazorpayNotes(
+export function formatShippingAddress(
   customer: CheckoutCustomerDetails,
-): Record<string, string> {
-  const address = [
+): string {
+  return [
     customer.street.trim(),
     customer.city.trim(),
     customer.state.trim(),
@@ -19,6 +19,12 @@ export function customerDetailsToRazorpayNotes(
   ]
     .filter(Boolean)
     .join(", ");
+}
+
+export function customerDetailsToRazorpayNotes(
+  customer: CheckoutCustomerDetails,
+): Record<string, string> {
+  const address = formatShippingAddress(customer);
 
   return {
     customerName: customer.fullName.trim(),

@@ -22,7 +22,9 @@ type InitiateCheckoutOptions = {
   description?: string;
   prefill?: RazorpayCheckoutPrefill;
   extraNotes?: Record<string, string>;
-  onSuccess?: (response: RazorpayHandlerResponse) => void;
+  onSuccess?: (
+    response: RazorpayHandlerResponse,
+  ) => void | Promise<void>;
   onDismiss?: () => void;
   onError?: (message: string) => void;
 };
@@ -88,12 +90,10 @@ export async function initiateRazorpayCheckout({
         }
       : {}),
     handler(response: RazorpayHandlerResponse) {
-      try {
-        onSuccess?.(response);
-      } catch (error) {
+      Promise.resolve(onSuccess?.(response)).catch((error) => {
         console.error("Error in Razorpay success handler:", error);
-        window.location.href = "/checkout/success";
-      }
+        onError?.("Payment processing failed after checkout.");
+      });
     },
     modal: {
       ondismiss() {
