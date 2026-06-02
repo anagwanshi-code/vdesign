@@ -1,4 +1,5 @@
 import { formatProductPriceWithMoq } from "@/lib/commerce/pricing";
+import { resolveProductMoq } from "@/lib/commerce/product-pricing";
 import { normalizeMoq } from "@/lib/commerce/moq";
 import { normalizeSaleType } from "@/lib/commerce/sale-type";
 import { buildFinishingTags } from "@/lib/product/finishing-tags";
@@ -17,7 +18,7 @@ import type {
   ProductShowcaseItem,
 } from "@/types/home";
 import type { HeroMedia } from "@/types/home";
-import type { ProductDetail } from "@/types/product";
+import type { ProductDetail, PremiumAddonOption, VolumeDiscountTier } from "@/types/product";
 import type {
   SanityAboutStudio,
   SanityCollectionSummary,
@@ -273,12 +274,64 @@ function resolveProductHoverImage(
   return mapSanityImageToHeroMedia(galleryImage, fallbackImage);
 }
 
+function mapVolumeDiscounts(product: SanityProduct): VolumeDiscountTier[] {
+  return (product.volumeDiscounts ?? [])
+    .map((tier) => ({
+      minQuantity: tier?.minQuantity,
+      discountPercentage: tier?.discountPercentage,
+    }))
+    .filter(
+      (
+        tier,
+      ): tier is { minQuantity: number; discountPercentage: number } =>
+        Number.isFinite(tier.minQuantity) &&
+        Number.isFinite(tier.discountPercentage) &&
+        tier.minQuantity! >= 2 &&
+        tier.discountPercentage! >= 0 &&
+        tier.discountPercentage! <= 100,
+    )
+    .map((tier) => ({
+      minQuantity: Math.floor(tier.minQuantity),
+      discountPercentage: tier.discountPercentage,
+    }))
+    .sort((a, b) => a.minQuantity - b.minQuantity);
+}
+
+function mapPremiumAddons(product: SanityProduct): PremiumAddonOption[] {
+  return (product.premiumAddons ?? [])
+    .map((addon) => ({
+      addonName: addon?.addonName?.trim() ?? "",
+      extraPrice: addon?.extraPrice,
+    }))
+    .filter(
+      (addon): addon is PremiumAddonOption =>
+        Boolean(addon.addonName) &&
+        Number.isFinite(addon.extraPrice) &&
+        addon.extraPrice! >= 0,
+    )
+    .map((addon) => ({
+      addonName: addon.addonName,
+      extraPrice: addon.extraPrice,
+    }));
+}
+
+function resolveProductMrp(product: SanityProduct): number | undefined {
+  const value = product.mrp ?? product.compareAtPrice;
+
+  if (typeof value === "number" && value > 0) {
+    return value;
+  }
+
+  return undefined;
+}
+
 export function mapSanityProductToDetail(
   product: SanityProduct,
   fallbackImage: HeroMedia,
 ): ProductDetail {
   const startingPrice = resolveProductStartingPrice(product);
   const media = resolveProductDetailMedia(product, fallbackImage);
+  const moq = resolveProductMoq(product.moq, product.minOrderQuantity);
 
   return {
     id: product._id,
@@ -287,9 +340,14 @@ export function mapSanityProductToDetail(
     subtitle: product.subtitle ?? undefined,
     description: product.description ?? undefined,
     priceInInr: startingPrice,
+    mrp: resolveProductMrp(product),
     saleType: normalizeSaleType(product.saleType),
-    minOrderQuantity: normalizeMoq(product.minOrderQuantity),
+    moq,
+    minOrderQuantity: moq,
+    allowCustomUpload: Boolean(product.allowCustomUpload),
     logoUploadRequired: Boolean(product.logoUploadRequired),
+    volumeDiscounts: mapVolumeDiscounts(product),
+    premiumAddons: mapPremiumAddons(product),
     image: media.image,
     images: media.images,
     gallery: media.gallery,
@@ -314,7 +372,7 @@ export function mapSanityProductToShowcaseItem(
   fallbackImage: HeroMedia,
 ): ProductShowcaseItem {
   const startingPrice = resolveProductStartingPrice(product);
-  const minOrderQuantity = normalizeMoq(product.minOrderQuantity);
+  const minOrderQuantity = resolveProductMoq(product.moq, product.minOrderQuantity);
   const saleType = normalizeSaleType(product.saleType);
   const hoverImage = resolveProductHoverImage(product, fallbackImage);
 

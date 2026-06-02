@@ -8,6 +8,7 @@ const PAYMENT_STATUS_OPTIONS = [
 
 const ORDER_STATUS_OPTIONS = [
   { title: "Paid", value: "Paid" },
+  { title: "Processing", value: "Processing" },
   { title: "Dispatched", value: "Dispatched" },
   { title: "Delivered", value: "Delivered" },
 ] as const;

@@ -45,7 +45,7 @@ function getSiteUrl(): string {
       : `https://${vercel}`;
   }
 
-  return "https://vdesignluxury.com";
+  return "https://vdesign-surat.vercel.app";
 }
 
 /**

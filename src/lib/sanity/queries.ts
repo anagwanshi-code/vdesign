@@ -20,6 +20,17 @@ const PRODUCT_CATALOG_FIELDS = groq`
     0
   ),
   compareAtPrice,
+  "mrp": coalesce(mrp, compareAtPrice),
+  "moq": coalesce(moq, minOrderQuantity, minimumOrderQuantity, 1),
+  allowCustomUpload,
+  volumeDiscounts[] {
+    minQuantity,
+    discountPercentage
+  },
+  premiumAddons[] {
+    addonName,
+    extraPrice
+  },
   subtitle,
   description,
   featured,
@@ -29,7 +40,7 @@ const PRODUCT_CATALOG_FIELDS = groq`
   isCustomizable,
   status,
   saleType,
-  "minOrderQuantity": coalesce(minOrderQuantity, minimumOrderQuantity, 100),
+  "minOrderQuantity": coalesce(moq, minOrderQuantity, minimumOrderQuantity, 1),
   logoUploadRequired,
   paperType,
   printMethod,
@@ -522,7 +533,9 @@ export const SITE_SETTINGS_QUERY = groq`
   },
   contactEmail,
   copyrightText,
-  announcements
+  announcements,
+  isShippingComplimentary,
+  flatShippingRate
 }
 `;
 

@@ -1,11 +1,21 @@
 import type { AdminOrder } from "@/types/admin-order";
 
 export function isPendingDispatchOrder(order: AdminOrder): boolean {
-  if (order.orderStatus === "Paid") {
+  const status = order.orderStatus?.trim();
+
+  if (status === "Paid" || status === "Processing") {
     return true;
   }
 
-  return !order.orderStatus && order.paymentStatus === "Paid";
+  return !status && order.paymentStatus === "Paid";
+}
+
+export function getPendingDispatchLabel(order: AdminOrder): string {
+  const status = order.orderStatus?.trim();
+  if (status === "Processing") {
+    return "Processing";
+  }
+  return "Paid";
 }
 
 export function isDispatchedOrder(order: AdminOrder): boolean {

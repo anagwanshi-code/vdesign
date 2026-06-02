@@ -7,6 +7,43 @@ type ProductSpecificationsProps = {
   specifications: ProductSpecifications | null | undefined;
 };
 
+type SpecRow = {
+  label: string;
+  value: string;
+};
+
+function buildSpecRows(specifications: ProductSpecifications): SpecRow[] {
+  const rows: SpecRow[] = [];
+
+  if (specifications.paperType) {
+    rows.push({ label: "Paper Stock", value: specifications.paperType });
+  }
+
+  if (specifications.printMethod) {
+    rows.push({ label: "Print Method", value: specifications.printMethod });
+  }
+
+  if (specifications.machineType) {
+    rows.push({ label: "Machine", value: specifications.machineType });
+  }
+
+  if (
+    specifications.laminationType &&
+    specifications.laminationType !== "None"
+  ) {
+    rows.push({ label: "Lamination", value: specifications.laminationType });
+  }
+
+  if (specifications.techFinishingOptions?.length) {
+    rows.push({
+      label: "Finishing",
+      value: specifications.techFinishingOptions.join(" · "),
+    });
+  }
+
+  return rows;
+}
+
 export function ProductSpecifications({
   specifications,
 }: ProductSpecificationsProps) {
@@ -14,63 +51,39 @@ export function ProductSpecifications({
     return null;
   }
 
+  const rows = buildSpecRows(specifications);
+
   return (
-    <section className="flex flex-col gap-6" aria-labelledby="product-specs-heading">
-      <h2
-        id="product-specs-heading"
-        className="font-serif text-2xl text-text-primary"
-      >
-        Technical Specifications
-      </h2>
-      <dl className="grid grid-cols-1 gap-x-8 gap-y-4 font-sans text-sm md:grid-cols-2">
-        {specifications.paperType ? (
-          <div className="flex flex-col border-b border-border/30 pb-2">
-            <dt className="mb-1 text-xs uppercase tracking-wider text-text-muted">
-              Paper Stock
-            </dt>
-            <dd className="text-text-primary">{specifications.paperType}</dd>
-          </div>
-        ) : null}
+    <section
+      className="rounded-2xl border border-slate-100 bg-slate-50 p-6 md:p-8"
+      aria-labelledby="product-specs-heading"
+    >
+      <div className="mb-6 flex flex-col gap-2">
+        <p className="font-sans text-xs uppercase tracking-wider text-gray-500">
+          Atelier details
+        </p>
+        <h2
+          id="product-specs-heading"
+          className="font-serif text-2xl font-medium text-gray-950 md:text-3xl"
+        >
+          Technical Specifications
+        </h2>
+      </div>
 
-        {specifications.printMethod ? (
-          <div className="flex flex-col border-b border-border/30 pb-2">
-            <dt className="mb-1 text-xs uppercase tracking-wider text-text-muted">
-              Print Method
+      <dl className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-slate-200/80 bg-slate-200/80 md:grid-cols-2">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="flex flex-col gap-1.5 bg-slate-50 px-5 py-4"
+          >
+            <dt className="font-sans text-xs uppercase tracking-wider text-gray-500">
+              {row.label}
             </dt>
-            <dd className="text-text-primary">{specifications.printMethod}</dd>
-          </div>
-        ) : null}
-
-        {specifications.machineType ? (
-          <div className="flex flex-col border-b border-border/30 pb-2">
-            <dt className="mb-1 text-xs uppercase tracking-wider text-text-muted">
-              Machine
-            </dt>
-            <dd className="text-text-primary">{specifications.machineType}</dd>
-          </div>
-        ) : null}
-
-        {specifications.laminationType &&
-        specifications.laminationType !== "None" ? (
-          <div className="flex flex-col border-b border-border/30 pb-2">
-            <dt className="mb-1 text-xs uppercase tracking-wider text-text-muted">
-              Lamination
-            </dt>
-            <dd className="text-text-primary">{specifications.laminationType}</dd>
-          </div>
-        ) : null}
-
-        {specifications.techFinishingOptions &&
-        specifications.techFinishingOptions.length > 0 ? (
-          <div className="flex flex-col border-b border-border/30 pb-2 md:col-span-2">
-            <dt className="mb-1 text-xs uppercase tracking-wider text-text-muted">
-              Finishing
-            </dt>
-            <dd className="text-text-primary">
-              {specifications.techFinishingOptions.join(" · ")}
+            <dd className="font-sans text-sm font-semibold text-gray-900">
+              {row.value}
             </dd>
           </div>
-        ) : null}
+        ))}
       </dl>
     </section>
   );

@@ -7,6 +7,8 @@ import { cta } from './objects/cta';
 import { heroBlock } from './objects/heroBlock';
 import { productGalleryImage } from './objects/productGalleryImage';
 import { productVariant } from './objects/productVariant';
+import { volumeDiscount } from './objects/volumeDiscount';
+import { premiumAddon } from './objects/premiumAddon';
 import { SchemaTypeDefinition } from 'sanity';
 
 export const schemaTypes: SchemaTypeDefinition[] = [
@@ -19,4 +21,6 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   cta,
   productGalleryImage,
   productVariant,
+  volumeDiscount,
+  premiumAddon,
 ];

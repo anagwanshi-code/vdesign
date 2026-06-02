@@ -17,6 +17,16 @@ export type ProductDetailVariant = {
   inStock: boolean;
 };
 
+export type VolumeDiscountTier = {
+  minQuantity: number;
+  discountPercentage: number;
+};
+
+export type PremiumAddonOption = {
+  addonName: string;
+  extraPrice: number;
+};
+
 export type ProductDetail = {
   id: string;
   handle: string;
@@ -24,9 +34,16 @@ export type ProductDetail = {
   subtitle?: string;
   description?: string;
   priceInInr: number;
+  /** Compare-at / MRP for strikethrough display. */
+  mrp?: number;
   saleType: ProductSaleType;
+  /** Storefront minimum order quantity from Sanity `moq`. */
+  moq: number;
   minOrderQuantity: number;
+  allowCustomUpload: boolean;
   logoUploadRequired: boolean;
+  volumeDiscounts: VolumeDiscountTier[];
+  premiumAddons: PremiumAddonOption[];
   image: HeroMedia;
   /** All PDP image URLs (primary first), deduplicated. */
   images: string[];

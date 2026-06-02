@@ -4,10 +4,12 @@ import {
   isRazorpayConfigured,
 } from "@/lib/razorpay/config";
 import { buildCheckoutOrderNotes } from "@/lib/checkout/order-notes";
+import { resolveShippingConfig } from "@/lib/checkout/shipping";
 import {
   calculateOrderTotals,
   orderTotalsToPaise,
 } from "@/lib/checkout/totals";
+import { getSiteSettings } from "@/lib/sanity/queries";
 import { isQuantityValidForSaleType } from "@/lib/commerce/moq";
 import { normalizeMoq } from "@/lib/commerce/moq";
 import type {
@@ -83,7 +85,11 @@ export async function POST(req: NextRequest) {
     (sum, item) => sum + item.priceInInr * item.quantity,
     0,
   );
-  const totals = calculateOrderTotals(subtotalInInr);
+  const shippingConfig = resolveShippingConfig(await getSiteSettings());
+  const totals = calculateOrderTotals(subtotalInInr, {
+    isShippingComplimentary: shippingConfig.isShippingComplimentary,
+    flatShippingRate: shippingConfig.flatShippingRate,
+  });
   const amountInPaise = orderTotalsToPaise(totals.grandTotalInInr);
 
   if (amountInPaise < 100) {

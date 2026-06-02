@@ -3,7 +3,7 @@
 import type { ProductCatalogMode } from "@/types/product";
 import { AnimatePresence, motion } from "framer-motion";
 
-const LUXURY_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
+const LUXURY_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 type ProductPriceDisplayProps = {
   price: number;
@@ -34,37 +34,39 @@ export function ProductPriceDisplay({
     compareAtPrice > 0;
 
   return (
-    <div className="mb-8 flex flex-col gap-2">
-      <div className="flex items-end gap-4">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
         <AnimatePresence mode="popLayout">
-          <motion.div
+          <motion.p
             key={price}
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.4, ease: LUXURY_EASE }}
-            className="font-sans text-2xl font-light tabular-nums text-foreground md:text-3xl"
+            className="font-serif text-4xl font-medium tabular-nums tracking-tight text-gray-950 md:text-[2.75rem]"
           >
             ₹{price.toLocaleString("en-IN")}
-          </motion.div>
+          </motion.p>
         </AnimatePresence>
 
         {showCompareAt ? (
-          <span className="mb-1 font-sans text-lg text-muted line-through tabular-nums">
+          <span className="mb-1 font-sans text-xl tabular-nums text-gray-400 line-through">
             ₹{compareAtPrice.toLocaleString("en-IN")}
           </span>
         ) : null}
       </div>
 
       {modeNotice ? (
-        <p className="font-sans text-xs text-muted">{modeNotice}</p>
+        <p className="font-sans text-sm text-gray-600">{modeNotice}</p>
       ) : null}
       {statusMessage ? (
-        <p className="font-sans text-xs text-magenta">{statusMessage}</p>
+        <p className="font-sans text-sm font-medium text-royal-magenta">
+          {statusMessage}
+        </p>
       ) : null}
       {sku ? (
-        <p className="font-sans text-xs uppercase tracking-widest text-muted">
-          SKU {sku}
+        <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500">
+          SKU · {sku}
         </p>
       ) : null}
     </div>

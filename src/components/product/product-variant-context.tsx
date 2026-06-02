@@ -36,7 +36,8 @@ export function ProductVariantProvider({
       ...selection,
       product,
       unitPriceInInr: selection.selected?.priceInInr ?? product.priceInInr,
-      compareAtPriceInInr: selection.selected?.compareAtPriceInInr,
+      compareAtPriceInInr:
+        selection.selected?.compareAtPriceInInr ?? product.mrp,
     }),
     [selection, product],
   );

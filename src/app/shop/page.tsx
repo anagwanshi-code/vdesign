@@ -43,12 +43,28 @@ const DEFAULT_TITLE = "Premium Products, Printed to Perfection.";
 const DEFAULT_DESCRIPTION =
   "Browse our full catalog of luxury packaging, frames, albums, and print essentials—crafted in Surat and shipped across India.";
 
+/** Collapses repeated "Printed to" copy from CMS and normalises to the canonical headline. */
+function sanitizeShopTitle(title: string): string {
+  const collapsed = title
+    .replace(/(Printed to\s+)+/gi, "Printed to ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (/perfection/i.test(collapsed)) {
+    return DEFAULT_TITLE;
+  }
+
+  return collapsed || DEFAULT_TITLE;
+}
+
 function renderShopTitle(title: string) {
-  const match = title.match(/^(.+?)\s+(Perfection\.?)$/i);
+  const normalized = sanitizeShopTitle(title);
+  const match = normalized.match(/^(.+?),\s*Printed to\s+(Perfection\.?)$/i);
+
   if (match) {
     return (
       <>
-        {match[1]}
+        {match[1].trim()},
         <br />
         Printed to{" "}
         <span className="font-dancing bg-gradient-to-r from-royal-magenta to-orange-500 bg-clip-text text-transparent">
@@ -57,7 +73,8 @@ function renderShopTitle(title: string) {
       </>
     );
   }
-  return title;
+
+  return normalized;
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
@@ -79,8 +96,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const heroImageUrl = pageContent?.heroImageUrl?.trim();
 
   return (
-    <div className="bg-white pt-10 lg:pt-16">
+    <div className="bg-white pt-6 lg:pt-8">
       <SplitPageHero
+        compact
         eyebrow="SHOP OUR COLLECTION"
         title={renderShopTitle(title)}
         description={description}
@@ -89,13 +107,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <>
             <Link
               href="#shop-catalog"
-              className="inline-flex items-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-8 py-3 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              className="inline-flex items-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
             >
               Shop All Products
             </Link>
             <Link
               href="/consultation"
-              className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-8 py-3 text-sm font-medium text-luxury-text transition-colors hover:border-royal-magenta hover:text-royal-magenta"
+              className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-6 py-2.5 text-sm font-medium text-luxury-text transition-colors hover:border-royal-magenta hover:text-royal-magenta"
             >
               Bulk Inquiry
             </Link>

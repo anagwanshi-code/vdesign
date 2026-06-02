@@ -141,6 +141,21 @@ export type SanityProduct = {
   slug: string;
   priceInInr: number;
   compareAtPrice?: number | null;
+  mrp?: number | null;
+  moq?: number | null;
+  allowCustomUpload?: boolean | null;
+  volumeDiscounts?:
+    | {
+        minQuantity?: number | null;
+        discountPercentage?: number | null;
+      }[]
+    | null;
+  premiumAddons?:
+    | {
+        addonName?: string | null;
+        extraPrice?: number | null;
+      }[]
+    | null;
   subtitle?: string | null;
   description?: string | null;
   featured?: boolean | null;
@@ -193,6 +208,8 @@ export type SanitySiteSettings = {
   contactEmail?: string | null;
   copyrightText?: string | null;
   announcements?: (string | null)[] | null;
+  isShippingComplimentary?: boolean | null;
+  flatShippingRate?: number | null;
 };
 
 export type SanityHomePageWithCatalog = {

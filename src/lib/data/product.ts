@@ -1,3 +1,4 @@
+import { resolveProductMoq } from "@/lib/commerce/product-pricing";
 import { MOCK_HOME_PAGE_DATA } from "@/lib/data/home";
 import { isSanityConfigured } from "@/lib/sanity/client";
 import { mapSanityProductToDetail } from "@/lib/sanity/mappers";
@@ -17,6 +18,8 @@ const MOCK_PRODUCT_SPECIFICATIONS: Record<string, ProductSpecifications> = {
 };
 
 function mapShowcaseItemToDetail(item: ProductShowcaseItem): ProductDetail {
+  const moq = resolveProductMoq(item.minOrderQuantity, item.minOrderQuantity);
+
   return {
     id: item.id,
     handle: item.handle,
@@ -24,8 +27,12 @@ function mapShowcaseItemToDetail(item: ProductShowcaseItem): ProductDetail {
     subtitle: item.subtitle,
     priceInInr: item.priceInInr,
     saleType: item.saleType,
-    minOrderQuantity: item.minOrderQuantity,
+    moq,
+    minOrderQuantity: moq,
+    allowCustomUpload: item.logoUploadRequired,
     logoUploadRequired: item.logoUploadRequired,
+    volumeDiscounts: [],
+    premiumAddons: [],
     specifications: MOCK_PRODUCT_SPECIFICATIONS[item.handle] ?? null,
     image: item.image,
     images: [item.image.src, item.hoverImage?.src]

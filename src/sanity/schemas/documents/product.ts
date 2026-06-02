@@ -15,9 +15,41 @@ export const product = defineType({
     { name: "main", title: "1. Basic Info", default: true },
     { name: "media", title: "2. Media & AI" },
     { name: "taxonomy", title: "3. Categories & Filters" },
-    { name: "pricing", title: "4. Price & Inventory" },
+    { name: "pricing", title: "4. Pricing & Discounts" },
     { name: "specs", title: "5. Technical Specs" },
-    { name: "customization", title: "6. Customization & Variants" },
+    { name: "customization", title: "6. Customizations" },
+  ],
+  fieldsets: [
+    {
+      name: "corePricing",
+      title: "Base pricing",
+      options: { collapsible: false },
+    },
+    {
+      name: "volumeTiers",
+      title: "Volume discount tiers",
+      options: { collapsible: true },
+    },
+    {
+      name: "inventory",
+      title: "Inventory & publish status",
+      options: { collapsible: true, collapsed: true },
+    },
+    {
+      name: "premiumAddons",
+      title: "Premium add-ons",
+      options: { collapsible: true },
+    },
+    {
+      name: "customUploads",
+      title: "Custom uploads & artwork",
+      options: { collapsible: true },
+    },
+    {
+      name: "variantMatrix",
+      title: "Sizes, frames & variants",
+      options: { collapsible: true, collapsed: true },
+    },
   ],
   fields: [
     // ==========================================
@@ -222,24 +254,58 @@ export const product = defineType({
     }),
 
     // ==========================================
-    // 3. PRICING
+    // 3. PRICING & DISCOUNTS
     // ==========================================
     defineField({
       name: "price",
-      title: "Base Price (₹)",
+      title: "Selling Price (₹)",
       type: "number",
       group: "pricing",
+      fieldset: "corePricing",
       validation: (Rule) => Rule.min(0),
       description:
-        "Display price when no variants exist, or as the “from” price on cards.",
+        "Current selling price. Used on cards and PDP when no variants exist.",
+    }),
+    defineField({
+      name: "mrp",
+      title: "MRP / Compare-at Price (₹)",
+      type: "number",
+      group: "pricing",
+      fieldset: "corePricing",
+      description:
+        "Original list price shown with strikethrough when higher than the selling price.",
+      validation: (Rule) => Rule.min(0),
     }),
     defineField({
       name: "compareAtPrice",
-      title: "Compare at Price (₹)",
+      title: "Compare at Price (Legacy)",
       type: "number",
       group: "pricing",
-      description: "Original price for displaying discounts.",
+      fieldset: "corePricing",
+      hidden: true,
+      description: "Legacy field — prefer MRP above. Kept for existing cloud data.",
       validation: (Rule) => Rule.min(0),
+    }),
+    defineField({
+      name: "moq",
+      title: "Minimum Order Quantity (MOQ)",
+      type: "number",
+      group: "pricing",
+      fieldset: "corePricing",
+      initialValue: 1,
+      description:
+        "Lowest quantity a customer may order. Use 1 for retail/flexible items; higher for bulk print runs.",
+      validation: (Rule) => Rule.required().integer().min(1),
+    }),
+    defineField({
+      name: "volumeDiscounts",
+      title: "Volume Discounts",
+      type: "array",
+      group: "pricing",
+      fieldset: "volumeTiers",
+      of: [{ type: "volumeDiscount" }],
+      description:
+        "Tiered pricing by quantity — e.g. 10+ units → 5% off, 50+ units → 12% off. Sorted by min quantity on the storefront.",
     }),
 
     defineField({
@@ -247,6 +313,7 @@ export const product = defineType({
       title: "Rating (1–5)",
       type: "number",
       group: "pricing",
+      fieldset: "inventory",
       validation: (Rule) => Rule.min(1).max(5),
     }),
     defineField({
@@ -254,6 +321,7 @@ export const product = defineType({
       title: "Number of Reviews",
       type: "number",
       group: "pricing",
+      fieldset: "inventory",
       validation: (Rule) => Rule.min(0),
     }),
 
@@ -277,13 +345,13 @@ export const product = defineType({
     }),
     defineField({
       name: "minOrderQuantity",
-      title: "Minimum Order Quantity (MOQ)",
+      title: "Bulk MOQ (Manufacturing)",
       type: "number",
       group: "specs",
       initialValue: 100,
       description:
-        "Bulk: customers must order in multiples of this value. Flexible: minimum units only.",
-      validation: (Rule) => Rule.required().integer().min(1),
+        "Bulk manufacturing minimum. Storefront MOQ is set under Pricing & Discounts; queries coalesce both fields.",
+      validation: (Rule) => Rule.integer().min(1),
     }),
     defineField({
       name: "paperType",
@@ -431,12 +499,14 @@ export const product = defineType({
       title: "SKU (Stock Keeping Unit)",
       type: "string",
       group: "pricing",
+      fieldset: "inventory",
     }),
     defineField({
       name: "inStock",
       title: "In Stock / Available for Order",
       type: "boolean",
       group: "pricing",
+      fieldset: "inventory",
       initialValue: true,
     }),
     defineField({
@@ -444,6 +514,7 @@ export const product = defineType({
       title: "Publish Status",
       type: "string",
       group: "pricing",
+      fieldset: "inventory",
       options: {
         list: [
           { title: "Active", value: "active" },
@@ -457,24 +528,46 @@ export const product = defineType({
     }),
 
     // ==========================================
-    // 6. CUSTOMIZATION & VARIANTS
+    // 6. CUSTOMIZATIONS
     // ==========================================
     defineField({
-      name: "logoUploadRequired",
-      title: "Logo/Artwork Upload Required",
+      name: "allowCustomUpload",
+      title: "Allow Custom Upload",
       type: "boolean",
       group: "customization",
+      fieldset: "customUploads",
+      initialValue: false,
+      description:
+        "Show a file upload field on the product page for custom logos, artwork, or design files.",
+    }),
+    defineField({
+      name: "logoUploadRequired",
+      title: "Upload Required at Checkout",
+      type: "boolean",
+      group: "customization",
+      fieldset: "customUploads",
       initialValue: true,
       description:
-        "Mandates the customer to upload their brand assets before checkout.",
+        "When enabled, customers must upload artwork before checkout. Requires “Allow Custom Upload” to be on.",
     }),
     defineField({
       name: "customizationNotes",
       title: "Customization Instructions",
       type: "text",
       group: "customization",
+      fieldset: "customUploads",
       description:
-        "Internal notes or customer-facing instructions regarding bespoke modifications.",
+        "Customer-facing instructions for bespoke modifications, file formats, or bleed guidelines.",
+    }),
+    defineField({
+      name: "premiumAddons",
+      title: "Premium Add-ons",
+      type: "array",
+      group: "customization",
+      fieldset: "premiumAddons",
+      of: [{ type: "premiumAddon" }],
+      description:
+        "Optional upsells shown on the PDP — e.g. Gold Foiling (+₹500), Velvet Lamination (+₹300).",
     }),
 
     defineField({
@@ -482,6 +575,7 @@ export const product = defineType({
       title: "Available Sizes",
       type: "array",
       group: "customization",
+      fieldset: "variantMatrix",
       of: [{ type: "reference", to: [{ type: "productSize" }] }],
       description: "Preset sizes offered for this artwork.",
     }),
@@ -490,6 +584,7 @@ export const product = defineType({
       title: "Additional Size Labels",
       type: "array",
       group: "customization",
+      fieldset: "variantMatrix",
       of: [{ type: "string" }],
       description:
         "Optional custom size strings when a shared preset is not needed.",
@@ -499,6 +594,7 @@ export const product = defineType({
       title: "Available Framing Options",
       type: "array",
       group: "customization",
+      fieldset: "variantMatrix",
       of: [{ type: "reference", to: [{ type: "productFrame" }] }],
       description: "Preset framing finishes offered for this artwork.",
     }),
@@ -507,6 +603,7 @@ export const product = defineType({
       title: "Additional Frame Labels",
       type: "array",
       group: "customization",
+      fieldset: "variantMatrix",
       of: [{ type: "string" }],
       description:
         "Optional custom frame strings when a shared preset is not needed.",
@@ -516,6 +613,7 @@ export const product = defineType({
       title: "Variants",
       type: "array",
       group: "customization",
+      fieldset: "variantMatrix",
       of: [{ type: "productVariant" }],
       description:
         "Size × frame combinations with individual INR pricing (dt-brushstrokes style matrix).",

@@ -2,15 +2,18 @@
 
 import { CheckoutEmailVerify } from "@/components/checkout/checkout-email-verify";
 import { CheckoutOrderSummary } from "@/components/checkout/checkout-order-summary";
-import { Button } from "@/components/ui/Button";
-import { useCart } from "@/hooks/use-cart";
 import { customerDetailsToRazorpayNotes } from "@/lib/checkout/customer-notes";
 import {
   getCitiesForState,
   INDIAN_STATES,
 } from "@/lib/checkout/india-locations";
 import { initiateRazorpayCheckout } from "@/lib/checkout/initiate-checkout";
-import { calculateOrderTotals } from "@/lib/checkout/totals";
+import {
+  selectMoqValidation,
+  selectOrderTotals,
+  selectSubtotalInInr,
+  useCartStore,
+} from "@/lib/store/useCartStore";
 import { cn } from "@/lib/utils/cn";
 import type { CheckoutCustomerDetails } from "@/types/checkout-customer";
 import type { VerifyOtpProfile } from "@/types/auth-otp";
@@ -20,18 +23,18 @@ import type {
 } from "@/types/checkout-verify";
 import type { RazorpayHandlerResponse } from "@/types/razorpay";
 import { Info, Loader2, Lock } from "lucide-react";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 const SELECT_CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`;
 
 const inputClass =
-  "w-full h-9 rounded-md border border-border bg-surface px-3 text-body-sm text-text-primary outline-none transition-colors duration-base ease-luxury placeholder:text-text-muted/70 focus:border-peacock focus:ring-1 focus:ring-peacock disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full border border-gray-200 bg-white px-3 py-2.5 font-sans text-sm text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-pink-600 focus:ring-1 focus:ring-pink-600/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 const selectClass = cn(
   inputClass,
-  "appearance-none bg-[length:1rem] bg-[right_0.5rem_center] bg-no-repeat pr-8",
+  "appearance-none bg-[length:1rem] bg-[right_0.75rem_center] bg-no-repeat pr-9",
 );
 
 type CheckoutFormValues = {
@@ -71,10 +74,10 @@ function Field({ label, htmlFor, children, className }: FieldProps) {
     <div className={cn("block", className)}>
       <label
         htmlFor={htmlFor}
-        className="mb-1 block text-caption font-medium text-text-primary"
+        className="mb-1.5 block font-sans text-xs font-semibold uppercase tracking-wider text-gray-700"
       >
         {label}
-        <span className="text-magenta"> *</span>
+        <span className="text-pink-600"> *</span>
       </label>
       {children}
     </div>
@@ -94,14 +97,25 @@ function formValuesToCustomer(values: CheckoutFormValues): CheckoutCustomerDetai
 }
 
 export function CheckoutForm() {
-  const {
-    cartItems,
-    clearCart,
-    closeCart,
-    subtotalInInr,
-    meetsMoqForCheckout,
-    moqMessage,
-  } = useCart();
+  const cartItems = useCartStore((state) => state.items);
+  const shippingConfig = useCartStore((state) => state.shippingConfig);
+  const closeCart = useCartStore((state) => state.closeCart);
+
+  const subtotalInInr = useMemo(
+    () => selectSubtotalInInr(cartItems),
+    [cartItems],
+  );
+
+  const { meetsMoqForCheckout, moqMessage } = useMemo(
+    () => selectMoqValidation(cartItems),
+    [cartItems],
+  );
+
+  const orderTotals = useMemo(
+    () => selectOrderTotals(cartItems, shippingConfig),
+    [cartItems, shippingConfig],
+  );
+
   const [isPaying, setIsPaying] = useState(false);
 
   const {
@@ -110,8 +124,9 @@ export function CheckoutForm() {
     control,
     setValue,
     getValues,
-    formState: { errors },
+    formState: { errors, isValid, isDirty },
   } = useForm<CheckoutFormValues>({
+    mode: "onChange",
     defaultValues: {
       fullName: "",
       email: "",
@@ -130,6 +145,9 @@ export function CheckoutForm() {
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
     (watchedEmail ?? "").trim(),
   );
+
+  const canProceedToPayment =
+    cartItems.length > 0 && meetsMoqForCheckout && isValid && !isPaying;
 
   const applyVerifiedProfile = useCallback(
     (profile: VerifyOtpProfile | null) => {
@@ -177,18 +195,16 @@ export function CheckoutForm() {
   }, []);
 
   const onSubmit = handleSubmit(async (values) => {
-    if (cartItems.length === 0 || !meetsMoqForCheckout || isPaying) {
+    if (!canProceedToPayment) {
       return;
     }
 
     const customer = formValuesToCustomer(values);
-    const totals = calculateOrderTotals(subtotalInInr);
+    const totals = selectOrderTotals(cartItems, shippingConfig);
     setIsPaying(true);
 
     const handlePaymentSuccess = async (response: RazorpayHandlerResponse) => {
-      const toastId = toast.loading(
-        "Verifying payment and generating order…",
-      );
+      const toastId = toast.loading("Verifying payment and generating order…");
 
       try {
         const verifyResponse = await fetch("/api/checkout/verify", {
@@ -204,6 +220,8 @@ export function CheckoutForm() {
                 productName: item.title,
                 quantity: item.quantity,
                 price: item.priceInInr,
+                premiumAddons: item.premiumAddons?.map((a) => a.addonName),
+                volumeDiscountPercent: item.volumeDiscountPercent,
               })),
               totalAmount: totals.grandTotalInInr,
             },
@@ -228,10 +246,7 @@ export function CheckoutForm() {
         }
 
         toast.dismiss(toastId);
-
-        if (typeof clearCart === "function") {
-          clearCart();
-        }
+        useCartStore.getState().clearCart();
         closeCart();
         window.location.assign("/checkout/success");
       } catch (error) {
@@ -278,237 +293,261 @@ export function CheckoutForm() {
   });
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:items-start lg:gap-5">
-      <form
-        onSubmit={onSubmit}
-        noValidate
-        className="rounded-lg border border-border bg-surface/60 p-4 md:p-5"
-      >
-        <h2 className="font-serif text-heading text-text-primary">Checkout</h2>
-
-        <fieldset className="mt-3 border-0 p-0">
-          <legend className="sr-only">Customer details</legend>
-          <p className="text-caption font-medium uppercase tracking-wider text-peacock">
-            Customer
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:items-start">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-8">
+        <section className="border border-gray-200 bg-white p-5 md:p-6">
+          <h2 className="font-serif text-2xl font-medium text-gray-950">
+            Contact &amp; Shipping Details
+          </h2>
+          <p className="mt-2 font-sans text-sm text-gray-600">
+            Guest checkout — enter your details to receive your receipt and
+            delivery updates.
           </p>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
-            <Field label="Full name" htmlFor="fullName" className="sm:col-span-2">
-              <input
-                id="fullName"
-                type="text"
-                autoComplete="name"
-                className={inputClass}
-                placeholder="Your full name"
-                {...register("fullName", { required: "Full name is required" })}
-              />
-              {errors.fullName ? (
-                <p className="mt-1 text-[11px] text-magenta">
-                  {errors.fullName.message}
-                </p>
-              ) : null}
-            </Field>
-            <div className="flex flex-col gap-2">
-              <Field label="Email" htmlFor="email" className="min-w-0 flex-1">
+
+          <fieldset className="mt-6 border-0 p-0">
+            <legend className="sr-only">Contact information</legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Full Name" htmlFor="fullName" className="sm:col-span-2">
                 <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
+                  id="fullName"
+                  type="text"
+                  autoComplete="name"
                   className={inputClass}
-                  placeholder="you@example.com"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Enter a valid email",
+                  placeholder="Your full name"
+                  {...register("fullName", {
+                    required: "Full name is required",
+                    minLength: {
+                      value: 2,
+                      message: "Enter your full name",
                     },
                   })}
                 />
-                {errors.email ? (
-                  <p className="mt-1 text-[11px] text-magenta">
-                    {errors.email.message}
+                {errors.fullName ? (
+                  <p className="mt-1 font-sans text-xs text-pink-700">
+                    {errors.fullName.message}
                   </p>
                 ) : null}
               </Field>
-              <CheckoutEmailVerify
-                email={(watchedEmail ?? getValues("email") ?? "").trim()}
-                isEmailValid={isEmailValid}
-                onVerified={applyVerifiedProfile}
-              />
-            </div>
-            <Field label="Phone" htmlFor="phone">
-              <input
-                id="phone"
-                type="tel"
-                autoComplete="tel"
-                className={inputClass}
-                placeholder="+91 98765 43210"
-                {...register("phone", {
-                  required: "Phone is required",
-                  minLength: { value: 10, message: "Enter at least 10 digits" },
-                  pattern: {
-                    value: /^[\d\s+\-()]{10,15}$/,
-                    message: "Enter a valid phone number",
-                  },
-                })}
-              />
-              {errors.phone ? (
-                <p className="mt-1 text-[11px] text-magenta">
-                  {errors.phone.message}
-                </p>
-              ) : null}
-            </Field>
-          </div>
-        </fieldset>
 
-        <fieldset className="mt-4 border-0 p-0">
-          <legend className="sr-only">Shipping address</legend>
-          <p className="text-caption font-medium uppercase tracking-wider text-peacock">
-            Shipping
-          </p>
-          <div className="mt-2 grid gap-3">
-            <Field label="Street address" htmlFor="street">
-              <input
-                id="street"
-                type="text"
-                autoComplete="street-address"
-                className={inputClass}
-                placeholder="Building, street, area"
-                {...register("street", { required: "Street address is required" })}
-              />
-              {errors.street ? (
-                <p className="mt-1 text-[11px] text-magenta">
-                  {errors.street.message}
-                </p>
-              ) : null}
-            </Field>
+              <div className="flex flex-col gap-2">
+                <Field label="Email Address" htmlFor="email">
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    className={inputClass}
+                    placeholder="you@example.com"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: "Enter a valid email address",
+                      },
+                    })}
+                  />
+                  {errors.email ? (
+                    <p className="mt-1 font-sans text-xs text-pink-700">
+                      {errors.email.message}
+                    </p>
+                  ) : null}
+                </Field>
+                <CheckoutEmailVerify
+                  email={(watchedEmail ?? getValues("email") ?? "").trim()}
+                  isEmailValid={isEmailValid}
+                  onVerified={applyVerifiedProfile}
+                />
+              </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="State" htmlFor="state">
-                <select
-                  id="state"
-                  autoComplete="address-level1"
-                  className={selectClass}
-                  style={{ backgroundImage: SELECT_CHEVRON }}
-                  {...register("state", {
-                    required: "State is required",
-                    onChange: () => {
-                      setValue("city", "", {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
+              <Field label="Mobile Number" htmlFor="phone">
+                <input
+                  id="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  className={inputClass}
+                  placeholder="+91 98765 43210"
+                  {...register("phone", {
+                    required: "Mobile number is required",
+                    minLength: {
+                      value: 10,
+                      message: "Enter at least 10 digits",
+                    },
+                    pattern: {
+                      value: /^[\d\s+\-()]{10,15}$/,
+                      message: "Enter a valid mobile number",
                     },
                   })}
-                >
-                  <option value="" disabled>
-                    Select state
-                  </option>
-                  {INDIAN_STATES.map((state) => (
-                    <option key={state} value={state}>
-                      {state}
-                    </option>
-                  ))}
-                </select>
-                {errors.state ? (
-                  <p className="mt-1 text-[11px] text-magenta">
-                    {errors.state.message}
+                />
+                {errors.phone ? (
+                  <p className="mt-1 font-sans text-xs text-pink-700">
+                    {errors.phone.message}
+                  </p>
+                ) : null}
+              </Field>
+            </div>
+          </fieldset>
+
+          <fieldset className="mt-8 border-0 border-t border-gray-100 p-0 pt-8">
+            <legend className="mb-4 font-sans text-xs font-semibold uppercase tracking-[0.22em] text-gray-500">
+              Delivery Address
+            </legend>
+            <div className="grid gap-4">
+              <Field label="Street Address" htmlFor="street">
+                <input
+                  id="street"
+                  type="text"
+                  autoComplete="street-address"
+                  className={inputClass}
+                  placeholder="Building, street, area"
+                  {...register("street", {
+                    required: "Delivery address is required",
+                  })}
+                />
+                {errors.street ? (
+                  <p className="mt-1 font-sans text-xs text-pink-700">
+                    {errors.street.message}
                   </p>
                 ) : null}
               </Field>
 
-              <Field label="City" htmlFor="city">
-                <select
-                  id="city"
-                  autoComplete="address-level2"
-                  className={selectClass}
-                  style={{ backgroundImage: SELECT_CHEVRON }}
-                  disabled={cityOptions.length === 0}
-                  {...register("city", { required: "City is required" })}
-                >
-                  <option value="" disabled>
-                    {cityOptions.length === 0
-                      ? "Select state first"
-                      : "Select city"}
-                  </option>
-                  {cityOptions.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="State" htmlFor="state">
+                  <select
+                    id="state"
+                    autoComplete="address-level1"
+                    className={selectClass}
+                    style={{ backgroundImage: SELECT_CHEVRON }}
+                    {...register("state", {
+                      required: "State is required",
+                      onChange: () => {
+                        setValue("city", "", {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      },
+                    })}
+                  >
+                    <option value="" disabled>
+                      Select state
                     </option>
-                  ))}
-                </select>
-                {errors.city ? (
-                  <p className="mt-1 text-[11px] text-magenta">
-                    {errors.city.message}
+                    {INDIAN_STATES.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.state ? (
+                    <p className="mt-1 font-sans text-xs text-pink-700">
+                      {errors.state.message}
+                    </p>
+                  ) : null}
+                </Field>
+
+                <Field label="City" htmlFor="city">
+                  <select
+                    id="city"
+                    autoComplete="address-level2"
+                    className={selectClass}
+                    style={{ backgroundImage: SELECT_CHEVRON }}
+                    disabled={cityOptions.length === 0}
+                    {...register("city", { required: "City is required" })}
+                  >
+                    <option value="" disabled>
+                      {cityOptions.length === 0
+                        ? "Select state first"
+                        : "Select city"}
+                    </option>
+                    {cityOptions.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.city ? (
+                    <p className="mt-1 font-sans text-xs text-pink-700">
+                      {errors.city.message}
+                    </p>
+                  ) : null}
+                </Field>
+              </div>
+
+              <Field label="PIN Code" htmlFor="pinCode" className="sm:max-w-[10rem]">
+                <input
+                  id="pinCode"
+                  type="text"
+                  autoComplete="postal-code"
+                  inputMode="numeric"
+                  className={inputClass}
+                  placeholder="395007"
+                  {...register("pinCode", {
+                    required: "PIN code is required",
+                    pattern: {
+                      value: /^[0-9]{6}$/,
+                      message: "Enter a 6-digit PIN code",
+                    },
+                  })}
+                />
+                {errors.pinCode ? (
+                  <p className="mt-1 font-sans text-xs text-pink-700">
+                    {errors.pinCode.message}
                   </p>
                 ) : null}
               </Field>
             </div>
 
-            <Field label="PIN code" htmlFor="pinCode" className="sm:max-w-[10rem]">
-              <input
-                id="pinCode"
-                type="text"
-                autoComplete="postal-code"
-                inputMode="numeric"
-                className={inputClass}
-                placeholder="395007"
-                {...register("pinCode", {
-                  required: "PIN code is required",
-                  pattern: {
-                    value: /^[0-9]{6}$/,
-                    message: "Enter a 6-digit PIN code",
-                  },
-                })}
-              />
-              {errors.pinCode ? (
-                <p className="mt-1 text-[11px] text-magenta">
-                  {errors.pinCode.message}
-                </p>
-              ) : null}
-            </Field>
-          </div>
-
-          <div
-            className="mt-3 flex gap-3 rounded-md border border-border/80 bg-zinc-50/90 px-3.5 py-3"
-            role="note"
-          >
-            <Info
-              className="mt-0.5 h-4 w-4 shrink-0 text-peacock"
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
-            <p className="font-sans text-caption leading-relaxed text-text-muted">
-              Please ensure your shipping details are accurate. All
-              consignments will be delivered exclusively to the address
-              provided below.
-            </p>
-          </div>
-        </fieldset>
-
-        {moqMessage ? (
-          <p className="mt-3 text-caption text-magenta">{moqMessage}</p>
-        ) : null}
-
-        <Button
-          type="submit"
-          variant="accent"
-          className="mt-4 h-9 w-full text-body-sm text-white sm:w-auto sm:min-w-[220px] [&_svg]:text-white"
-          disabled={!meetsMoqForCheckout || isPaying}
-        >
-          {isPaying ? (
-            <span className="inline-flex items-center gap-2 text-white">
-              <Loader2
-                className="h-3.5 w-3.5 animate-spin text-white"
+            <div
+              className="mt-5 flex gap-3 border border-gray-200 bg-gray-50 px-4 py-3"
+              role="note"
+            >
+              <Info
+                className="mt-0.5 h-4 w-4 shrink-0 text-gray-500"
+                strokeWidth={1.5}
                 aria-hidden="true"
               />
-              Opening payment…
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-2 text-white">
-              <Lock className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-              Pay securely with Razorpay
-            </span>
+              <p className="font-sans text-xs leading-relaxed text-gray-600">
+                Please ensure your shipping details are accurate. All
+                consignments will be delivered exclusively to the address
+                provided above.
+              </p>
+            </div>
+          </fieldset>
+        </section>
+
+        {moqMessage ? (
+          <p className="font-sans text-sm text-pink-700">{moqMessage}</p>
+        ) : null}
+
+        {!isValid && isDirty ? (
+          <p className="font-sans text-sm text-gray-600">
+            Complete all contact and shipping fields to proceed to payment.
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={!canProceedToPayment}
+          className={cn(
+            "flex w-full items-center justify-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 py-4 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-all duration-500 ease-out",
+            "hover:-translate-y-0.5 hover:from-pink-500 hover:to-rose-400 hover:shadow-[0_8px_25px_rgb(225,29,72,0.4)]",
+            "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none",
           )}
-        </Button>
+        >
+          {isPaying ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Opening payment…
+            </>
+          ) : (
+            <>
+              <Lock className="h-4 w-4" aria-hidden="true" />
+              Proceed to Payment ·{" "}
+              {new Intl.NumberFormat("en-IN", {
+                style: "currency",
+                currency: "INR",
+                maximumFractionDigits: 0,
+              }).format(orderTotals.grandTotalInInr)}
+            </>
+          )}
+        </button>
       </form>
 
       <CheckoutOrderSummary

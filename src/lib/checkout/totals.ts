@@ -29,23 +29,36 @@ export function formatInr(amount: number): string {
   }).format(amount);
 }
 
+export type OrderTotalsOptions = {
+  gstRate?: number;
+  isShippingComplimentary?: boolean;
+  flatShippingRate?: number;
+  shippingInInr?: number;
+  freeShippingThresholdInInr?: number;
+};
+
 export function calculateOrderTotals(
   subtotalInInr: number,
-  options?: {
-    gstRate?: number;
-    shippingInInr?: number;
-    freeShippingThresholdInInr?: number;
-  },
+  options?: OrderTotalsOptions,
 ): OrderTotals {
   const gstRate = options?.gstRate ?? DEFAULT_GST_RATE;
-  const freeShippingThreshold =
-    options?.freeShippingThresholdInInr ?? FREE_SHIPPING_THRESHOLD_INR;
-  const configuredShipping = options?.shippingInInr ?? DEFAULT_SHIPPING_INR;
 
   const subtotal = roundInr(Math.max(0, subtotalInInr));
   const gstInInr = roundInr(subtotal * gstRate);
-  const shippingInInr =
-    subtotal >= freeShippingThreshold ? 0 : roundInr(configuredShipping);
+
+  let shippingInInr: number;
+  if (options?.isShippingComplimentary !== undefined) {
+    shippingInInr = options.isShippingComplimentary
+      ? 0
+      : roundInr(options.flatShippingRate ?? DEFAULT_SHIPPING_INR);
+  } else {
+    const freeShippingThreshold =
+      options?.freeShippingThresholdInInr ?? FREE_SHIPPING_THRESHOLD_INR;
+    const configuredShipping = options?.shippingInInr ?? DEFAULT_SHIPPING_INR;
+    shippingInInr =
+      subtotal >= freeShippingThreshold ? 0 : roundInr(configuredShipping);
+  }
+
   const grandTotalInInr = roundInr(subtotal + gstInInr + shippingInInr);
 
   return {

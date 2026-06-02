@@ -19,7 +19,7 @@ const SIMILAR_PRODUCT_FIELDS = groq`
   ),
   subtitle,
   saleType,
-  "minOrderQuantity": coalesce(minOrderQuantity, minimumOrderQuantity, 100),
+  "minOrderQuantity": coalesce(moq, minOrderQuantity, minimumOrderQuantity, 1),
   logoUploadRequired,
   paperType,
   printMethod,

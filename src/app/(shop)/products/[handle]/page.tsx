@@ -1,8 +1,6 @@
 import { SimilarProducts } from "@/components/catalog/similar-products";
 import { ProductDetailGallery } from "@/components/product/product-detail-gallery";
-import { ProductPurchaseSection } from "@/components/product/product-purchase-section";
-import { ProductSpecifications } from "@/components/product/product-specifications";
-import { formatQuantityHint } from "@/lib/commerce/pricing";
+import { ProductDetails } from "@/components/product/product-details";
 import { resolveProductByHandle } from "@/lib/data/product";
 import { getSimilarProducts } from "@/lib/product/similar-products";
 import type { Metadata } from "next";
@@ -74,13 +72,16 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   );
 
   return (
-    <article className="mx-auto w-full max-w-content px-5 pb-16 pt-10 md:px-8 lg:px-20 lg:pb-24 lg:pt-16">
-      <nav className="mb-10 text-caption text-text-muted" aria-label="Breadcrumb">
+    <article className="mx-auto w-full max-w-content px-4 pb-20 pt-10 md:px-8 lg:px-20 lg:pb-28 lg:pt-16">
+      <nav
+        className="mb-12 font-sans text-sm text-gray-500"
+        aria-label="Breadcrumb"
+      >
         <ol className="flex flex-wrap items-center gap-2">
           <li>
             <Link
               href="/collections"
-              className="transition-colors duration-base ease-luxury hover:text-peacock"
+              className="transition-colors duration-300 hover:text-royal-magenta"
             >
               Collections
             </Link>
@@ -91,7 +92,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               <li>
                 <Link
                   href={`/collections/${product.collection.slug}`}
-                  className="transition-colors duration-base ease-luxury hover:text-peacock"
+                  className="transition-colors duration-300 hover:text-royal-magenta"
                 >
                   {product.collection.title}
                 </Link>
@@ -99,12 +100,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </>
           ) : null}
           <li aria-hidden="true">/</li>
-          <li className="text-text-primary">{product.title}</li>
+          <li className="font-medium text-gray-900">{product.title}</li>
         </ol>
       </nav>
 
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-20">
-        <div className="sticky top-32 z-10 lg:top-40">
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+        <div className="sticky top-28 z-10 lg:top-36">
           <ProductDetailGallery
             images={product.images}
             primary={product.image}
@@ -113,32 +114,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           />
         </div>
 
-        <div className="flex flex-col gap-8">
-          <header className="flex flex-col gap-4">
-            <p className="text-overline uppercase text-saffron">Signature Edit</p>
-            <h1 className="font-serif text-display-lg text-text-primary">
-              {product.title}
-            </h1>
-            {product.subtitle ? (
-              <p className="text-body-lg text-text-muted">{product.subtitle}</p>
-            ) : null}
-            {product.description ? (
-              <p className="max-w-prose text-body text-text-muted">
-                {product.description}
-              </p>
-            ) : null}
-            <p className="text-caption uppercase tracking-widest text-text-muted">
-              {formatQuantityHint(
-                product.saleType,
-                product.minOrderQuantity,
-              )}
-            </p>
-          </header>
-
-          <ProductPurchaseSection key={product.id} product={product} />
-
-          <ProductSpecifications specifications={product.specifications} />
-        </div>
+        <ProductDetails product={product} />
       </div>
 
       <SimilarProducts

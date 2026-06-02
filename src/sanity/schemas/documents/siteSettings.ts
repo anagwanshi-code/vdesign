@@ -58,6 +58,20 @@ export const siteSettings = defineType({
       description:
         "Short promotional lines for the top marquee. Leave empty to use site defaults.",
     }),
+    defineField({
+      name: "isShippingComplimentary",
+      title: "Offer Complimentary Shipping",
+      type: "boolean",
+      initialValue: true,
+      description: "Turn on to offer free shipping.",
+    }),
+    defineField({
+      name: "flatShippingRate",
+      title: "Flat Shipping Rate (₹)",
+      type: "number",
+      initialValue: 150,
+      hidden: ({ document }) => Boolean(document?.isShippingComplimentary),
+    }),
   ],
   preview: {
     prepare: () => ({
