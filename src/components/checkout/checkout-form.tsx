@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckoutEmailVerify } from "@/components/checkout/checkout-email-verify";
 import { CheckoutOrderSummary } from "@/components/checkout/checkout-order-summary";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/hooks/use-cart";
@@ -12,6 +13,7 @@ import { initiateRazorpayCheckout } from "@/lib/checkout/initiate-checkout";
 import { calculateOrderTotals } from "@/lib/checkout/totals";
 import { cn } from "@/lib/utils/cn";
 import type { CheckoutCustomerDetails } from "@/types/checkout-customer";
+import type { VerifyOtpProfile } from "@/types/auth-otp";
 import type {
   CheckoutVerifyErrorResponse,
   CheckoutVerifySuccessResponse,
@@ -107,6 +109,7 @@ export function CheckoutForm() {
     handleSubmit,
     control,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<CheckoutFormValues>({
     defaultValues: {
@@ -120,8 +123,48 @@ export function CheckoutForm() {
     },
   });
 
+  const watchedEmail = useWatch({ control, name: "email" });
   const selectedState = useWatch({ control, name: "state" });
   const cityOptions = getCitiesForState(selectedState ?? "");
+
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    (watchedEmail ?? "").trim(),
+  );
+
+  const applyVerifiedProfile = useCallback(
+    (profile: VerifyOtpProfile | null) => {
+      if (!profile) return;
+
+      if (profile.customerName) {
+        setValue("fullName", profile.customerName, { shouldValidate: true });
+      }
+      if (profile.phone) {
+        setValue("phone", profile.phone, { shouldValidate: true });
+      }
+      if (profile.street) {
+        setValue("street", profile.street, { shouldValidate: true });
+      }
+      if (profile.state) {
+        setValue("state", profile.state, { shouldValidate: true });
+      }
+      if (profile.city) {
+        const cities = getCitiesForState(profile.state ?? "");
+        const cityValue =
+          cities.includes(profile.city) || cities.length === 0
+            ? profile.city
+            : "";
+        if (cityValue) {
+          setValue("city", cityValue, { shouldValidate: true });
+        }
+      } else if (profile.shippingAddress && !profile.street) {
+        setValue("street", profile.shippingAddress, { shouldValidate: true });
+      }
+      if (profile.pinCode) {
+        setValue("pinCode", profile.pinCode, { shouldValidate: true });
+      }
+    },
+    [setValue],
+  );
 
   const handleModalDismiss = useCallback(() => {
     setIsPaying(false);
@@ -264,27 +307,34 @@ export function CheckoutForm() {
                 </p>
               ) : null}
             </Field>
-            <Field label="Email" htmlFor="email">
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                className={inputClass}
-                placeholder="you@example.com"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Enter a valid email",
-                  },
-                })}
+            <div className="flex flex-col gap-2">
+              <Field label="Email" htmlFor="email" className="min-w-0 flex-1">
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  className={inputClass}
+                  placeholder="you@example.com"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Enter a valid email",
+                    },
+                  })}
+                />
+                {errors.email ? (
+                  <p className="mt-1 text-[11px] text-magenta">
+                    {errors.email.message}
+                  </p>
+                ) : null}
+              </Field>
+              <CheckoutEmailVerify
+                email={(watchedEmail ?? getValues("email") ?? "").trim()}
+                isEmailValid={isEmailValid}
+                onVerified={applyVerifiedProfile}
               />
-              {errors.email ? (
-                <p className="mt-1 text-[11px] text-magenta">
-                  {errors.email.message}
-                </p>
-              ) : null}
-            </Field>
+            </div>
             <Field label="Phone" htmlFor="phone">
               <input
                 id="phone"

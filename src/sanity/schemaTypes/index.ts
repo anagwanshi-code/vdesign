@@ -5,6 +5,7 @@ import { aboutPage } from "./aboutPage";
 import { category } from "./category";
 import { contactPage } from "./contactPage";
 import { downloadResource } from "./downloadResource";
+import { guestOtp } from "./guestOtp";
 import { founder } from "./founder";
 import { industry } from "./industry";
 import { portfolio } from "./portfolio";
@@ -35,5 +36,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     industriesPage,
     shopPage,
     order,
+    guestOtp,
   ],
 };

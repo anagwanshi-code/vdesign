@@ -236,9 +236,9 @@ export function CartDrawer() {
                     {estimatedTotals.shippingLabel}
                   </span>
                 </div>
-                <div className="flex items-center justify-between border-t border-border pt-2 font-serif text-body text-text-primary">
+                <div className="flex items-center justify-between border-t border-border pt-3 text-lg font-semibold text-foreground">
                   <span>Estimated total</span>
-                  <span className="tabular-nums">
+                  <span className="tabular-nums text-foreground">
                     {estimatedTotals.grandTotalLabel}
                   </span>
                 </div>

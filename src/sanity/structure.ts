@@ -22,6 +22,7 @@ const HIDDEN_DOCUMENT_TYPES = new Set([
   "founder",
   "downloadResource",
   "order",
+  "guestOtp",
 ]);
 
 function singletonDocument(

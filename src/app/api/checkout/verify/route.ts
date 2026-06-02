@@ -1,6 +1,6 @@
 import { generateOrderId } from "@/lib/checkout/generate-order-id";
 import { formatShippingAddress } from "@/lib/checkout/customer-notes";
-import { generateOrderReceiptHTML } from "@/lib/email/order-receipt";
+import { generateOrderReceiptHTML } from "@/lib/email/order-receipt-template";
 import { createMailTransporter } from "@/lib/email/transporter";
 import { isRazorpayConfigured } from "@/lib/razorpay/config";
 import { verifyRazorpayPaymentSignature } from "@/lib/razorpay/verify-signature";
@@ -15,6 +15,9 @@ import type {
   CheckoutVerifySuccessResponse,
 } from "@/types/checkout-verify";
 import { type NextRequest, NextResponse } from "next/server";
+
+/** Studio copy of every order confirmation email */
+const ORDER_RECEIPT_ADMIN_BCC = "vdesign.viky@gmail.com";
 
 function validateOrderData(
   orderData: CheckoutVerifyRequestBody["orderData"],
@@ -146,24 +149,34 @@ export async function POST(req: NextRequest) {
     try {
       const transporter = createMailTransporter();
       const fromAddress = process.env.GMAIL_USER;
+      const customerEmail = orderData.customer.email.trim();
 
-      if (transporter && fromAddress) {
+      if (transporter && fromAddress && customerEmail) {
         await transporter.sendMail({
           from: `"V Design" <${fromAddress}>`,
-          to: customer.email.trim(),
+          to: customerEmail,
+          bcc: ORDER_RECEIPT_ADMIN_BCC,
           replyTo: fromAddress,
-          subject: `Order confirmed — ${orderId}`,
+          subject: "Order Confirmation - V Design",
           html: generateOrderReceiptHTML({
             orderId,
-            customer,
-            items: orderData.items,
+            orderDate: new Date(),
+            email: customerEmail,
+            customerName: customer.fullName.trim(),
+            phone: customer.phone.trim(),
+            shippingAddress: formatShippingAddress(customer),
+            items: orderData.items.map((item) => ({
+              productName: item.productName.trim(),
+              quantity: item.quantity,
+              price: item.price,
+            })),
             totalAmount: orderData.totalAmount,
             paymentId: razorpayPaymentId,
           }),
         });
       } else {
         console.warn(
-          "[checkout/verify] Mail not configured; skipping order receipt email",
+          "[checkout/verify] Mail not configured or missing customer email; skipping receipt",
         );
       }
     } catch (emailError) {

@@ -102,9 +102,11 @@ export function CheckoutOrderSummary({
             {totals.shippingLabel}
           </span>
         </div>
-        <div className="flex items-center justify-between border-t border-border pt-1.5 font-serif text-body-sm text-text-primary">
+        <div className="flex items-center justify-between border-t border-border pt-2.5 text-lg font-semibold text-foreground">
           <span>Total</span>
-          <span className="tabular-nums">{totals.grandTotalLabel}</span>
+          <span className="tabular-nums text-foreground">
+            {totals.grandTotalLabel}
+          </span>
         </div>
       </div>
 
