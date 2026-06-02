@@ -50,6 +50,14 @@ export const siteSettings = defineType({
       type: "string",
       initialValue: "© 2026 V Design. All rights reserved.",
     }),
+    defineField({
+      name: "announcements",
+      title: "Announcement Bar Messages",
+      type: "array",
+      of: [defineArrayMember({ type: "string" })],
+      description:
+        "Short promotional lines for the top marquee. Leave empty to use site defaults.",
+    }),
   ],
   preview: {
     prepare: () => ({

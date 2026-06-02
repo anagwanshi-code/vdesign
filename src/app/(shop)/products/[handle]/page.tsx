@@ -8,6 +8,7 @@ import { getSimilarProducts } from "@/lib/product/similar-products";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+export const revalidate = 30;
 
 type ProductPageProps = {
   params: Promise<{ handle: string }>;

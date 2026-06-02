@@ -3,6 +3,7 @@ import type { CollectionIndexItem } from "@/types/collection";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Our Collections",

@@ -1,5 +1,9 @@
 import { createClient as createSanityClient } from "@sanity/client";
-import { createClient, type SanityClient } from "next-sanity";
+import { createClient, type QueryParams, type SanityClient } from "next-sanity";
+
+import { SANITY_FETCH_OPTIONS, SANITY_REVALIDATE_SECONDS } from "./revalidate";
+
+export { SANITY_REVALIDATE_SECONDS, SANITY_FETCH_OPTIONS };
 
 export const SANITY_API_VERSION = "2024-05-24";
 
@@ -22,7 +26,7 @@ export function createSanityReadClient(): SanityClient | null {
     projectId: SANITY_PROJECT_ID,
     dataset: SANITY_DATASET,
     apiVersion: SANITY_API_VERSION,
-    useCdn: true,
+    useCdn: false,
   });
 }
 
@@ -39,7 +43,7 @@ export function createSanityApiClient(options?: {
     projectId: SANITY_PROJECT_ID,
     dataset: SANITY_DATASET,
     apiVersion: SANITY_API_VERSION,
-    useCdn: options?.useCdn ?? true,
+    useCdn: options?.useCdn ?? false,
     token: options?.token,
   });
 }
@@ -54,5 +58,5 @@ export async function sanityFetch<T>(
     return null;
   }
 
-  return client.fetch<T>(query, params);
+  return client.fetch<T>(query, params as QueryParams, SANITY_FETCH_OPTIONS);
 }

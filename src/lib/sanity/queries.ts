@@ -210,12 +210,24 @@ const PRODUCT_CATALOG_FIELDS = groq`
 export const HOME_PAGE_WITH_CATALOG_QUERY = groq`
 {
   "editorial": *[_type == "homePage" && _id == "homePageV2"][0] {
-    brandLogosTitle,
-    "brandLogoUrls": brandLogos[].asset->url,
+    heroHeadingRegular,
+    heroHeadingCursive,
+    heroHeading,
+    "heroHeadingRegular": coalesce(heroHeadingRegular, heroHeading),
+    heroSubheading,
+    trustStripHeading,
+    heroStats[] {
+      numberValue,
+      label,
+      value
+    },
     homeStats[] {
       value,
       label
     },
+    "brandLogosTitle": coalesce(trustStripHeading, brandLogosTitle),
+    "clientLogoUrls": coalesce(clientLogos, brandLogos)[].asset->url,
+    "brandLogoUrls": coalesce(clientLogos, brandLogos)[].asset->url,
     hero {
       eyebrow,
       headline,
@@ -509,9 +521,19 @@ export const SITE_SETTINGS_QUERY = groq`
     url
   },
   contactEmail,
-  copyrightText
+  copyrightText,
+  announcements
 }
 `;
+
+export async function getAnnouncementMessages(): Promise<string[]> {
+  const settings = await getSiteSettings();
+  const fromCms =
+    settings?.announcements
+      ?.map((line) => line?.trim())
+      .filter((line): line is string => Boolean(line)) ?? [];
+  return fromCms;
+}
 
 export async function getSiteSettings(): Promise<SanitySiteSettings | null> {
   try {

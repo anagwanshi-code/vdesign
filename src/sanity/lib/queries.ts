@@ -112,6 +112,15 @@ export const ABOUT_PAGE_QUERY = groq`*[_type == "aboutPage"] | order(_updatedAt 
   "studioImageUrls": studioImages[].asset->url
 }`;
 
+export const TESTIMONIALS_QUERY = groq`*[_type == "testimonial"] | order(_createdAt desc) {
+  _id,
+  name,
+  designation,
+  review,
+  rating,
+  "imageUrl": image.asset->url
+}`;
+
 export const FOUNDER_QUERY = groq`*[_type == "founder"][0] {
   name,
   role,

@@ -142,6 +142,7 @@ export async function POST(req: NextRequest) {
         price: item.price,
       })),
       paymentStatus: "Paid",
+      orderStatus: "Paid",
       razorpayOrderId,
       razorpayPaymentId,
     });
@@ -181,6 +182,40 @@ export async function POST(req: NextRequest) {
       }
     } catch (emailError) {
       console.error("[checkout/verify] Order receipt email failed:", emailError);
+    }
+
+    try {
+      const webhookUrl = process.env.MAKE_WEBHOOK_URL?.trim();
+
+      if (webhookUrl) {
+        const makePayload = {
+          orderId,
+          sanityDocumentId: document._id,
+          paymentStatus: "Paid" as const,
+          razorpayOrderId,
+          razorpayPaymentId,
+          shippingAddress: formatShippingAddress(customer),
+          customer: orderData.customer,
+          items: orderData.items,
+          totalAmount: orderData.totalAmount,
+        };
+
+        const webhookResponse = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(makePayload),
+        });
+
+        if (!webhookResponse.ok) {
+          console.error(
+            "[checkout/verify] Make.com webhook failed:",
+            webhookResponse.status,
+            await webhookResponse.text().catch(() => ""),
+          );
+        }
+      }
+    } catch (webhookError) {
+      console.error("[checkout/verify] Make.com webhook error:", webhookError);
     }
 
     return NextResponse.json<CheckoutVerifySuccessResponse>({

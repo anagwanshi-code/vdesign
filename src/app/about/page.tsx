@@ -2,7 +2,7 @@ import { AboutHeroHeading } from "@/components/blocks/about-hero-heading";
 import { AboutJourney } from "@/components/blocks/about-journey";
 import { AboutStudio } from "@/components/blocks/about-studio";
 import { AboutValues } from "@/components/blocks/about-values";
-import { FounderStory } from "@/components/blocks/founder-story";
+import { FounderStory, type FounderData } from "@/components/blocks/founder-story";
 import { PremiumCta } from "@/components/blocks/premium-cta";
 import { sanityFetch } from "@/lib/sanity/client";
 import { ABOUT_PAGE_QUERY, FOUNDER_QUERY } from "@/sanity/lib/queries";
@@ -12,6 +12,7 @@ import { Play } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -37,7 +38,7 @@ const DEFAULT_STUDIO_DESCRIPTION =
 
 export default async function AboutPage() {
   const [founder, about] = await Promise.all([
-    client.fetch(FOUNDER_QUERY),
+    client.fetch<FounderData | null>(FOUNDER_QUERY),
     sanityFetch<AboutPageContent>(ABOUT_PAGE_QUERY),
   ]);
 

@@ -43,10 +43,29 @@ export type SanityAboutStudio = {
 };
 
 export type SanityHomePage = {
+  heroHeadingRegular?: string | null;
+  heroHeadingCursive?: string | null;
+  heroHeading?: string | null;
+  heroSubheading?: string | null;
+  trustStripHeading?: string | null;
   hero: SanityHeroBlock | null;
   brandLogosTitle?: string | null;
   brandLogoUrls?: (string | null)[] | null;
-  homeStats?: { value?: string | null; label?: string | null }[] | null;
+  clientLogoUrls?: (string | null)[] | null;
+  heroStats?:
+    | {
+        numberValue?: string | null;
+        value?: string | null;
+        label?: string | null;
+      }[]
+    | null;
+  homeStats?:
+    | {
+        numberValue?: string | null;
+        value?: string | null;
+        label?: string | null;
+      }[]
+    | null;
   featuredCollections?: SanityCollectionSummary[] | null;
   featuredProducts?: SanityProduct[] | null;
   aboutStudio?: SanityAboutStudio | null;
@@ -173,6 +192,7 @@ export type SanitySiteSettings = {
   socialLinks?: SanitySocialLink[] | null;
   contactEmail?: string | null;
   copyrightText?: string | null;
+  announcements?: (string | null)[] | null;
 };
 
 export type SanityHomePageWithCatalog = {

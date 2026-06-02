@@ -23,6 +23,7 @@ const HIDDEN_DOCUMENT_TYPES = new Set([
   "downloadResource",
   "order",
   "guestOtp",
+  "testimonial",
 ]);
 
 function singletonDocument(
@@ -161,6 +162,7 @@ export const structure: StructureResolver = (S) =>
                 "downloadResource",
                 "Downloadable Resource (PDFs)",
               ),
+              documentTypeListItem(S, "testimonial", "Testimonials"),
             ]),
         ),
 

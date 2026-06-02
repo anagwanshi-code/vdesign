@@ -1,7 +1,8 @@
 "use client";
 
+import { HeroTrustStats } from "@/components/home/hero-trust-stats";
 import { cn, premiumCtaHoverClass } from "@/lib/utils/cn";
-import type { HeroEditorialParams } from "@/types/home";
+import type { HeroEditorialParams, HomeStatItem } from "@/types/home";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,6 +17,12 @@ const SLIDER_IMAGES = [
 ] as const;
 
 const SLIDER_INTERVAL_MS = 4000;
+
+const DEFAULT_HERO_HEADING_REGULAR = "We Build Brands That Leave a";
+const DEFAULT_HERO_HEADING_CURSIVE = "Mark.";
+
+const CURSIVE_HEADING_CLASS =
+  "font-dancing inline align-baseline text-[1.15em] italic leading-none text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-400 pr-2 sm:text-[1.2em] md:text-[1.25em] lg:text-[1.35em]";
 
 type HeroImageInput =
   | string
@@ -44,12 +51,18 @@ function resolveHeroImageAlt(image: HeroImageInput | undefined, index: number): 
 
 type HeroBlockProps = {
   hero: HeroEditorialParams;
+  homeStats?: HomeStatItem[];
   /** Tighter vertical spacing when stacked in the homepage viewport hero */
   compact?: boolean;
   className?: string;
 };
 
-export function HeroBlock({ hero, compact = false, className }: HeroBlockProps) {
+export function HeroBlock({
+  hero,
+  homeStats = [],
+  compact = false,
+  className,
+}: HeroBlockProps) {
   const prefersReducedMotion = useReducedMotion();
   const motionEnabled = !prefersReducedMotion;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -94,20 +107,24 @@ export function HeroBlock({ hero, compact = false, className }: HeroBlockProps) 
   };
 
   const eyebrow = hero.eyebrow?.trim() || "We Don't Just Design.";
+  const headingRegular =
+    hero.heroHeadingRegular?.trim() || DEFAULT_HERO_HEADING_REGULAR;
+  const headingCursive =
+    hero.heroHeadingCursive?.trim() || DEFAULT_HERO_HEADING_CURSIVE;
 
   return (
     <section
       className={cn(
-        "flex w-full flex-col overflow-hidden bg-white",
+        "flex w-full min-w-0 max-w-full flex-col overflow-hidden bg-transparent",
         className,
       )}
       aria-label="Editorial hero"
     >
       <div
         className={cn(
-          "mx-auto grid w-full max-w-7xl grid-cols-1 items-center px-6 lg:grid-cols-2",
+          "mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center px-4 sm:px-6 lg:grid-cols-2",
           compact
-            ? "gap-12 pb-12 pt-12 lg:gap-16 lg:pb-20 lg:pt-16"
+            ? "gap-8 pb-10 pt-10 sm:gap-12 sm:pb-12 sm:pt-12 lg:gap-16 lg:pb-20 lg:pt-16"
             : "gap-10 pb-12 pt-10 lg:gap-12 lg:pb-20 lg:pt-16",
         )}
       >
@@ -122,16 +139,14 @@ export function HeroBlock({ hero, compact = false, className }: HeroBlockProps) 
 
           <h1
             className={cn(
-              "font-serif leading-[1.1] text-zinc-900",
+              "font-serif leading-[1.1] text-balance text-zinc-900",
               compact
-                ? "mb-4 text-4xl md:text-5xl lg:text-6xl"
-                : "mb-6 text-5xl md:text-7xl",
+                ? "mb-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
+                : "mb-6 text-4xl sm:text-5xl md:text-7xl",
             )}
           >
-            We Build Brands That Leave a{" "}
-            <span className="font-dancing ml-2 bg-gradient-to-r from-[#E91E63] to-purple-600 bg-clip-text text-6xl text-transparent md:text-8xl">
-              Mark.
-            </span>
+            {headingRegular}{" "}
+            <span className={CURSIVE_HEADING_CLASS}>{headingCursive}</span>
           </h1>
 
           <p
@@ -161,51 +176,36 @@ export function HeroBlock({ hero, compact = false, className }: HeroBlockProps) 
               {secondaryCta.label}
             </Link>
           </div>
+
+          <HeroTrustStats stats={homeStats} className="lg:max-w-none" />
         </motion.div>
 
         <motion.div
           className={cn(
-            "relative mx-auto w-full overflow-hidden rounded-2xl lg:ml-auto",
-            compact
-              ? "aspect-video max-w-3xl shadow-2xl"
-              : "aspect-video shadow-lg",
+            "relative mx-auto w-full min-w-0 max-w-full overflow-hidden rounded-2xl lg:ml-auto lg:max-w-3xl",
+            compact ? "aspect-video shadow-2xl" : "aspect-video shadow-lg",
           )}
           initial={motionEnabled ? { opacity: 0, scale: 0.98 } : false}
-          animate={
-            motionEnabled
-              ? {
-                  opacity: 1,
-                  scale: 1,
-                  y: [0, -10, 0],
-                }
-              : undefined
-          }
+          animate={motionEnabled ? { opacity: 1, scale: 1 } : undefined}
           transition={
             motionEnabled
-              ? {
-                  opacity: { duration: 0.9, ease: CINEMATIC_EASE },
-                  scale: { duration: 0.9, ease: CINEMATIC_EASE },
-                  y: {
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                }
+              ? { duration: 0.9, ease: CINEMATIC_EASE }
               : undefined
           }
         >
           {sliderImages.map((src, index) => (
             <Image
-              key={src}
+              key={`${src}-${index}`}
               src={src}
               alt={resolveHeroImageAlt(hero.heroImages[index], index)}
               fill
               priority={index === 0}
+              fetchPriority={index === 0 ? "high" : "low"}
               className={cn(
                 "object-cover transition-opacity duration-1000 ease-in-out",
                 index === currentIndex ? "opacity-100" : "opacity-0",
               )}
-              sizes="(max-width: 1024px) 100vw, 768px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 768px"
             />
           ))}
         </motion.div>

@@ -3,7 +3,6 @@
 import { FacebookIcon } from "@/components/icons/facebook-icon";
 import { InstagramIcon } from "@/components/icons/instagram-icon";
 import { PinterestIcon } from "@/components/icons/pinterest-icon";
-import { useLenis } from "@studio-freight/react-lenis";
 import { Link2, Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -101,16 +100,11 @@ export function FooterClient({
   socialLinks,
 }: FooterClientProps) {
   const pathname = usePathname();
-  const lenis = useLenis();
   const phone = DEFAULT_PHONE;
 
   const handleHomeClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
       e.preventDefault();
-      if (lenis) {
-        lenis.scrollTo(0, { duration: 1.2 });
-        return;
-      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -244,9 +238,14 @@ export function FooterClient({
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-zinc-800 py-5 md:flex-row">
-          <p className="text-sm text-zinc-500">{copyrightText}</p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
+        <div className="grid gap-4 border-t border-zinc-800 py-5 md:grid-cols-3 md:items-center">
+          <p className="text-center text-sm text-zinc-500 md:text-left">
+            {copyrightText}
+          </p>
+          <nav
+            className="flex items-center justify-center gap-8 sm:gap-12"
+            aria-label="Legal"
+          >
             <Link
               href="/privacy"
               className="text-sm text-zinc-500 transition-colors hover:text-white"
@@ -259,15 +258,8 @@ export function FooterClient({
             >
               Terms & Conditions
             </Link>
-            <Link
-              href="/studio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-zinc-500 transition-colors hover:text-royal-magenta"
-            >
-              Studio Access
-            </Link>
-          </div>
+          </nav>
+          <div className="hidden md:block" aria-hidden="true" />
         </div>
       </div>
     </footer>

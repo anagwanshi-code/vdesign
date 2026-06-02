@@ -11,7 +11,9 @@ import { getHomePageWithCatalog } from "@/lib/sanity/queries";
 export const MOCK_HOME_PAGE_DATA: HomePageData = {
   hero: {
     eyebrow: "Luxury Design Studio",
-    title: "Silence, Then Revelation",
+    title: "We Build Brands That Leave a Mark.",
+    heroHeadingRegular: "We Build Brands That Leave a",
+    heroHeadingCursive: "Mark.",
     description:
       "Premium packaging, curated commerce, and cinematic creative agency work—rooted in modern Indian artistic excellence and engineered for the world stage.",
     ctaPrimary: {

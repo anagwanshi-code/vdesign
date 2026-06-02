@@ -41,7 +41,7 @@ function mapSanityHomeStats(
   const items =
     stats
       ?.map((item) => ({
-        value: item.value?.trim() || "",
+        value: (item.numberValue ?? item.value)?.trim() || "",
         label: item.label?.trim() || "",
       }))
       .filter((item) => item.value || item.label)
@@ -491,15 +491,56 @@ export function mapSanityHomePageWithCatalog(
 } | null {
   const editorial = content.editorial;
   const brandLogosTitle =
-    editorial?.brandLogosTitle?.trim() || "TRUSTED BY GROWING BRANDS";
+    editorial?.trustStripHeading?.trim() ||
+    editorial?.brandLogosTitle?.trim() ||
+    "TRUSTED BY GROWING BRANDS";
   const brandLogoUrls =
-    editorial?.brandLogoUrls?.filter((url): url is string =>
-      Boolean(url?.trim()),
+    (editorial?.clientLogoUrls ?? editorial?.brandLogoUrls)?.filter(
+      (url): url is string => Boolean(url?.trim()),
     ) ?? [];
-  const homeStats = mapSanityHomeStats(editorial?.homeStats);
-  const hero = editorial?.hero?.headline
+  const homeStats = mapSanityHomeStats(
+    editorial?.heroStats?.length
+      ? editorial.heroStats
+      : editorial?.homeStats,
+  );
+
+  const heroFromBlock = editorial?.hero
     ? mapSanityHeroToEditorial(editorial.hero, fallback.hero)
     : fallback.hero;
+
+  const hero: HeroEditorialParams = {
+    ...heroFromBlock,
+    heroHeadingRegular:
+      editorial?.heroHeadingRegular?.trim() ||
+      editorial?.heroHeading?.trim() ||
+      heroFromBlock.heroHeadingRegular,
+    heroHeadingCursive:
+      editorial?.heroHeadingCursive?.trim() ||
+      heroFromBlock.heroHeadingCursive,
+    title:
+      [
+        editorial?.heroHeadingRegular?.trim() ||
+          editorial?.heroHeading?.trim() ||
+          editorial?.hero?.headline?.trim(),
+        editorial?.heroHeadingCursive?.trim(),
+      ]
+        .filter(Boolean)
+        .join(" ") ||
+      heroFromBlock.title,
+    description:
+      editorial?.heroSubheading?.trim() ||
+      editorial?.hero?.subheadline?.trim() ||
+      heroFromBlock.description,
+  };
+
+  const hasHeroContent = Boolean(
+    editorial?.heroHeadingRegular ||
+      editorial?.heroHeadingCursive ||
+      editorial?.heroHeading ||
+      editorial?.heroSubheading ||
+      editorial?.hero?.headline ||
+      editorial?.hero?.heroImages?.length,
+  );
   const featuredCollections = mapSanityFeaturedCollections(
     editorial?.featuredCollections,
     fallback.hero.media,
@@ -518,16 +559,23 @@ export function mapSanityHomePageWithCatalog(
         )
       : [];
 
-  const hasHero = Boolean(editorial?.hero?.headline);
   const hasFeaturedCollections = featuredCollections.length > 0;
   const hasFeaturedProducts = featuredProducts.length > 0;
   const hasProducts = sanityProducts.length > 0;
 
+  const hasTrustContent =
+    brandLogoUrls.length > 0 ||
+    Boolean(editorial?.trustStripHeading?.trim()) ||
+    Boolean(editorial?.heroStats?.length) ||
+    Boolean(editorial?.homeStats?.length);
+
   if (
-    !hasHero &&
-    !hasFeaturedCollections &&
-    !hasFeaturedProducts &&
-    !hasProducts
+    !editorial ||
+    (!hasHeroContent &&
+      !hasFeaturedCollections &&
+      !hasFeaturedProducts &&
+      !hasProducts &&
+      !hasTrustContent)
   ) {
     return null;
   }

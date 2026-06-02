@@ -8,6 +8,7 @@ import type { PageHeroContent } from "@/types/page-hero";
 import type { ProductCategoryDocument } from "@/types/product-category";
 import type { Metadata } from "next";
 import Link from "next/link";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Products",

@@ -107,6 +107,11 @@ export function CheckoutEmailVerify({
         return;
       }
 
+      if (!("profile" in payload)) {
+        toast.error("Verification failed");
+        return;
+      }
+
       if (payload.profile) {
         onVerified(payload.profile);
         toast.success("Details loaded from your previous order");

@@ -17,6 +17,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+export const revalidate = 30;
+
 export const metadata: Metadata = {
   title: "Contact & Book Consultation",
   description:
@@ -24,9 +26,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const content = await client
-    .withConfig({ useCdn: false })
-    .fetch<ContactPageContent | null>(CONTACT_PAGE_QUERY);
+  const content = await client.fetch<ContactPageContent | null>(CONTACT_PAGE_QUERY);
 
   const heroImageUrl = content?.heroImageUrl?.trim() || null;
   const email = content?.email?.trim() || DEFAULT_CONTACT_EMAIL;

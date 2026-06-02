@@ -3,8 +3,10 @@ import { SplitPageHero } from "@/components/blocks/split-page-hero";
 import { client } from "@/sanity/lib/client";
 import { ALL_PORTFOLIO_QUERY, PORTFOLIO_PAGE_QUERY } from "@/sanity/lib/queries";
 import type { PageHeroContent } from "@/types/page-hero";
+import type { PortfolioListItem } from "@/types/portfolio";
 import type { Metadata } from "next";
 import Link from "next/link";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -35,10 +37,8 @@ function renderPortfolioTitle(title: string) {
 
 export default async function PortfolioPage() {
   const [projects, pageContent] = await Promise.all([
-    client.fetch(ALL_PORTFOLIO_QUERY),
-    client
-      .withConfig({ useCdn: false })
-      .fetch<PageHeroContent | null>(PORTFOLIO_PAGE_QUERY),
+    client.fetch<PortfolioListItem[]>(ALL_PORTFOLIO_QUERY),
+    client.fetch<PageHeroContent | null>(PORTFOLIO_PAGE_QUERY),
   ]);
 
   const title = pageContent?.title?.trim() || DEFAULT_TITLE;

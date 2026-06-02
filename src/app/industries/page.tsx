@@ -9,6 +9,7 @@ import type { PageHeroContent } from "@/types/page-hero";
 import { Download } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Industries",
@@ -39,9 +40,7 @@ function renderIndustriesTitle(title: string) {
 export default async function IndustriesPage() {
   const [industries, pageContent] = await Promise.all([
     client.fetch<IndustryDocument[]>(INDUSTRIES_QUERY),
-    client
-      .withConfig({ useCdn: false })
-      .fetch<PageHeroContent | null>(INDUSTRIES_PAGE_QUERY),
+    client.fetch<PageHeroContent | null>(INDUSTRIES_PAGE_QUERY),
   ]);
 
   const title = pageContent?.title?.trim() || DEFAULT_TITLE;

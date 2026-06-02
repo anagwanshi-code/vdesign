@@ -8,8 +8,10 @@ import {
   SHOP_PAGE_QUERY,
 } from "@/sanity/lib/queries";
 import type { PageHeroContent } from "@/types/page-hero";
+import type { ShopCategoryItem, ShopProductItem } from "@/types/shop";
 import type { Metadata } from "next";
 import Link from "next/link";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -61,8 +63,8 @@ function renderShopTitle(title: string) {
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const { category: categorySlug } = await searchParams;
   const [products, categories, pageContent] = await Promise.all([
-    client.fetch(ALL_PRODUCTS_QUERY),
-    client.fetch(ALL_CATEGORIES_QUERY),
+    client.fetch<ShopProductItem[]>(ALL_PRODUCTS_QUERY),
+    client.fetch<ShopCategoryItem[]>(ALL_CATEGORIES_QUERY),
     client.fetch<PageHeroContent | null>(SHOP_PAGE_QUERY),
   ]);
 

@@ -6,6 +6,12 @@ const PAYMENT_STATUS_OPTIONS = [
   { title: "Failed", value: "Failed" },
 ] as const;
 
+const ORDER_STATUS_OPTIONS = [
+  { title: "Paid", value: "Paid" },
+  { title: "Dispatched", value: "Dispatched" },
+  { title: "Delivered", value: "Delivered" },
+] as const;
+
 export const order = defineType({
   name: "order",
   title: "Orders",
@@ -105,6 +111,16 @@ export const order = defineType({
       initialValue: "Pending",
     }),
     defineField({
+      name: "orderStatus",
+      title: "Order Status",
+      type: "string",
+      options: {
+        list: [...ORDER_STATUS_OPTIONS],
+        layout: "radio",
+      },
+      initialValue: "Paid",
+    }),
+    defineField({
       name: "razorpayOrderId",
       title: "Razorpay Order ID",
       type: "string",
@@ -120,20 +136,27 @@ export const order = defineType({
       type: "string",
       description: "Courier tracking number (Air Waybill)",
     }),
+    defineField({
+      name: "courierName",
+      title: "Courier Name",
+      type: "string",
+      description: "Shipping carrier (e.g. Delhivery, Blue Dart)",
+    }),
   ],
   preview: {
     select: {
       orderId: "orderId",
       customerName: "customerName",
+      orderStatus: "orderStatus",
       paymentStatus: "paymentStatus",
       totalAmount: "totalAmount",
     },
-    prepare({ orderId, customerName, paymentStatus, totalAmount }) {
+    prepare({ orderId, customerName, orderStatus, paymentStatus, totalAmount }) {
       const amountLabel =
         totalAmount != null ? `₹${totalAmount}` : undefined;
       return {
         title: orderId || "Order",
-        subtitle: [customerName, paymentStatus, amountLabel]
+        subtitle: [customerName, orderStatus ?? paymentStatus, amountLabel]
           .filter(Boolean)
           .join(" · "),
       };

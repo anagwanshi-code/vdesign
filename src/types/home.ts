@@ -20,6 +20,10 @@ export type HomeStatItem = {
 export type HeroEditorialParams = {
   eyebrow: string;
   title: string;
+  /** Serif portion of the hero headline */
+  heroHeadingRegular?: string;
+  /** Cursive gradient highlight at the end of the headline */
+  heroHeadingCursive?: string;
   description: string;
   ctaPrimary: HeroCta;
   ctaSecondary: HeroCta;
