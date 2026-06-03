@@ -98,8 +98,8 @@ export function HeroBlock({
   }, [prefersReducedMotion, sliderImages.length]);
 
   const primaryCta = {
-    label: hero.ctaPrimary.label?.trim() || "Explore Our Work",
-    href: hero.ctaPrimary.href?.trim() || "/work",
+    label: hero.ctaPrimary.label?.trim() || "Shop The Collection",
+    href: hero.ctaPrimary.href?.trim() || "/shop",
   };
   const secondaryCta = {
     label: hero.ctaSecondary.label?.trim() || "Book Consultation",

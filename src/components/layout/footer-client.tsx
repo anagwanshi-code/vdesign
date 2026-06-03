@@ -39,29 +39,17 @@ const INDUSTRIES_SERVE_LINKS = [
   { label: "Retail", href: "/industries" },
 ] as const;
 
+const linkClass =
+  "block text-sm text-gray-600 transition-colors hover:text-pink-600";
+
+const headingClass =
+  "mb-4 font-sans text-sm font-bold uppercase tracking-widest text-gray-900";
+
 type SocialLink = {
   label: string;
   platform: string;
   href: string;
 };
-
-const DEFAULT_SOCIAL: SocialLink[] = [
-  {
-    label: "Instagram",
-    platform: "instagram",
-    href: "https://www.instagram.com/",
-  },
-  {
-    label: "Facebook",
-    platform: "facebook",
-    href: "https://www.facebook.com/",
-  },
-  {
-    label: "Pinterest",
-    platform: "pinterest",
-    href: "https://www.pinterest.com/",
-  },
-];
 
 function normalizePlatformKey(platform: string): string {
   const key = platform.trim().toLowerCase();
@@ -110,24 +98,24 @@ export function FooterClient({
   };
 
   return (
-    <footer className="border-t border-zinc-800 bg-[#0B1120] pt-12 pb-8 text-zinc-400 lg:pt-12">
+    <footer className="border-t border-rose-200 bg-[#FAF8F5] pt-8 pb-8 text-gray-600">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
+        <div className="mb-8 grid grid-cols-1 items-start gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-10">
           <div>
             <Link
               href="/"
               onClick={handleHomeClick}
-              className="inline-block"
+              className="inline-block max-w-[180px]"
             >
               <Image
                 src="/logo.png"
                 alt="V Design"
-                width={320}
-                height={107}
-                className="mb-4 h-auto w-44 object-contain md:w-48"
+                width={180}
+                height={60}
+                className="h-auto w-full max-w-[180px] object-contain"
               />
             </Link>
-            <p className="mb-5 max-w-sm text-sm leading-relaxed text-zinc-400">
+            <p className="mb-4 mt-4 max-w-sm text-sm leading-relaxed text-gray-600">
               V Design is a creative branding, packaging, printing, and digital
               solutions company. We transform ideas into impactful experiences.
             </p>
@@ -139,7 +127,7 @@ export function FooterClient({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="text-zinc-400 transition-colors hover:text-royal-magenta"
+                  className="text-gray-600 transition-colors hover:text-pink-600"
                 >
                   {renderSocialIcon(social.platform)}
                 </a>
@@ -148,16 +136,14 @@ export function FooterClient({
           </div>
 
           <div>
-            <h3 className="mb-4 font-sans text-sm uppercase tracking-widest text-white">
-              Quick Links
-            </h3>
+            <h3 className={headingClass}>Quick Links</h3>
             <ul className="list-none space-y-2 p-0">
               {QUICK_LINKS.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
                     onClick={link.href === "/" ? handleHomeClick : undefined}
-                    className="block text-sm text-zinc-400 transition-colors hover:text-royal-magenta"
+                    className={linkClass}
                   >
                     {link.label}
                   </Link>
@@ -167,17 +153,15 @@ export function FooterClient({
           </div>
 
           <div>
-            <h3 className="mb-4 font-sans text-sm uppercase tracking-widest text-white">
-              Contact Info
-            </h3>
+            <h3 className={headingClass}>Contact Info</h3>
             <ul className="space-y-2.5 text-sm leading-relaxed">
               <li>
                 <a
                   href={`tel:${phone.replace(/\s/g, "")}`}
-                  className="inline-flex items-start gap-3 text-zinc-400 transition-colors hover:text-royal-magenta"
+                  className="inline-flex items-start gap-3 text-gray-600 transition-colors hover:text-pink-600"
                 >
                   <Phone
-                    className="mt-0.5 h-4 w-4 shrink-0 text-royal-magenta/80"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-pink-600/80"
                     strokeWidth={1.5}
                     aria-hidden="true"
                   />
@@ -187,19 +171,19 @@ export function FooterClient({
               <li>
                 <a
                   href={`mailto:${email}`}
-                  className="inline-flex items-start gap-3 text-zinc-400 transition-colors hover:text-royal-magenta"
+                  className="inline-flex items-start gap-3 text-gray-600 transition-colors hover:text-pink-600"
                 >
                   <Mail
-                    className="mt-0.5 h-4 w-4 shrink-0 text-royal-magenta/80"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-pink-600/80"
                     strokeWidth={1.5}
                     aria-hidden="true"
                   />
                   {email}
                 </a>
               </li>
-              <li className="inline-flex items-start gap-3 text-zinc-400">
+              <li className="inline-flex items-start gap-3 text-gray-600">
                 <MapPin
-                  className="mt-0.5 h-4 w-4 shrink-0 text-royal-magenta/80"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-pink-600/80"
                   strokeWidth={1.5}
                   aria-hidden="true"
                 />
@@ -209,16 +193,11 @@ export function FooterClient({
           </div>
 
           <div>
-            <h3 className="mb-4 font-sans text-sm uppercase tracking-widest text-white">
-              Industries We Serve
-            </h3>
+            <h3 className={headingClass}>Industries We Serve</h3>
             <ul className="list-none space-y-2 p-0">
               {INDUSTRIES_SERVE_LINKS.map((link) => (
                 <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="block text-sm text-zinc-400 transition-colors hover:text-royal-magenta"
-                  >
+                  <Link href={link.href} className={linkClass}>
                     {link.label}
                   </Link>
                 </li>
@@ -228,7 +207,7 @@ export function FooterClient({
               href={MAP_DIRECTIONS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center text-sm font-medium text-royal-magenta transition-colors hover:text-white"
+              className="inline-flex items-center pt-3 text-sm font-medium text-pink-600 transition-colors hover:text-pink-700"
             >
               Visit Our Studio
               <span className="ml-2" aria-hidden="true">
@@ -238,8 +217,8 @@ export function FooterClient({
           </div>
         </div>
 
-        <div className="grid gap-4 border-t border-zinc-800 py-5 md:grid-cols-3 md:items-center">
-          <p className="text-center text-sm text-zinc-500 md:text-left">
+        <div className="grid gap-4 border-t border-rose-200 py-5 md:grid-cols-3 md:items-center">
+          <p className="text-center text-sm text-gray-600 md:text-left">
             {copyrightText}
           </p>
           <nav
@@ -248,13 +227,13 @@ export function FooterClient({
           >
             <Link
               href="/privacy"
-              className="text-sm text-zinc-500 transition-colors hover:text-white"
+              className="text-sm text-gray-600 transition-colors hover:text-pink-600"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms"
-              className="text-sm text-zinc-500 transition-colors hover:text-white"
+              className="text-sm text-gray-600 transition-colors hover:text-pink-600"
             >
               Terms & Conditions
             </Link>

@@ -105,7 +105,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       </nav>
 
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
-        <div className="sticky top-28 z-10 lg:top-36">
+        <div className="z-10 lg:sticky lg:top-36">
           <ProductDetailGallery
             images={product.images}
             primary={product.image}

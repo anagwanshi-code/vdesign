@@ -9,6 +9,9 @@ export type ShopProductItem = {
   title: string;
   slug: string;
   price: number;
+  mrp?: number | null;
+  compareAtPrice?: number | null;
+  maxVolumeDiscountPercent?: number | null;
   rating?: number | null;
   reviewsCount?: number | null;
   isBestSeller?: boolean | null;

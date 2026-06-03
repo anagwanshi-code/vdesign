@@ -1,3 +1,4 @@
+import { ProductDescriptionExpandable } from "@/components/product/product-description-expandable";
 import type { ProductDetail } from "@/types/product";
 
 type ProductDetailsHeaderProps = {
@@ -27,9 +28,7 @@ export function ProductDetailsHeader({
       ) : null}
 
       {product.description ? (
-        <p className="max-w-prose font-sans text-base leading-7 text-gray-600">
-          {product.description}
-        </p>
+        <ProductDescriptionExpandable description={product.description} />
       ) : null}
     </header>
   );

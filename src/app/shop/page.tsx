@@ -96,32 +96,45 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const heroImageUrl = pageContent?.heroImageUrl?.trim();
 
   return (
-    <div className="bg-white pt-6 lg:pt-8">
-      <SplitPageHero
-        compact
-        eyebrow="SHOP OUR COLLECTION"
-        title={renderShopTitle(title)}
-        description={description}
-        heroImageUrl={heroImageUrl}
-        actions={
-          <>
-            <Link
-              href="#shop-catalog"
-              className="inline-flex items-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              Shop All Products
-            </Link>
-            <Link
-              href="/consultation"
-              className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-6 py-2.5 text-sm font-medium text-luxury-text transition-colors hover:border-royal-magenta hover:text-royal-magenta"
-            >
-              Bulk Inquiry
-            </Link>
-          </>
-        }
-      />
+    <div className="bg-white pt-2 md:pt-6 lg:pt-8">
+      <header className="border-b border-zinc-100 px-4 pb-4 md:hidden">
+        <p className="text-xs font-semibold uppercase tracking-widest text-royal-magenta">
+          Shop
+        </p>
+        <h1 className="mt-1 font-serif text-2xl leading-tight text-gray-900">
+          {sanitizeShopTitle(title).replace(/,\s*Printed to.*$/i, "")}
+        </h1>
+      </header>
 
-      <ShopTrustBanner />
+      <div className="hidden md:block">
+        <SplitPageHero
+          compact
+          eyebrow="SHOP OUR COLLECTION"
+          title={renderShopTitle(title)}
+          description={description}
+          heroImageUrl={heroImageUrl}
+          actions={
+            <>
+              <Link
+                href="#shop-catalog"
+                className="inline-flex items-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                Shop All Products
+              </Link>
+              <Link
+                href="/consultation"
+                className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-6 py-2.5 text-sm font-medium text-luxury-text transition-colors hover:border-royal-magenta hover:text-royal-magenta"
+              >
+                Bulk Inquiry
+              </Link>
+            </>
+          }
+        />
+      </div>
+
+      <div className="hidden md:block">
+        <ShopTrustBanner />
+      </div>
 
       <ShopCatalogSection
         products={products ?? []}

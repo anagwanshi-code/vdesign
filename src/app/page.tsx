@@ -54,7 +54,17 @@ export default async function HomePage() {
   return (
     <>
       <div className="flex w-full min-w-0 max-w-full flex-col overflow-hidden">
-        <HeroBlock hero={hero} homeStats={homeStats} compact />
+        <HeroBlock
+          hero={{
+            ...hero,
+            ctaPrimary: {
+              label: "Shop The Collection",
+              href: "/shop",
+            },
+          }}
+          homeStats={homeStats}
+          compact
+        />
         <TrustStrip
           brandLogosTitle={brandLogosTitle}
           brandLogoUrls={brandLogoUrls}

@@ -2,7 +2,7 @@
 
 type MessageSegment = {
   text: string;
-  highlight?: "gold" | "rose";
+  highlight?: "accent" | "emphasis";
 };
 
 function parseAnnouncementMessage(message: string): MessageSegment[] {
@@ -17,12 +17,12 @@ function parseAnnouncementMessage(message: string): MessageSegment[] {
     }
 
     const token = match[0];
-    if (token === "✨" || token === "🌟") {
-      segments.push({ text: token, highlight: "gold" });
-    } else if (token.startsWith("₹")) {
-      segments.push({ text: token, highlight: "gold" });
+    if (token === "Bespoke Packaging Collection") {
+      segments.push({ text: token, highlight: "accent" });
+    } else if (token === "✨" || token === "🌟" || token.startsWith("₹")) {
+      segments.push({ text: token, highlight: "emphasis" });
     } else {
-      segments.push({ text: token, highlight: "rose" });
+      segments.push({ text: token, highlight: "accent" });
     }
 
     lastIndex = match.index + token.length;
@@ -39,15 +39,15 @@ function AnnouncementMessage({ message }: { message: string }) {
   const segments = parseAnnouncementMessage(message);
 
   return (
-    <span className="inline-flex items-center tracking-[0.12em] text-white/90 drop-shadow-[0_0_12px_rgba(255,255,255,0.15)] sm:tracking-[0.18em]">
+    <span className="inline-flex items-center tracking-[0.12em] text-gray-900 sm:tracking-[0.18em]">
       {segments.map((segment, index) => (
         <span
           key={`${segment.text}-${index}`}
           className={
-            segment.highlight === "gold"
-              ? "text-saffron-gold/95 [text-shadow:0_0_20px_rgba(226,160,63,0.45)]"
-              : segment.highlight === "rose"
-                ? "font-medium text-rose-200 [text-shadow:0_0_18px_rgba(233,30,99,0.35)]"
+            segment.highlight === "accent"
+              ? "font-bold text-pink-600"
+              : segment.highlight === "emphasis"
+                ? "font-semibold text-pink-600"
                 : undefined
           }
         >
@@ -82,20 +82,16 @@ export function AnnouncementBarClient({ messages }: AnnouncementBarClientProps) 
 
   return (
     <div
-      className="relative z-[60] overflow-hidden bg-gradient-to-r from-slate-900 via-gray-800 to-slate-900"
+      className="relative z-[60] overflow-hidden border-b border-rose-100 bg-gradient-to-r from-rose-50 via-white to-rose-50"
       role="region"
       aria-label="Promotional announcements"
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.07] via-transparent to-black/20"
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-rose-50 to-transparent sm:w-24"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-slate-900 to-transparent sm:w-24"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-gray-800 to-transparent sm:w-24"
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-rose-50 to-transparent sm:w-24"
         aria-hidden="true"
       />
 
@@ -107,7 +103,7 @@ export function AnnouncementBarClient({ messages }: AnnouncementBarClientProps) 
           >
             <AnnouncementMessage message={message} />
             <span
-              className="mx-8 text-[10px] tracking-widest text-white/25"
+              className="mx-8 text-[10px] tracking-widest text-rose-200"
               aria-hidden="true"
             >
               ◆

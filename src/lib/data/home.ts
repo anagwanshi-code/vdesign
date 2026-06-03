@@ -17,8 +17,8 @@ export const MOCK_HOME_PAGE_DATA: HomePageData = {
     description:
       "Premium packaging, curated commerce, and cinematic creative agency work—rooted in modern Indian artistic excellence and engineered for the world stage.",
     ctaPrimary: {
-      label: "Explore Collections",
-      href: "/collections",
+      label: "Shop The Collection",
+      href: "/shop",
     },
     ctaSecondary: {
       label: "View Agency Work",

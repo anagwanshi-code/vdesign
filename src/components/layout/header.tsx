@@ -9,7 +9,7 @@ import {
 } from "@/lib/navigation/header-nav";
 import { cn } from "@/lib/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, Store, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -69,6 +69,21 @@ function SearchButton({
     >
       <Search className="h-5 w-5" strokeWidth={1.5} />
     </button>
+  );
+}
+
+function ShopLinkButton({ className }: { className?: string }) {
+  return (
+    <Link
+      href="/shop"
+      className={cn(
+        "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-zinc-800 transition-colors hover:border-brand-pink hover:bg-royal-magenta/5 hover:text-brand-pink",
+        className,
+      )}
+      aria-label="Shop collection"
+    >
+      <Store className="h-5 w-5" strokeWidth={1.5} />
+    </Link>
   );
 }
 
@@ -162,7 +177,8 @@ export function Header() {
               </Link>
             </div>
 
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-2 sm:gap-3">
+              <ShopLinkButton />
               <CartButton onClick={openCart} totalQuantity={totalQuantity} />
               <SearchButton onClick={() => setSearchModalOpen(true)} />
             </div>
@@ -197,6 +213,7 @@ export function Header() {
               >
                 Book Consultation
               </Link>
+              <ShopLinkButton />
               <CartButton onClick={openCart} totalQuantity={totalQuantity} />
               <SearchButton onClick={() => setSearchModalOpen(true)} />
             </div>
@@ -243,22 +260,34 @@ export function Header() {
               </div>
 
               <ul className="flex flex-col gap-1">
-                {MOBILE_NAV_LINKS.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={closeMobileMenu}
-                      className={cn(
-                        "block rounded-lg px-3 py-3 font-sans text-sm uppercase tracking-[0.12em] transition-colors",
-                        isHeaderNavLinkActive(pathname, link.href)
-                          ? "bg-royal-magenta/5 text-brand-pink"
-                          : "text-zinc-800 hover:bg-zinc-50 hover:text-brand-pink",
-                      )}
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
+                {MOBILE_NAV_LINKS.map((link) => {
+                  const isShopLink =
+                    link.href === "/shop" ||
+                    link.name.toLowerCase() === "shop";
+                  const isActive = isHeaderNavLinkActive(pathname, link.href);
+
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        onClick={closeMobileMenu}
+                        className={cn(
+                          "block rounded-lg px-3 py-3 font-sans text-sm uppercase tracking-[0.12em] transition-colors",
+                          isShopLink
+                            ? cn(
+                                "font-extrabold text-pink-600",
+                                isActive && "bg-pink-50",
+                              )
+                            : isActive
+                              ? "bg-royal-magenta/5 text-brand-pink"
+                              : "text-zinc-800 hover:bg-zinc-50 hover:text-brand-pink",
+                        )}
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
 
               <Link
