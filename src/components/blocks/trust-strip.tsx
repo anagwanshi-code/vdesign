@@ -85,7 +85,7 @@ export function TrustStrip({
                   src={url}
                   alt=""
                   fill
-                  className="object-contain opacity-55 grayscale transition-all duration-300 hover:opacity-90 hover:grayscale-0"
+                  className="object-contain"
                   sizes="176px"
                 />
               </div>
