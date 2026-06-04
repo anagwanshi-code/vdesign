@@ -46,8 +46,11 @@ export function generateOrderDispatchHTML(data: OrderDispatchEmailData): string 
               <h1 style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:500;line-height:1.35;color:#1A1A1A;">
                 Your order is on its way
               </h1>
+              <p style="margin:0 0 10px;font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.65;color:#5C5C5C;">
+                Dear <strong style="font-size:22px;font-weight:700;color:#1f2937;font-family:Georgia,'Times New Roman',serif;">${customerName}</strong>,
+              </p>
               <p style="margin:0;font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.65;color:#5C5C5C;">
-                Dear ${customerName}, thank you for your patience. Your V Design order has been handed over to our courier partner and is now in transit.
+                Thank you for your patience. Your V Design order has been handed over to our courier partner and is now in transit.
               </p>
             </td>
           </tr>

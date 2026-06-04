@@ -15,5 +15,9 @@ export function createMailTransporter(): Transporter | null {
   return nodemailer.createTransport({
     service: "gmail",
     auth: { user, pass },
+    // prevent silent hangs in serverless environments
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
   });
 }

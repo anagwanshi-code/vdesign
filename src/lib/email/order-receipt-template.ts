@@ -219,8 +219,11 @@ export function generateOrderReceiptHTML(order: OrderReceiptEmailOrder): string 
               <h1 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:500;line-height:1.35;color:#1A1A1A;">
                 Thank you for your order
               </h1>
+              <p style="margin:0 0 10px;font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.65;color:#5C5C5C;">
+                Dear <strong style="font-size:22px;font-weight:700;color:#1f2937;font-family:Georgia,'Times New Roman',serif;">${escapeHtml(customerName)}</strong>,
+              </p>
               <p style="margin:0;font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.65;color:#5C5C5C;">
-                Dear ${escapeHtml(customerName)}, your payment has been received and your order is confirmed. We will contact you shortly regarding proofing and dispatch.
+                Your payment has been received and your order is confirmed. We will contact you shortly regarding proofing and dispatch.
               </p>
             </td>
           </tr>
