@@ -36,19 +36,17 @@ export function generateOrderDispatchHTML(data: OrderDispatchEmailData): string 
             <td height="4" style="background:linear-gradient(90deg,#0088A9,#E91E63);font-size:0;line-height:4px;">&nbsp;</td>
           </tr>
           <tr>
-            <td style="padding:36px 32px 24px;text-align:center;background:linear-gradient(180deg,#F0F9FB 0%,#FFFFFF 100%);border-bottom:1px solid #EBE6E0;">
-              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:500;color:#1A1A1A;">V Design</p>
+            <td style="padding:32px 36px 28px;text-align:center;background:linear-gradient(180deg,#F0F9FB 0%,#FFFFFF 100%);border-bottom:1px solid #EBE6E0;">
+              <img src="https://cdn.sanity.io/images/12czcms8/production/65735d5d2a262d386fe260746c9e1a9d04bcde29-2000x964.png?w=2000&fit=max&auto=format" alt="V Design" width="180" style="max-width:180px;width:100%;height:auto;display:block;margin:0 auto;border:none;outline:none;" />
               <p style="margin:10px 0 0;font-family:'Segoe UI',system-ui,sans-serif;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#0088A9;">Order dispatched</p>
             </td>
           </tr>
           <tr>
             <td style="padding:28px 32px 8px;">
-              <h1 style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:500;line-height:1.35;color:#1A1A1A;">
+              <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:500;line-height:1.35;color:#1A1A1A;">
                 Your order is on its way
               </h1>
-              <p style="margin:0 0 10px;font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.65;color:#5C5C5C;">
-                Dear <strong style="font-size:22px;font-weight:700;color:#1f2937;font-family:Georgia,'Times New Roman',serif;">${customerName}</strong>,
-              </p>
+              <p style="margin:0 0 16px;font-family:'Segoe UI',system-ui,sans-serif;font-size:18px;font-weight:bold;color:#1f2937;line-height:1.4;">Dear ${customerName},</p>
               <p style="margin:0;font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.65;color:#5C5C5C;">
                 Thank you for your patience. Your V Design order has been handed over to our courier partner and is now in transit.
               </p>
