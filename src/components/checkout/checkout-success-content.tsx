@@ -83,7 +83,7 @@ export function CheckoutSuccessContent() {
 
         <Link
           href="/shop"
-          className={`mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#E91E63] to-purple-600 px-9 py-3.5 font-sans text-body font-medium text-white shadow-lg ${premiumCtaHoverClass} hover:shadow-pink-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-surface`}
+          className={`mt-6 inline-flex items-center justify-center rounded-full bg-pink-600 bg-gradient-to-r from-[#E91E63] to-purple-600 px-9 py-3.5 font-sans text-body font-medium text-white shadow-lg ${premiumCtaHoverClass} hover:shadow-pink-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-surface`}
         >
           Continue Shopping
         </Link>

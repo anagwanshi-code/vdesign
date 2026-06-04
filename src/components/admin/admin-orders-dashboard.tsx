@@ -41,7 +41,7 @@ const dispatchInputClass =
 
 const dispatchSubmitClass = cn(
   "inline-flex h-11 items-center justify-center gap-2 rounded-lg px-6 font-sans text-sm font-bold uppercase tracking-[0.12em] text-white transition-all duration-300",
-  "bg-gradient-to-r from-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-400 hover:shadow-[0_8px_25px_rgb(225,29,72,0.35)]",
+  "bg-pink-600 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-pink-500 hover:to-rose-400 hover:shadow-[0_8px_25px_rgb(225,29,72,0.35)]",
   "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none",
 );
 

@@ -25,7 +25,7 @@ export function ResourcesSearch() {
       />
       <button
         type="submit"
-        className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-sm transition-transform hover:scale-105"
+        className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-pink-600 bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-sm transition-transform hover:scale-105"
         aria-label="Search resources"
       >
         <Search className="h-4 w-4" strokeWidth={2} aria-hidden="true" />

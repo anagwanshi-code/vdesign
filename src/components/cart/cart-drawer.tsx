@@ -261,7 +261,7 @@ export function CartDrawer() {
                   disabled={cartItems.length === 0 || !meetsMoqForCheckout}
                   onClick={handleGoToCheckout}
                   className={cn(
-                    "w-full rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 py-4 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-all duration-500 ease-out",
+                    "w-full rounded-xl bg-pink-600 bg-gradient-to-r from-rose-600 to-pink-600 py-4 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-all duration-500 ease-out",
                     "hover:-translate-y-0.5 hover:from-pink-500 hover:to-rose-400 hover:shadow-[0_8px_25px_rgb(225,29,72,0.4)]",
                     "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none",
                   )}

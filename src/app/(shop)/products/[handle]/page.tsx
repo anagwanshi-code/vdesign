@@ -17,11 +17,6 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
   const routeParams = await params;
 
-  console.log(
-    "Searching for slug/handle:",
-    (routeParams as { slug?: string }).slug || routeParams.handle,
-  );
-
   const slug = (
     (routeParams as { slug?: string }).slug || routeParams.handle
   )
@@ -35,22 +30,33 @@ export async function generateMetadata({
     return { title: "Product Not Found" };
   }
 
+  const description =
+    product.description ??
+    product.subtitle ??
+    "Curated luxury product from V Design Luxury.";
+  const imageUrl = product.image?.src ?? "/opengraph-image.png";
+
   return {
     title: product.title,
-    description:
-      product.description ??
-      product.subtitle ??
-      "Curated luxury product from V Design Luxury.",
+    description,
+    openGraph: {
+      title: `${product.title} — V Design`,
+      description,
+      type: "website",
+      locale: "en_IN",
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: product.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.title} — V Design`,
+      description,
+      images: [imageUrl],
+    },
   };
 }
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const routeParams = await params;
-
-  console.log(
-    "Searching for slug/handle:",
-    (routeParams as { slug?: string }).slug || routeParams.handle,
-  );
 
   const slug = (
     (routeParams as { slug?: string }).slug || routeParams.handle

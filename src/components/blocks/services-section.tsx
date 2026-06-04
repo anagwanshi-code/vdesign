@@ -86,14 +86,14 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
         </div>
 
         {displayServices.length > 0 ? (
-          <ul className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-3">
             {displayServices.map((service) => {
               const Icon = service.icon;
 
               return (
-                <li key={service.id}>
-                  <article className="group overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
-                    <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-zinc-100">
+                <li key={service.id} className="h-full">
+                  <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
+                    <div className="relative aspect-video shrink-0 overflow-hidden rounded-t-2xl bg-zinc-100">
                       {service.imageUrl ? (
                         <Image
                           src={service.imageUrl}
@@ -111,9 +111,9 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
                       )}
                     </div>
 
-                    <div className="p-8">
+                    <div className="flex flex-1 flex-col p-8">
                       <div
-                        className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-luxury-bg shadow-sm"
+                        className="mb-6 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-luxury-bg shadow-sm"
                         aria-hidden="true"
                       >
                         <Icon
@@ -122,17 +122,19 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
                         />
                       </div>
 
-                      <h3 className="mb-3 font-serif text-2xl text-luxury-text">
-                        {service.title}
-                      </h3>
+                      <div className="flex flex-1 flex-col">
+                        <h3 className="mb-3 font-serif text-2xl text-luxury-text">
+                          {service.title}
+                        </h3>
 
-                      <p className="text-sm leading-relaxed text-luxury-muted">
-                        {service.description}
-                      </p>
+                        <p className="flex-1 text-sm leading-relaxed text-luxury-muted">
+                          {service.description}
+                        </p>
+                      </div>
 
                       <Link
                         href="/services"
-                        className="mt-6 inline-flex text-sm font-medium text-luxury-text transition-colors duration-300 group-hover:text-royal-magenta"
+                        className="mt-auto inline-flex pt-6 text-sm font-medium text-luxury-text transition-colors duration-300 group-hover:text-royal-magenta"
                       >
                         View Services →
                       </Link>

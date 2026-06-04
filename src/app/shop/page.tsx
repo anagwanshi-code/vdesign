@@ -17,6 +17,21 @@ export const metadata: Metadata = {
   title: "Shop",
   description:
     "Shop premium print and packaging from V Design—frames, albums, boxes, wedding printing, and corporate kits with secure delivery across India.",
+  openGraph: {
+    title: "Shop — V Design",
+    description:
+      "Shop premium print and packaging from V Design—frames, albums, boxes, wedding printing, and corporate kits with secure delivery across India.",
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "V Design Shop" }],
+    type: "website",
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shop — V Design",
+    description:
+      "Shop premium print and packaging from V Design—frames, albums, boxes, wedding printing, and corporate kits with secure delivery across India.",
+    images: ["/opengraph-image.png"],
+  },
 };
 
 type ShopPageProps = {
@@ -117,7 +132,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <>
               <Link
                 href="#shop-catalog"
-                className="inline-flex items-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                className="inline-flex items-center rounded-full bg-pink-600 bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
               >
                 Shop All Products
               </Link>

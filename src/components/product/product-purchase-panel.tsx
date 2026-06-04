@@ -310,7 +310,7 @@ export function ProductPurchasePanel() {
           onClick={handleAddToBag}
           disabled={!canTransact}
           className={cn(
-            "group flex w-full items-center justify-center gap-3 bg-gradient-to-r from-rose-600 to-pink-600 px-4 py-4 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-all duration-500 ease-out",
+            "group flex w-full items-center justify-center gap-3 bg-pink-600 bg-gradient-to-r from-rose-600 to-pink-600 px-4 py-4 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-all duration-500 ease-out",
             "hover:-translate-y-1 hover:from-pink-500 hover:to-rose-400 hover:shadow-[0_8px_25px_rgb(225,29,72,0.4)]",
             "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none",
           )}

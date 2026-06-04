@@ -211,7 +211,7 @@ export default async function PortfolioCaseStudyPage({
           </p>
           <Link
             href="/consultation"
-            className="inline-flex rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-8 py-3 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex rounded-full bg-pink-600 bg-gradient-to-r from-pink-500 to-rose-500 px-8 py-3 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >
             Start Your Project
           </Link>

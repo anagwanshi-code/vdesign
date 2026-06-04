@@ -44,7 +44,7 @@ export function PremiumCta({
         </p>
         <Link
           href={href}
-          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#E91E63] to-purple-600 px-10 py-4 text-base font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-500/25"
+          className="inline-flex items-center justify-center rounded-full bg-pink-600 bg-gradient-to-r from-[#E91E63] to-purple-600 px-10 py-4 text-base font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-pink-500/25"
         >
           {buttonLabel}
         </Link>

@@ -41,9 +41,9 @@ export function ProductGrid({
   }
 
   return (
-    <ul
+        <ul
       className={cn(
-        "grid gap-8",
+        "grid items-stretch gap-8",
         maxColumns === 4
           ? "grid-cols-2 gap-4 md:grid-cols-3 md:gap-8 lg:grid-cols-4"
           : "grid-cols-2 gap-4 md:grid-cols-3 md:gap-8 lg:grid-cols-3",
@@ -59,13 +59,13 @@ export function ProductGrid({
           : null;
 
         return (
-        <li key={product.id}>
-          <article className="group flex h-full flex-col rounded-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
+        <li key={product.id} className="h-full">
+          <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-md">
             {primaryImage ? (
             <Link
               href={`/products/${product.handle}`}
               className={cn(
-                "relative overflow-hidden rounded-sm border border-border",
+                "relative shrink-0 overflow-hidden bg-zinc-50",
                 isCompact ? "aspect-[3/4]" : "aspect-[4/5]",
               )}
             >
@@ -103,7 +103,7 @@ export function ProductGrid({
               <Link
                 href={`/products/${product.handle}`}
                 className={cn(
-                  "flex items-center justify-center rounded-sm border border-border bg-border/20 font-sans text-xs uppercase tracking-widest text-muted",
+                  "flex shrink-0 items-center justify-center bg-border/20 font-sans text-xs uppercase tracking-widest text-muted",
                   isCompact ? "aspect-[3/4]" : "aspect-[4/5]",
                 )}
               >
@@ -114,7 +114,7 @@ export function ProductGrid({
             <div
               className={cn(
                 "flex flex-1 flex-col",
-                isCompact ? "mt-4 gap-1.5" : "mt-6 gap-2",
+                isCompact ? "gap-1.5 p-3" : "gap-2 p-4 md:p-5",
               )}
             >
               <Link

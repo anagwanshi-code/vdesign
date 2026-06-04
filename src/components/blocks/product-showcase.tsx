@@ -58,23 +58,24 @@ export function ProductShowcase({ products }: ProductShowcaseProps) {
             No products yet. Add products in Sanity Studio to feature them here.
           </p>
         ) : (
-          <ul className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product) => {
+          <ul className="mt-16 grid grid-cols-1 items-stretch gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map((product, index) => {
               const href = product.slug
                 ? `/products/${product.slug}`
                 : "/shop";
 
               return (
-                <li key={product._id}>
-                  <Link
-                    href={href}
-                    className="group block transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl"
-                  >
-                    <div className="relative mb-6 aspect-[4/5] overflow-hidden rounded-lg border border-zinc-100 bg-luxury-surface shadow-sm">
+                <li key={product._id} className="h-full">
+                  <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-md">
+                    <Link
+                      href={href}
+                      className="relative block aspect-[4/5] shrink-0 overflow-hidden bg-luxury-surface"
+                    >
                       <Image
                         src={product.imageUrl || "/images/placeholder.svg"}
                         alt={product.title}
                         fill
+                        priority={index === 0}
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         unoptimized={!product.imageUrl?.startsWith("http")}
@@ -84,20 +85,24 @@ export function ProductShowcase({ products }: ProductShowcaseProps) {
                           Bestseller
                         </span>
                       ) : null}
-                    </div>
+                    </Link>
 
-                    <h3 className="mb-1 font-serif text-xl text-luxury-text transition-colors group-hover:text-royal-magenta">
-                      {product.title}
-                    </h3>
-                    {product.categoryName ? (
-                      <p className="mb-2 text-xs uppercase tracking-widest text-luxury-muted">
-                        {product.categoryName}
+                    <div className="flex flex-1 flex-col p-4 md:p-5">
+                      <Link href={href} className="block">
+                        <h3 className="mb-1 font-serif text-xl text-luxury-text transition-colors group-hover:text-royal-magenta">
+                          {product.title}
+                        </h3>
+                      </Link>
+                      {product.categoryName ? (
+                        <p className="mb-2 text-xs uppercase tracking-widest text-luxury-muted">
+                          {product.categoryName}
+                        </p>
+                      ) : null}
+                      <p className="mt-auto text-sm font-semibold tabular-nums text-royal-magenta">
+                        ₹{product.price ?? 0}
                       </p>
-                    ) : null}
-                    <p className="text-sm font-semibold text-royal-magenta">
-                      ₹{product.price ?? 0}
-                    </p>
-                  </Link>
+                    </div>
+                  </article>
                 </li>
               );
             })}

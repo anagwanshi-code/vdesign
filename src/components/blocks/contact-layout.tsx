@@ -181,7 +181,7 @@ export function ContactLayout({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 py-3 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-80 sm:w-auto sm:px-8"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-pink-600 bg-gradient-to-r from-pink-500 to-rose-500 py-3 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-80 sm:w-auto sm:px-8"
             >
               {isSubmitting ? (
                 <>
@@ -284,7 +284,7 @@ export function ContactLayout({
             <button
               type="button"
               onClick={closeSuccessModal}
-              className="mt-6 inline-flex rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-8 py-3 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              className="mt-6 inline-flex rounded-full bg-pink-600 bg-gradient-to-r from-pink-500 to-rose-500 px-8 py-3 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
             >
               Done
             </button>

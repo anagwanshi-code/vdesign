@@ -154,11 +154,11 @@ export default function EcommerceGrid({
             const price = product.price ?? 0;
 
             return (
-              <li key={product._id}>
-                <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-zinc-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl">
+              <li key={product._id} className="h-full">
+                <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
                   <Link
                     href={product.slug ? `/products/${product.slug}` : "/shop"}
-                    className="relative block aspect-square overflow-hidden bg-zinc-50"
+                    className="relative block aspect-square shrink-0 overflow-hidden bg-zinc-50"
                   >
                     <Image
                       src={product.imageUrl || "/images/placeholder.svg"}
@@ -174,7 +174,7 @@ export default function EcommerceGrid({
                       </span>
                     ) : null}
                   </Link>
-                  <div className="flex flex-grow flex-col p-3 md:p-4">
+                  <div className="flex flex-1 flex-col p-4 md:p-5">
                     <Link
                       href={product.slug ? `/products/${product.slug}` : "/shop"}
                     >

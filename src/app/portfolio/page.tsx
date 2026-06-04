@@ -57,7 +57,7 @@ export default async function PortfolioPage() {
           <>
             <Link
               href="#portfolio-grid"
-              className="inline-flex items-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-8 py-3 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              className="inline-flex items-center rounded-full bg-pink-600 bg-gradient-to-r from-pink-500 to-rose-500 px-8 py-3 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
             >
               View All Projects
             </Link>

@@ -131,7 +131,7 @@ export function ResourcesDownloads({ downloads }: ResourcesDownloadsProps) {
           </p>
           <Link
             href="/contact"
-            className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            className="mt-6 inline-flex items-center justify-center rounded-full bg-pink-600 bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >
             Get Expert Help
           </Link>

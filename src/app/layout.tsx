@@ -6,7 +6,7 @@ import { resolveAnnouncements } from "@/lib/data/announcements";
 import { getAnnouncementMessages, getSiteSettings } from "@/lib/sanity/queries";
 import { Toaster } from "sonner";
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Dancing_Script, Inter } from "next/font/google";
+import { Cormorant_Garamond, Dancing_Script, Poppins } from "next/font/google";
 import "@/styles/globals.css";
 
 const SITE_TITLE = "V Design | Premium Print & Packaging Studio";
@@ -38,9 +38,10 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
   display: "swap",
 });
 
@@ -65,11 +66,20 @@ export const metadata: Metadata = {
     siteName: "V Design",
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "V Design | Premium Print & Packaging Studio",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: ["/opengraph-image.png"],
   },
   robots: {
     index: true,
@@ -99,7 +109,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${inter.variable} ${dancingScript.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${poppins.variable} ${dancingScript.variable} h-full antialiased`}
     >
       <body className="relative flex min-h-screen flex-col bg-[#FAFAFA] font-sans text-zinc-600 selection:bg-brand-pink/20 selection:text-zinc-900">
         <div className="site-luxury-canvas" aria-hidden="true" />

@@ -163,7 +163,7 @@ export function HeroBlock({
             <Link
               href={primaryCta.href}
               className={cn(
-                "rounded-full bg-gradient-to-r from-[#E91E63] to-rose-500 px-8 py-3.5 font-medium text-white shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E91E63] focus-visible:ring-offset-2",
+                "rounded-full bg-pink-600 bg-gradient-to-r from-[#E91E63] to-rose-500 px-8 py-3.5 font-medium text-white shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E91E63] focus-visible:ring-offset-2",
                 premiumCtaHoverClass,
               )}
             >

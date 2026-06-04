@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
   content: [
@@ -36,7 +37,7 @@ const config: Config = {
       },
       fontFamily: {
         serif: ["var(--font-serif)", "Georgia", "Times New Roman", "serif"],
-        sans: ["var(--font-sans)", "Satoshi", "system-ui", "sans-serif"],
+        sans: ["var(--font-poppins)", ...(defaultTheme.fontFamily?.sans ?? [])],
         display: ["var(--font-serif)", "Georgia", "serif"],
         dancing: ["var(--font-dancing)", "cursive"],
       },
